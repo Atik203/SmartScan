@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Offline Math Expression Detector</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+        }
+        .image-row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .image-container {
+            flex: 1;
+        }
+        .image-container img {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border: 1px solid #ccc;
+        }
+        .image-container p {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h2>📄 <b>Offline Math Expression Detector</b></h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="images" multiple>
+        <button type="submit">Start Processing</button>
+    </form>
+
+    {% if results %}
+        <p style="color:green;"><b>✅ Processing complete.</b></p>
+        {% for item in results %}
+            <div style="margin-top:20px;">
+                <p><b>{{ item.file }}</b></p>
+                <div class="image-row">
+                    <div class="image-container">
+                        <p>Original</p>
+                        <img src="{{ url_for('static', filename=item.original) }}">
+                    </div>
+                    <div class="image-container">
+                        <p>Dewarped</p>
+                        <img src="{{ url_for('static', filename=item.dewarped) }}">
+                    </div>
+                    <div class="image-container">
+                        <p>Detected</p>
+                        <img src="{{ url_for('static', filename=item.detected) }}">
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if completed %}
+        <h3>📝 <b>Completed Files:</b></h3>
+        <ul>
+            {% for f in completed %}
+                <li>{{ f }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>

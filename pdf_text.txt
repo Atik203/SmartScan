@@ -1,0 +1,1165 @@
+Received 14 October 2025, accepted 21 November 2025, date of publication 28 November 2025,
+date of current version 10 December 2025.
+Digital Object Identifier 10.1109/ACCESS.2025.3638780
+An Automated Academic Book Scanner With
+Deep Learning Powered Math Expression
+Detection and Recognition
+S. THAMARAISELVAN1, VIVEK VENUGOPAL
+1, SUSMITHA VEKKOT
+1,
+AND PRAMOD KUMAR PISHARADY
+2
+1Department of Electronics and Communication Engineering, Amrita School of Engineering, Amrita Vishwa Vidyapeetham, Bengaluru 560035, India
+2Departments of Neurology and Radiology, University of Minnesota, Minneapolis, MN 55455, USA
+Corresponding author: Vivek Venugopal (v_vivek@blr.amrita.edu)
+This work was supported by Amrita Vishwa Vidyapeetham through Article Processing Charges (APC).
+ABSTRACT Mathematical expressions are hard to read, which makes it hard to digitize printed STEM
+material. Conventional OCR methods do not work well on contents which comprise of text along with
+mathematical expressions. This paper proposes an automated book scanning system comprising of Raspberry
+Pi, page gripper and flipper set up and a smartphone camera for capturing the content. Once the content is
+captured, a combination of text recognition, mathematical expression detection and recognition modules
+work in synergy to provide the final digitized content. The mathematical expression detection module
+consists of a customized RoIHeads version of Faster R-CNN. The proposed model performed with 95.71%
+precision, 91.77% recall, 93.74% F1-score, and 87.42% mean IOU on the publicly available IBEM dataset.
+Once the expressions are detected, they are recognised using the Vision Encoder-Decoder Model architecture
+and the subsequent latex version of the mathematical expression is generated. This model is trained on the
+Im2Latex dataset and provided a BLEU score of 86.44 % on the test set. We also demonstrated the utility of
+the proposed method in academic STEM book scanning with accurate recovery of mathematical expressions.
+Our system gives a cost effective solution which makes it possible to extract text and mathematical content
+from printed books in a method that is scalable and accurate. This opens the door to large-scale digital
+preservation and machine-readable academic archiving.
+INDEX TERMS Automated book scanning, mathematical expression detection and recognition, faster R-
+CNN, tesseract OCR, custom RoI head, vision encoder-decoder.
+I. INTRODUCTION
+The digital transformation of educational resources, partic-
+ularly in STEM fields, has become an essential component
+of modern academics and archive science. This transi-
+tion attempts to improve accessibility while also enabling
+machine-readability for massive amounts of scientific knowl-
+edge. Accurately recognizing and extracting mathematical
+equations from printed materials is a significant issue in
+this pursuit. Unlike conventional text, mathematical formulas
+have two-dimensional layouts, specialized notations, and are
+frequently embedded inside surrounding prose - character-
+istics that make traditional Optical Character Recognition
+(OCR) systems ineffective [1], [2]. These systems often
+The associate editor coordinating the review of this manuscript and
+approving it for publication was Yiqi Liu
+.
+have three major limitations: poor symbol disambiguation,
+inadequate spatial relation modeling, and low fidelity formula
+reconstruction, especially when working with large or dense
+mathematical layouts [3], [4].
+To
+assess
+the
+shortcomings
+of
+conventional
+OCR
+approaches, we conducted an initial evaluation using
+Tesseract, a widely adopted open-source OCR engine
+developed by Google. While effective for general text
+and numbers, Tesseract proved ineffective at isolating and
+structurally parsing mathematical expressions [5]. In most
+cases, it flattened the mathematical semantics, merging
+expressions with adjacent text and resulting in loss of
+syntactic and spatial integrity.
+Historically, computational knowledge of mathematical
+expressions has progressed through three significant techni-
+cal stages. The first phase was distinguished by rule-based
+VOLUME 13, 2025
+ 2025 The Authors. This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 License.
+For more information, see https://creativecommons.org/licenses/by-nc-nd/4.0/
+206121
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+systems and handcrafted features that battled with a variety
+of sign shapes, contextual ambiguity, and layout changes. The
+second phase featured machine learning and early deep learn-
+ing techniques, particularly Convolutional Neural Networks
+(CNNs) and object detection models like R-CNN [6] and
+YOLO [7]. Although these algorithms enhanced localization,
+they still had limitation when analyzing hierarchical or
+geographical relationships. The third and most recent phase
+saw a paradigm shift with the integration of attention
+mechanisms, Graph Neural Networks (GNNs), and encoder-
+decoder architectures, allowing for contextual and spatially
+aware recognition and significantly improving performance
+on benchmarks such as CROHME [8] and TRMER [9].
+Despite these computational breakthroughs, scanning
+printed books remains a labor-intensive process. Traditional
+procedures rely on manual page turning and image capture,
+making them inefficient and unsuitable for large-scale
+digitization projects. Robotic book scanning systems, such
+as those created by Elder and Wong [10] and later modified
+using electroadhesive and vacuum-based mechanisms [11],
+have shown the ability to automate this operation. However,
+such systems are either expensive or have limited flexibility
+and adaptability.
+A. NOVELTY AND CONTRIBUTIONS
+This paper proposes a comprehensive solution to both
+algorithmic and practical limits in mathematical expression
+recognition and book digitization. Specifically, our contri-
+bution focuses on the integration of automated scanning
+hardware with deep learning–based math expression detec-
+tion and recognition modules. The integrated system helps in
+automating page turning, image capturing, and processing,
+which eliminates the need for operator intervention and
+allows for continuous operation to create a cohesive, end-
+to-end academic book digitization system. From a model
+innovation perspective, we customize an existing model
+(Faster R-CNN Architecture) with optimized region proposal
+networks and fine-tuned RoI heads along with a lightweight
+offline processing interface. The important innovations are:
+• Fully Automated Book Scanning System: A novel,
+low-cost scanning machine is created with inexpensive
+and modular components. The system automates page
+turning, image capturing, and processing, which elimi-
+nates the need for operator intervention and allows for
+continuous operation.
+• Custom Faster R-CNN Architecture: We provide a
+tailored Faster R-CNN model with optimized region
+proposal networks and fine-tuned RoI heads. This model
+is specifically designed to detect printed mathematical
+expressions from STEM pages with high accuracy and
+few false positives.
+• Offline Processing Interface: We provide a lightweight
+offline web interface for usage in bandwidth-constrained
+or disconnected contexts. It allows users to upload
+and batch process scanned pages, extract mathematical
+expressions, and save results locally, ensuring accessi-
+bility and scalability without the need for cloud services.
+The rest of this paper is organized as follows: Section II
+discusses related work in mathematical expression recogni-
+tion and automated scanning systems. Section III describes
+the attributes and structure of the dataset used. Section IV
+describes the proposed methodology, including the recog-
+nition algorithm and hardware design. Section V offers the
+experimental findings and comparisons. Finally, Section VI
+summarizes major findings and future research directions.
+II. RELATED WORK
+Automated book scanning has made significant progress,
+with systems aimed to reduce manual intervention, improve
+accuracy, and maximize cost effectiveness. Elder and Wong
+created a low-cost robotic book scanner that can turn pages
+and produce high-quality digital documents while preserving
+the original materials [10]. Sinmaz et al. conducted a
+thorough investigation into the effect of book precondition-
+ing on the success rates of automated page-turning [12].
+Similarly, Watanabe et al. showed a contactless page-turning
+mechanism that used air suction to efficiently handle pages
+at high rates, demonstrating the potential for large-scale
+digitization projects [13].
+Ata et al. presented the Automated Linear Book-Scanning
+System (ALBS), with a sophisticated combination of pneu-
+matic and mechanical elements to successfully automate
+the scanning process
+[14]. Nawshin et al. established
+a low-cost automated scanner combined with translation
+capabilities, exhibiting practical utility in varied educational
+and library environments [15]. Furthermore, commercial
+systems from businesses such as Xerox (Mandel et al., Xerox
+Corporation) and Google (Qumsiyeh, Google Inc.) used
+vacuum-based page-turning mechanisms in conjunction with
+high-resolution photography, meeting industry standards for
+digitization accuracy and throughput [5], [16].
+Effective mathematical expression digitization is essen-
+tially dependent on the correct detection and isolation of
+mathematical content inside textual materials. The IBEM
+dataset, proposed by Anitei et al., has considerably supported
+this work by offering a dataset for mathematical expression
+indexing and searching, serving as a critical standard for
+future research in mathematical expression detection [17].
+In addition to dataset development, Phong et al. intro-
+duced a detection methodology based on Fast Fourier
+Transform (FFT) and Support Vector Machines (SVM),
+which recognises displayed mathematical expressions within
+printed texts, resulting in improved precision in expression
+localization [18]. Furthermore, Ohyama et al. used a U-Net
+architecture trained on a wide range of scientific articles,
+displaying robust identification skills even in the presence of
+different expression layouts and typefaces [19].
+Yu et al. proposed direct extraction of mathematical
+expressions from PDF documents, which used intrinsic PDF
+metadata and greatly outperformed standard image-based
+206122
+VOLUME 13, 2025
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+approaches [20]. Zhou et al.’s recent Transformer-based
+Mathematical Expression Recognition (TRMER) approach
+improved detection and recognition accuracy by simultane-
+ously capturing spatial and semantic features [9].
+The conversion of printed mathematical expressions into
+structured formats like LaTeX relies on advanced OCR
+technologies. Transformer-based models such as MathNet
+(Schmitt-Koopmann et al.) achieve superior accuracy through
+a data-centric design that incorporates diverse fonts and
+normalized LaTeX annotations [3]. Furthermore, Deng et al.
+created What You Get Is What You See (WYGIWYS):
+a visual markup decompiler that combined CNN with
+attention-based decoding for translating complicated visual
+mathematical representations into accurate digital LaTeX
+formats [21].
+Insights from the handwritten mathematical expression
+domain show fundamental obstacles and opportunities for
+printed content identification. Gervais et al.’s MathWriting
+dataset, the biggest publicly available dataset for handwritten
+mathematical expressions, has allowed for significant gains
+in recognition capabilities by offering massive, diverse, and
+annotated data [22]. Concurrently, Zhang and Li’s novel
+integration of CNNs, Transformers, and diffusion-based data
+augmentation techniques significantly improved recognition
+accuracy [23]. Similarly, Li et al. used a YOLOv5-based
+model enhanced with spatial attention mechanisms and
+Bidirectional LSTM networks to achieve robust and accurate
+handwritten mathematical expression recognition [24].
+Aggarwal et al. conducted a comprehensive survey
+of structural analysis methodologies across printed and
+handwritten mathematical expressions, highlighting critical
+differences in spatial relationship parsing strategies and
+guiding future research toward more accurate semantic
+interpretations of complex mathematical structures [25].
+Integrated hybrid systems represent the cutting edge of cur-
+rent research, merging hardware automation with advanced
+recognition models. Sable et al.’s Doc-Handler demonstrated
+this integration by smoothly combining computer vision,
+natural language processing, and robotic manipulation to
+considerably streamline document scanning and translation
+[26]. Lee et al. exhibited electroadhesive forces for page-
+turning, highlighting unique mechanical methods combined
+with advanced image processing and recognition algorithms
+to improve the reliability and accuracy of automated book
+scanning [11]. Overall, while significant progress has been
+made, several problems remain such as mechanical depend-
+ability, improved identification accuracy across multiple
+mathematical notations, and building cost-effective auto-
+mated book scanning system with enhanced capabilities.
+Addressing these difficulties is crucial for moving forward
+with high-precision mathematical expression extraction and
+STEM instructional material digitization.
+III. DATASETS
+We used two publicly accessible datasets, each chosen for a
+different stage of the pipeline, to build a strong system for
+FIGURE 1. Example of IBEM dataset image with ground truth bounding
+boxes.
+finding and recognizing mathematical statements in printed
+documents. These datasets were not only large, but they also
+had diverse structures.
+We used IBEM dataset, to detect mathematical expres-
+sions [27]. It consists of scanned handwritten pages with
+both isolated and embedded math expressions. The dataset
+has different layout styles, symbol arrangements, and content
+densities. This variation allows the system to understand
+how math expressions are embedded in real-life academic
+papers, even when the content is very dense. Figure 1
+shows an example of annotated expressions from the IBEM
+dataset.
+For the expression recognition stage, we use Im2LaTeX-
+100K (Image-to-Latex) dataset [28]. This dataset consists
+of rendered mathematical formulae along with their corre-
+sponding LaTeX markup, making it effectively suitable for
+training encoder-decoder models. It can handle a wide range
+of equations, from single-line expressions to structured multi-
+line formulas. This exposure helps the recognition model get
+a good grasp of the visual and semantic structure of math
+content. A representative sample of this dataset is shown in
+Figure 2.
+Table 1 gives a brief look at the dataset features,
+and their target tasks. Table 2 surveys recent leading
+methods on the IBEM and Im2LaTeX-100K datasets.
+VOLUME 13, 2025
+206123
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+It highlights top-performing models across both these
+datasets.
+FIGURE 2. Sample images from the Im2Latex-100k dataset.
+TABLE 1. Summary of datasets used.
+IV. PROPOSED AUTOMATED BOOK SCANNER SYSTEM
+This section discusses about the key components in the
+printed mathematical expression recognition system as well
+as the low cost automated book scanner system.
+A. SOFTWARE ARCHITECTURE: PRINTED MATHEMATICAL
+EXPRESSION RECOGNITION (PMER) SYSTEM
+Figure 3 shows the general architecture of the Printed Math-
+ematical Expression Recognition (PMER) system, which
+includes an end-to-end workflow for recognizing, isolating,
+and transforming printed mathematical expressions into
+LaTeX representations. The system blends hardware and
+software components into a single framework. It consists
+of four major stages: Text detection, expression detection,
+extraction, and recognition. Each stage is meticulously
+planned to handle input images—captured using the auto-
+mated book scanner (online system) or uploaded via the
+offline web interface—and transform mathematical content
+into organized digital representations. This modular pipeline
+enables the flexibility, scalability, and interoperability of
+various STEM publications.
+1) EXPRESSION DETECTION FRAMEWORK
+The initial phase of the PMER workflow focuses on
+detecting spatial regions in scanned texts that contain
+mathematical expressions. Specifically, it employs a Faster
+R-CNN model that combines a ResNet-50 backbone with a
+Feature Pyramid Network (FPN), Region Proposal Network
+(RPN) and RoI pooling operations. As part of pre-processing,
+normalization and augmentation is employed as illustrated in
+Figure 3. Following pre-processing, the image is fed into the
+ResNet50+FPN module, which extracts hierarchical features
+at various scales. The RPN then generates object sugges-
+tions, which may include mathematical expressions. These
+suggestions are refined using RoI pooling and identified
+as expression or non-expression areas. The post-processing
+step uses Non-Maximum Suppression (NMS), confidence
+thresholding, and bounding box regression to finalize predic-
+tions. This stage produces a picture with localized bounding
+boxes around the detected expressions and their associated
+confidence ratings.
+2) TEXT DETECTION FRAMEWORK
+The next operation in the scanning pipeline is to identify and
+extract plain text information from scanned book pictures,
+which will serve as the foundation for subsequent expression-
+specific processing. To accomplish this, we use the Tesseract
+OCR engine [33], which employs a robust sequence
+modeling pipeline that includes CNNs and Bidirectional
+Long Short-Term Memory (BiLSTM) layers, followed by a
+transcription mechanism based on Connectionist Temporal
+Classification. Tesseract-based detection is used to isolate
+non-mathematical elements like paragraphs, headers, labels,
+and annotations. Although this technique is not suitable
+for identifying complicated mathematical notation due to
+its linear sequence prediction limitations, it is critical in
+distinguishing general textual content from mathematical
+zones. These non-mathematical portions are subsequently
+removed from the downstream mathematical expression
+recognition module, increasing precision and processing
+efficiency.
+3) EXPRESSION RECOGNITION FRAMEWORK
+The next step is to recognize the detected expression images
+and turn them into LaTeX syntax. This is accomplished
+through the use of a Vision Encoder-Decoder Model archi-
+tecture, which combines a transformer-based visual encoder
+(e.g., DeiT or ViT) and a transformer decoder (e.g., TrOCR)
+that has been pretrained on written mathematical information.
+Each cropped image is separated into a sequence of patches,
+which are subsequently flattened and embedded in feature
+vectors.
+The encoder learns the formula’s contextual visual struc-
+ture, including positional relationships between symbols.
+The decoder uses masked multi-head attention and auto-
+regressive decoding to convert these visual embeddings to
+sequential LaTeX tokens. The predicted LaTeX sequence
+is then post-processed to remove padding, special tokens,
+and formatting issues. This recognition configuration enables
+the system to correctly comprehend a wide range of
+mathematical notation styles, from algebraic equations to
+matrix or summation formats, displaying both generalization
+and structural sensitivity. The TrOCR model implementa-
+tion in this work was adapted from Microsoft’s official
+repository [34].
+206124
+VOLUME 13, 2025
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+TABLE 2. Summary of key prior work on IBEM (expression detection) and Im2LaTeX-100K (expression recognition).
+4) EXPRESSION EXTRACTION FRAMEWORK
+The final step is to extract the recognized mathematical
+expression accurately. At this point, each bounding box
+detected during detection is used to crop the mathematical
+region from the original image. A Python-based post-
+processing pipeline examines the spatial context of each
+discovered region and divides it into two structural types:
+embedded expressions (found within text lines) and isolated
+expressions (standalone equations). An example of this can
+be seen in Figure 3. This differentiation helps the clarity
+of downstream recognition tasks. The trimmed expressions
+are saved as discrete high-resolution PNG files, enabling
+modular inclusion into future workflows. While, no deep
+learning model is used at this stage, the accuracy and logical
+grouping attained here serve an important role in preserving
+consistency throughout the identification process.
+B. HARDWARE ARCHITECTURE
+The automated book scanning system was built with a major
+focus on being cost-effective, adaptable, and self-sufficient
+so that printed text may be digitized. Figure 4 shows that
+the scanner has a V-shaped wooden cradle, custom-made
+motorized arms, suction and air-based flipping mechanisms,
+smartphone-based imaging, and a micro-controller based
+control panel system.
+The cradle is set at an angle of around 50 degrees, which
+is the best angle to support books of different sizes while
+putting less stress on the spine of the book. The system was
+set up such that the pages would stay in the same place and
+the spacing would be the same when imaging and flipping.
+1) KEY HARDWARE COMPONENTS AND FUNCTIONAL
+ROLES
+The automatic book scanning system has various electronic
+and control parts. Each has a specific job to do to ensure exact
+movement, airflow control, and smooth operation.
+•
+Arduino Mega 2560: Serves as the central microcon-
+troller for managing all motor sequences, fan operations,
+and user input controls. It handles PWM signals for
+servo movement and processes serial commands from
+the Raspberry Pi.
+•
+Raspberry Pi 4 Model B (8GB): Acts as the system’s
+high-level processor. It coordinates camera triggering,
+TABLE 3. System configuration and core libraries used.
+manages serial communication with Arduino, and
+forwards captured images to the processing pipeline.
+•
+6000 RPM DC Blower Fan: Used to generate
+high-speed suction through a connected conduit pipe.
+This fan enables secure page lifting during the flipping
+mechanism.
+•
+PC Fan: Positioned beneath the cradle, it provides a
+brief air flick to help separate stuck pages. It is activated
+automatically during the flipping cycle.
+•
+5V DC Relay Module: Controls the on/off switching
+of the PC fan through signals sent from the Arduino
+Mega. This ensures timed activation only during specific
+motion cycles.
+•
+LM2596 Buck Converter: Steps down the 12V
+power supply to 5V to power logic-level devices like
+Arduino, relay modules, and fans, ensuring stable
+voltage distribution.
+•
+MG996R Servo Motor: High-torque servo motors
+used in both the page gripper and flipper arms. They
+provide smooth and controlled actuation for mechanical
+page handling.
+C. OPERATIONAL MECHANISM OF THE HARDWARE
+SYSTEM
+Figure 5 shows the operational mechanism of the hardware
+system. It presents the sequential automation loop, starting
+with gripping the page and recognizing the formulae,
+followed by turning the page and resetting. The synchronized
+integration of embedded control, smart image processing, and
+VOLUME 13, 2025
+206125
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+FIGURE 3. Overall architecture of the PMER software pipeline (Text+ Math Detection, Recognition and
+Extraction) for the printed mathematical expressions.
+mechanical design are the key highlights of the prototype
+scanner. More details pertaining to the operation of the
+scanner is provided in the Appendix section.
+V. EXPERIMENTAL RESULTS AND DISCUSSIONS
+This section deals with the computational set up used for
+the experimentation along with the performance evaluation
+of the proposed system. Further we also provide a detailed
+comparison of the proposed framework with off the shelf
+solutions in the market.
+A. SYSTEM CONFIGURATION
+All of the training and evaluation tasks were done on a special
+workstation made for deep learning and processing high-
+resolution images. The configuration was chosen to make
+sure that actions that require a lot of processing power, such
+managing massive datasets, training models, and making
+inferences in real time, go smoothly. Table 3 shows the system
+configurations used for the proposed work.
+This setup gave us enough computing capacity to run
+our whole pipeline, from preprocessing images and training
+206126
+VOLUME 13, 2025
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+FIGURE 4. Real-world prototype of the automated book scanner system.
+TABLE 4. Comparison of expression detection models.
+TABLE 5. Metrics comparison of different expression detection models (all values in percentage).
+models to making predictions and evaluating them. The
+GPU-accelerated environment made batch processing faster
+and training shorter, especially when fine-tuning the deep
+learning models using high-resolution math page images.
+B. PERFORMANCE EVALUATION OF TRAINED MODELS -
+OUTPUT
+The proposed pipeline for processing STEM material is
+divided into three phases- Expression detection, Expression
+recognition and Text recognition. However, the emphasis
+of our work is on the first two phases. To examine the
+detection stage’s efficacy, five distinct model configurations
+were tested: four Faster R-CNN variations and a YOLOv8
+model. Each was trained on the IBEM dataset and then tested
+on actual scanned textbook pages. Table 4 summarizes archi-
+tectural configurations, features, and constraints, whereas
+Table 5 provides quantitative metrics.
+1) EXPRESSION DETECTION MODEL & ITS METRICES
+COMPARISON
+As seen in Table 4, the detection models differ greatly in
+complexity and performance. Notably, the unique Faster
+R-CNN with RoIHeads (ResNet50 V3 - enhanced) combines
+enhanced data augmentation, dynamic learning rates, and
+architectural improvements to provide the greatest overall
+performance. Table 5 summarizes the precision, recall, F1-
+score, and mean IoU for all models. ResNet50 V3 (Advanced)
+had the best detection accuracy, with a precision of 95.71%,
+an F1-score of 93.74%, and a test mean IoU of 87.42%.
+YOLOv8, while faster and easier to deploy, finished second
+with a test mean IoU of 86.49% but somewhat higher loss
+figures. ResNet152 had the highest recall (95.86%) but
+lacked precision due to frequent false positives. Early-stage
+models (V1, V2) performed quite poorly because to limited
+training methodologies and a lack of fine-tuning. These
+findings demonstrate ResNet50 V3 (Advanced)’s superiority
+in providing robust, generalizable, and accurate expression
+identification appropriate for subsequent recognition stages
+and so we finalized this model for the Hardware Integration
+which can be referred in Figure 3. In addition, we also
+provide a comparison between Model V4 and V5 in terms
+of the inference time since Faster R-CNN is a two-
+stage detector and YOLOv8 a one-stage model. Table 6
+provides an inference time comparison of the two models.
+VOLUME 13, 2025
+206127
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+FIGURE 5. System flowchart outlining the hardware-software automation
+loop.
+TABLE 6. Inference comparison of Faster R-CNN with YOLOv8.
+Although YOLO-based models demonstrate lower inference
+latency compared to R-CNN architectures, our focus is
+on recognition accuracy as the critical performance metric
+in automated book scanner system. The reliability of our
+PMER system primarily depends on the correct detection
+of the mathematical expression regions. Latency variations
+between our expression recognition system and YOLOv8 is
+approximately 185 milliseconds—which is tolerable and can
+be compensated through predictive buffering or anticipatory
+detection. Hence, while YOLO offers faster processing,
+the higher recognition accuracy of R-CNN ensures greater
+operational consistency.
+To summarize, although YOLOv8 offers faster runtime and
+stable inference, our proposed approach achieves a favorable
+balance between accuracy and latency, remaining within
+the page-flip hardware’s real-time constraints. We acknowl-
+edge that YOLOv8 represents a promising candidate for
+deployment-focused optimization in future work.
+2) ABLATION STUDY
+Next, we perform an ablation study of the proposed math-
+ematical expression detection system. For this experiment,
+we consider the best performing mathematical expression
+detection system (Model V3) and check for the impact of
+learning rate scheduler, gradient clipping and augmentation
+on the performance. Table 7 provides a performance com-
+parison in terms of mAP at 50%,1 mAP at 50%, average
+latency and Throughput. It can be observed that the removal
+of any one of learning rate scheduler, gradient clipping and
+augmentation leads to a change in mAP by around 2.7 to
+4.8%. The absence of gradient clipping leads to an increase
+in latency and the throughput remains comparable.
+3) EXPRESSION DETECTION OUTPUT ANALYSIS
+To visually evaluate expression detection performance,
+we offer qualitative findings for the best-performing model
+(ResNet50 V3 - Advanced) and compare it to YOLOv8, the
+second-best model.
+Figure 6 displays the detection results of a dataset image
+using ResNet50 V3 (Advanced). The picture is divided
+into three panels: the left (presents text detection from
+the document), the middle shows math detection, and the
+right shows combined detections of both text and math
+expressions. The visualization shows the model’s capacity
+to minimize noise and false positives using threshold-based
+refinement.
+Figure 7 shows the model’s capacity to generalize to
+real-world images from Introduction to Robotics: Mechanics
+and Control (John J. Craig, 3rd edition) [35]. Despite con-
+straints such as book curvature, illumination discrepancies,
+and a variety of fonts, the model accurately localized and
+filtered the mathematical regions.
+Figure 8 shows a direct comparison between YOLOv8
+and ResNet50 V3 (Advanced) on a scanned page along
+with the original document image. While both models found
+acceptable expressions, ResNet50 V3 produced tighter, more
+aligned bounding boxes and fewer false positives, particularly
+in dense or complex layouts. YOLOv8 has a clear speed
+advantage, but the ResNet-based model outperforms in
+precision-critical cases.
+4) EXPRESSION RECOGNITION OUTPUT ANALYSIS
+To evaluate the pipeline’s recognition stage, we fed
+the extracted mathematical expressions—localized with
+the best-performing detection model (ResNet50 V3 -
+Advanced)—into a TrOCR-based Vision Encoder-Decoder
+model. This model was fine-tuned using the im2latex
+dataset, allowing it to produce LaTeX representations of
+printed mathematical information. The quantitative results
+for this stage are summarized in Table 8, where the model
+performance was assessed based on CER and BLEU score
+and compared with Mathpix production service and Pix2Tex
+model. As far as recognition results are concerned, our
+model performed on par with the Pix2Tex baseline and much
+better compared to Mathpix demonstrating a BLEU score of
+86.44% with a CER of 10.84%.
+Figure 9 shows sample recognition results for clean images
+from the im2latex dataset. These structured, high-resolution
+samples make an excellent testbed for validating base
+206128
+VOLUME 13, 2025
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+FIGURE 6. Expression detection output on dataset image using ResNet50 V3 (Advanced).
+FIGURE 7. Expression detection output on scanned book [35] image using ResNet50 V3 (Advanced).
+TABLE 7. Ablation study of the proposed mathematical expression detection system.
+TABLE 8. Performance metrics of proposed TrOCR-based expression
+recognition with other state-of-the-art expression recognition models (All
+values in percentage).
+recognition accuracy. The model has excellent alignment with
+ground truth expressions and minimal character-level errors,
+demonstrating its strong baseline capability on synthetic
+academic-style inputs.
+In Figure 10, real-world performance is evaluated through
+recognition of scanned pages from Richard M. Murray’s
+A Mathematical Introduction to Robotic Manipulation [36].
+These inputs include realistic artifacts such as lighting vari-
+ation, background interference, and font diversity. Despite
+the noise, the recognition model maintains high fidelity,
+successfully translating expressions to syntactically correct
+LaTeX while demonstrating strong generalization.
+5) FAILURE CASES AND ERROR DISCUSSION
+Though the expression detection and recognition sys-
+tem performed generally well, some failure cases were
+VOLUME 13, 2025
+206129
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+FIGURE 8. Comparison of ResNet50-V3 (Advanced) and YOLOV8 on book image. The bounding box along with the
+respective confidence scores are embedded in the scanned content.
+FIGURE 9. Expression recognition results using im2latex dataset images.
+noted
+during
+testing.
+Among
+the
+most
+noteworthy
+problems are:
+1) Duplicate Predictions & Minor Text Prediction
+Issues: The model created duplicate bounding boxes
+for the same formula because some pages had several
+similar expressions on them. These false positives,
+Figure 11 (a) show that the confidence zones are
+overlapping, which means that non-maximum sup-
+pression (NMS) needs to be improved and also
+there is a minor issues in predicting text from the
+document which is shown in black Coloured boxes for
+reference.
+2) Rendering Issues: Several LaTeX render problems
+occurred during the recognition stage. This was
+mostly due to the model’s training on expression-level
+segments with limited token depth. When dealing
+with large or highly complex expressions, the decoder
+occasionally returned legitimate LaTeX that exceeded
+rendering restrictions or contained unescaped charac-
+ters, resulting in broken formulas in the final output.
+An example of this can be seen in Figure 11 (b).
+This points to the necessity for more advanced training
+with extended expressions or hierarchical decoding
+algorithms.
+3) Minor Expression Recognition Errors: Character
+misclassification was seen in some low-resolution or
+poorly light photos, including subscript confusion,
+misaligned symbols, and missing brackets. These are
+particularly visible in Figure 11 (c), where circled
+sections show localized prediction mistakes. Improv-
+ing picture preprocessing and using resolution-aware
+decoding may help to mitigate these issues.
+206130
+VOLUME 13, 2025
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+FIGURE 10. Expression recognition results from scanned book images [36].
+FIGURE 11. Common failure cases in expression detection and recognition: (a) duplicate detections, (b) LaTeX rendering issues, (c) character-level
+mispredictions.
+C. EVALUATION OF THE AUTOMATED BOOK SCANNER
+SYSTEM
+The suggested automated book scanning system was tested
+in real-world scenarios to ensure operational reliability,
+processing correctness, and cost-effectiveness. The goal was
+to demonstrate the prototype’s ability to digitize printed
+STEM material, including complicated mathematical expres-
+sions, with minimal human intervention while maintaining
+mechanical stability.
+1) PROTOTYPE PERFORMANCE OVERVIEW
+In continuous operation, the device completes a full cycle
+of page grabbing, image capture from two smartphones,
+page turning, and resetting in 10 to 12 seconds. This timing
+allows for a consistent flow of around 300 to 400 pages
+per hour, depending on the page format and substance. The
+performance was consistently reliable, with few misflips or
+misalignments due to the intelligent use of synchronized
+grasping, airflow-based flipping, and automated capture
+management.
+Notably, the Raspberry Pi, which is used to coordinate
+smartphone camera acquisition and initial picture handling,
+experiences latency when executing pre-processing and math
+expression detection activities due to limited computing
+power. To improve efficiency and avoid delays in the
+scanning loop, the collected photos are wirelessly and
+automatically sent from the Pi to an external laptop.
+This transfer enables faster processing of high-resolution
+images, allowing all downstream processes such as cropping,
+dewarping, expression identification, and snippet extraction
+to be carried out with increased throughput and little latency
+which has been already discussed in Figure 5.
+VOLUME 13, 2025
+206131
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+FIGURE 12. Full image processing pipeline: from raw capture to final detection output.
+FIGURE 13. Examples of successfully detected math expressions across pages [37].
+2) EMPIRICAL EVALUATION WITH STEM MATERIAL
+The system was carefully tested using the textbook ‘‘Materi-
+als Science and Engineering’’ (2nd Ed., Callister) [37], which
+contains substantial academic information and numerous
+types of written mathematical expressions. The device
+worked independently in cycles, grabbing each page, acti-
+vating cameras, switching pages, and resetting positions.
+Captured photos were saved in an organized folder system
+for traceability. These photos were enhanced in several
+steps, including cropping, dewarping, deskewing, and noise
+reduction, before being delivered to the PMER pipeline
+for text and math detection. Figure 12 illustrates the entire
+processing pipeline, from raw capture to final annotated
+detection. After detection was completed, all mathematical
+expressions were retrieved and saved as distinct snippet
+photos for recognition and archiving. Figure 13 shows sample
+outputs of successfully identified text and expressions across
+multiple book pages, demonstrating the system’s robustness
+to layout variation.
+To quantify the performance of the proposed scanner
+system, we scanned 135 pages of content in the textbook
+and passed on to the mathematical expression detection and
+recognition modules. Table 9 provides the results for the
+expression detection metrics for the scans captured by our
+proposed system. The system had an average latency of
+0.34 seconds and a throughput of 2.96 images per second.
+206132
+VOLUME 13, 2025
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+FIGURE 14. Offline interface showing original, dewarped, and detection results.
+TABLE 9. Expression detection metrics on the scans collected by the RIG
+on the STEM material.
+3) COST AND MARKET COMPARISON
+The proposed automated book scanner was designed with the
+purpose of providing an economical yet functional alternative
+to existing commercial technologies. Unlike industrial-grade
+scanners, which frequently include proprietary software and
+sophisticated mechanical setups, this prototype was created
+with off-the-shelf components, bespoke 3D-printed parts,
+and open-source software integration. The system, consisting
+of MG996R servo motors, dual blower fans, PC fan with
+relay, Arduino Mega, Raspberry Pi 4B (8GB), control
+panel electronics, power supply (500W SMPS and buck
+converters), and physical frame (wooden and 3D-printed
+parts), was built for a budget of around (Indian Rupee) Rs.
+18,000 to Rs. 20,000 (equivalent to $215-$240 USD). This
+makes it ideal for educational institutions, research labs,
+and libraries that require low-cost digitization infrastructure
+while maintaining automation and precision. In compari-
+son, the suggested system provides a balanced solution,
+including automatic page flipping, synchronized image
+collection, and deep-learning-based mathematical expression
+recognition—all at a substantially reduced cost. Table 10
+presents an organized overview of the comparison.
+D. OFFLINE PROCESSING SYSTEM AND WEB INTERFACE
+To expand the utility of the proposed PMER system
+beyond real-time collection, an offline batch-processing web
+interface was created. This solution is designed for use in sit-
+uations where pre-scanned book images are available and
+direct hardware integration is not required. The web interface
+allows users to upload an entire folder of scanned pages and
+process them using the same cropping, dewarping, detection,
+and expression extraction workflow. This enables organi-
+zations, libraries, or individuals with previously scanned
+content to benefit from expression recognition technology
+without requiring access to the physical scanner. Each file’s
+original image, dewarped result, and final detection overlay
+are displayed side by side in the interface, allowing for
+transparency and easy verification. Figure 14 depicts the
+interface used in the evaluation.
+VI. CONCLUSION AND FUTURE SCOPE
+This work presented a revolutionary end-to-end method-
+ology for digitizing printed mathematical information that
+combines mechanical automation and deep learning-based
+expression recognition. The system’s base is a fully auto-
+mated book scanner prototype designed specifically for
+this project, which streamlines image acquisition using
+synchronized mechanical page flipping and dual-camera
+VOLUME 13, 2025
+206133
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+TABLE 10. Cost and feature comparison with commercial scanners.
+recording. This technology is combined with a powerful
+software pipeline designed to detect, extract, and recognize
+printed mathematical formulas, providing a realistic solution
+to digitize STEM literature. Multiple detection models were
+tested, and Faster R-CNN with ResNet-50 custom trained
+(Version V3 - Advanced) consistently beat the competition,
+providing high precision and recall rates for expression local-
+ization. For expression recognition, the TrOCR-based Vision
+Encoder-Decoder architecture was used, which demonstrated
+excellent accuracy in transforming mathematical expression
+images into LaTeX code during training and evaluation using
+benchmark datasets. In controlled situations with designed
+datasets, the recognition module produced accurate LaTeX
+outputs. However, during the real-world implementation,
+the recognition system encountered performance constraints.
+The difference in image quality, resolution, and noise
+between dataset images and real-world scanned output
+hampered accurate recognition. As a result, while the
+detection model correctly identified expressions on scanned
+textbook pages, the recognition component was unable
+to consistently generate valid LaTeX output from those
+expressions. These findings emphasize the importance of
+more robust pre-processing and dataset adaptability when
+moving from training to practical use. The real-world testing
+of the system included the digitization of academic textbooks
+with complicated mathematical notation. It remained oper-
+ationally stable across hundreds of pages, completing each
+full cycle (gripping, turning, capturing, and resetting) in 10-
+12 seconds. This resulted in a throughput of around 300-400
+pages per hour. An offline web interface was also created,
+allowing users to upload pre-scanned pages and process them
+in batches without relying on scanner hardware, broadening
+the system’s reach to contexts lacking real-time automation
+infrastructure.
+In terms of pricing, the proposed system outperforms
+cutting-edge commercial book scanners, which often cost
+thousands of dollars and rely on proprietary software. In com-
+parison, our prototype was created for about $215-$240 USD
+utilizing off-the-shelf and open-source components, while
+yet providing complete automation and integrated expression
+detection, a substantial contribution for educational institu-
+tions and researchers with limited budgets.
+Future work will focus on improving expression segmen-
+tation in congested pages, enhancing recognition robustness
+under diverse document conditions, and expanding the sys-
+tem to accommodate handwritten expressions. The addition
+of a user-friendly editing interface for verifying or amending
+outputs, expanding support for multilingual mathematical
+symbols, and making the hardware smaller and portable are
+all being considered. In addition, comparative investigations
+with other cutting-edge models will be conducted, with a
+particular emphasis on cost-effectiveness and performance
+scaling in practical circumstances.
+ACKNOWLEDGMENT
+The
+authors
+gratefully
+acknowledge
+Sri
+Mata
+Amri-
+tanandamayi Devi (Amma), Chancellor, Amrita Vishwa
+Vidyapeetham, for her inspiration.1
+APPENDIX
+This section provides the key components and intermediate
+outputs of the automatic book scanner system. As illustrated
+in Figure 15, the extracted output reflects the inability
+1The BOM and the CAD/STL scripts associated with this work is
+available at: https://aseblr-my.sharepoint.com/:u:/g/personal/v_susmitha_
+blr_amrita_edu/ESRxyo7abkpNmT3FekCNZDwBaBdUAeWqx0M6rR2eei
+Z4qw?e=ABA74s
+FIGURE 15. Tesseract OCR output on mathematical expressions.
+206134
+VOLUME 13, 2025
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+FIGURE 16. Workflow stages of the automated scanning and flipping system.
+FIGURE 17. Recognition results of different kinds of complex mathematical expressions.
+of Tesseract to handle formulaic content with structural
+awareness. The workflow stages of the automated scanning
+and flipping system is shown in Figure 16.
+With reference to the actual configuration as depicted in
+Figure 16, the following are the key stages in the hardware
+operation.
+1) Stage 1 – Page Gripper and Image Capture: The
+servo-controlled gripper arm descends, isolating one
+page. Once stabilized, the Raspberry Pi sends a
+capture command to the mounted cellphones. High-
+resolution page photos are captured and transmitted to
+the Pi, then to a laptop for preprocessing (including
+cropping, dewarping, deskewing, and noise reduction).
+The improved photos are then fed into the PMER
+pipeline, which detects and recognizes mathematical
+expressions.
+2) Stage 2 – Gripper Retraction and Flipper Activa-
+tion: Once the photos have been acquired, the gripper
+arm is retracted. The page flipper mechanism (C-arm)
+is actuated, sweeping in an arc from Position 1 to
+Position 2. A suction conduit attached to the arm draws
+the page up with airflow from Blower Fan 1.
+3) Stage 3 – Suction, Flicking, and Air Assist:As the
+flipping arm approaches its final position, the PC fan
+is engaged via a relay, flicking the edge of the page
+for better separation. A second blower on the other
+side sends air toward the page, completing the flipping
+process while preventing multi-page rotations.
+4) Stage 4 – Cycle Completion and Reset: The flipper
+arm returns to Position 1, and the system prepares for
+the next cycle. A main reset switch stops all operations
+and clears saved motor positions.
+Figure 17 demonstrates the model’s robustness by dis-
+playing recognition outputs across multiple mathematical
+expression formats, including integrals, summations, multi-
+line formulas, and matrix notations. Regardless of struc-
+tural complexity, the model consistently produces correct
+LaTeX structure and formatting. These findings highlight
+the model’s ability to handle a wide range of printed
+mathematical content.
+REFERENCES
+[1] S. Thamaraiselvan, V. Venugopal, and S. Vekkot, ‘‘Interpretable handwrit-
+ten digit classification: Analyzing feature extraction and explainable AI
+on the extended MNIST dataset,’’ in Proc. 13th Int. Conf. Syst. Model.
+Advancement Res. Trends (SMART), Dec. 2024, pp. 591–597.
+[2] M. Vasuki, M. Arun Gangadharan, J. T. Daniel, A. Sadashiv, V. Venugopal,
+and S. Vekkot, ‘‘Multi-modal automatic video segmentation with sentence
+transformer embeddings and KeyBERT-based subtopic extraction,’’ in
+Proc. 2nd World Conf. Commun. Comput. (WCONF), Jul. 2024, pp. 1–6.
+[3] F. M. Schmitt-Koopmann, E. M. Huang, H.-P. Hutter, T. Stadelmann, and
+A. Darvishy, ‘‘MathNet: A data-centric approach for printed mathematical
+expression recognition,’’ IEEE Access, vol. 12, pp. 76963–76974, 2024.
+[4] S. T. Pecheti, N. Kodurupaka, and M. Belwal, ‘‘Recursive descent
+parser for abstract syntax tree visualization of mathematical expressions,’’
+in Proc. 7th Int. Conf. Comput. Syst. Inf. Technol. Sustain. Solutions
+(CSITSS), Nov. 2023, pp. 1–6.
+VOLUME 13, 2025
+206135
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+[5] B. Qumsiyeh, ‘‘Google book scanner,’’ Google Inc., USA, Tech. Rep.,
+2009.
+[6] N. Ragesh, R. Ranjith, and P. Sivraj, ‘‘Fast R-CNN based masked face
+recognition for access control system,’’ in Proc. 4th Int. Conf. Inventive
+Res. Comput. Appl. (ICIRCA), Sep. 2022, pp. 1049–1055.
+[7] M. Hussain, ‘‘YOLOv1 to v8: Unveiling each variant—A compre-
+hensive review of YOLO,’’ IEEE Access, vol. 12, pp. 42816–42833,
+2024.
+[8] X. Yejing, H. Mouchère, F. Liwicki, R. Sumit, S. Rajkumar, M. Nakagawa,
+C. T. Nguyen, and T. Thanh-Nghia, ‘‘ICDAR 2023 CROHME: Compe-
+tition on recognition of handwritten mathematical expressions,’’ in Proc.
+Int. Conf. Document Anal. Recognit. San José, CA, USA: Springer, 2023,
+pp. 553–565.
+[9] Z. Zhou, S. Ji, Y. Wang, Z. Weng, and Y. Zhu, ‘‘TRMER: Transformer-
+based
+end
+to
+end
+printed
+mathematical
+expression
+recognition,’’
+in
+Proc.
+Int.
+Joint
+Conf.
+Neural
+Netw.
+(IJCNN),
+Jun.
+2023,
+pp. 1–6.
+[10] T. Elder and C. Wong, ‘‘Robotic book scanner,’’ California Polytech. State
+Univ., San Luis Obispo, CA, USA, project Jun. 2014. [Online]. Available:
+https://digitalcommons.calpoly.edu/cgi/viewcontent.cgi?article=1125&
+context=cpesp
+[11] J.-H. Lee, B.-H. Jeon, Y.-R. Cha, and H.-C. Yang, ‘‘Automatic page-turning
+mechanism with near-field electroadhesive force,’’ in Proc. IEEE/RSJ Int.
+Conf. Intell. Robots Syst. (IROS), Sep. 2017, pp. 1–12.
+[12] E. K. Sinmaz, M. Kocaseçer, and M. Ayyildiz, ‘‘The effect of book
+preconditioning on page-turning success rate during automated book
+digitization,’’ Instrum. Experim. Techn., vol. 65, no. 5, pp. 826–833,
+Oct. 2022.
+[13] Y. Watanabe, M. Tamei, M. Yamada, and M. Ishikawa, ‘‘Automatic page
+turner machine for high-speed book digitization,’’ in Proc. IEEE/RSJ Int.
+Conf. Intell. Robots Syst., Nov. 2013, pp. 272–279.
+[14] O. W. Ata, A. Dadou, and M. Ismail, ‘‘Automated linear book-scanning
+system (ALBS),’’ in Proc. IEEE Jordan Int. Joint Conf. Electr. Eng. Inf.
+Technol. (JEEIT), Jordan, Apr. 2019, pp. 353–358.
+[15] S. Nawshin, S. K. Das, N. Hossain, J. D. Mela, A. Shafin Mohammad
+Mahdee Jameel, and S. Islam, ‘‘Development of an automated low-cost
+book scanner and translator,’’ in Proc. 1st Int. Conf. Adv. Sci., Eng. Robot.
+Technol. (ICASERT), May 2019, pp. 1–5.
+[16] D. Mandel et al., ‘‘Xerox book scanner platform,’’ Xerox Inc., USA,
+Tech. Rep., 2009.
+[17] D. Anitei, J. A. Sánchez, J. M. Benedí, and E. Noya, ‘‘The IBEM
+dataset: A large printed scientific image dataset for indexing and searching
+mathematical expressions,’’ Pattern Recognit. Lett., vol. 172, pp. 29–36,
+Aug. 2023.
+[18] B. H. Phong, T. M. Hoang, and T.-L. Le, ‘‘A new method for displayed
+mathematical expression detection based on FFT and SVM,’’ in Proc. 4th
+NAFOSTED Conf. Inf. Comput. Sci., Nov. 2017, pp. 90–95.
+[19] W. Ohyama, M. Suzuki, and S. Uchida, ‘‘Detecting mathematical
+expressions in scientific document images using a U-Net trained
+on a diverse dataset,’’ IEEE Access, vol. 7, pp. 144030–144042,
+2019.
+[20] B. Yu, X. Tian, and W. Luo, ‘‘Extracting mathematical components
+directly from PDF documents for mathematical expression recognition and
+retrieval,’’ in Proc. Int. Conf. Signal Process., 2014, pp. 170–179.
+[21] Y. Deng, A. Kanervisto, and A. M. Rush, ‘‘What you get is what you see:
+A visual markup decompiler,’’ 2017, arXiv:1609.04938.
+[22] F. Gervais, V. Fadeeva, and A. Maksai, ‘‘Mathwriting: A dataset for hand-
+written mathematical expression recognition,’’ 2024, arXiv:2402.09129.
+[23] Y. Zhang and G. Li, ‘‘Improving handwritten mathematical expression
+recognition via integrating convolutional neural network with trans-
+former and diffusion-based data augmentation,’’ IEEE Access, vol. 12,
+pp. 67945–67956, 2024.
+[24] F. Li, H. Fang, D. Wang, R. Liu, Q. Hou, and B. Xie, ‘‘Offline handwritten
+mathematical expression recognition based on YOLOv5s,’’ Vis. Comput.,
+vol. 40, no. 3, pp. 1439–1452, Mar. 2024.
+[25] R. Aggarwal, S. Pandey, A. K. Tiwari, and G. Harit, ‘‘Survey of structural
+analysis in mathematical expression recognition,’’ IETE Tech. Rev., vol. 41,
+no. 4, pp. 486–497, Jul. 2024.
+[26] N. P. Sable, P. Shelke, N. Deogaonkar, N. Joshi, R. Kabadi, and T. Joshi,
+‘‘Doc-handler: Document scanner, manipulator, and translator based on
+image and natural language processing,’’ in Proc. Int. Conf. Emerg. Smart
+Comput. Informat. (ESCI), Mar. 2023, pp. 1–6.
+[27] D. Anitei, J. A. Sánchez, J. M. Benedí, and E. Noya, ‘‘The IBEM
+dataset: A large printed scientific image dataset for indexing and searching
+mathematical expressions,’’ Pattern Recognit. Lett., vol. 172, pp. 29–36,
+2023.
+[28] A. Kanervisto, ‘‘Im2latex-100k dataset,’’ Zenodo, 2016, doi: 10.5281/zen-
+odo.56198.
+[29] F. M. Schmitt-Koopmann, E. M. Huang, H.-P. Hutter, T. Stadelmann,
+and A. Darvishy, ‘‘FormulaNet: A benchmark dataset for mathematical
+formula detection,’’ IEEE Access, vol. 10, pp. 91588–91596, 2022.
+[30] P. Mali, P. Kukkadapu, M. Mahdavi, and R. Zanibbi, ‘‘ScanSSD: Scanning
+single shot detector for mathematical formulas in PDF document images,’’
+2020, arXiv:2003.08005.
+[31] Y. Deng, A. Kanervisto, J. Ling, and A. M. Rush, ‘‘Image-to-markup
+generation with coarse-to-fine attention,’’ in Proc. 36th Int. Conf. Mach.
+Learn., 2016, pp. 980–989.
+[32] E. Z. Orji, A. Haydar, and İ. Erşan, ‘‘Inception-transformer: End-to-
+end printed mathematical expression recognition using convolutional
+and transformer networks,’’ Nanotechnol. Perceptions, vol. 20, no. 6,
+pp. 26–90, 2024.
+[33] R. Smith, ‘‘An overview of the tesseract OCR engine,’’ in Proc. 9th
+Int. Conf. Document Anal. Recognit. (ICDAR), vol. 2, Sep. 2007,
+pp. 629–633.
+[34] M. Li, T. Lv, J. Chen, L. Cui, Y. Lu, D. Florencio, C. Zhang, Z. Li, and F.
+Wei, ‘‘TrOCR: Transformer-based optical character recognition with pre-
+trained models,’’ in Proc. AAAI Conf. Artif. Intell., vol. 37, no. 11, pp.
+13094–13102, Jun. 2023.
+[35] J. J. Craig, Introduction to Robotics: Mechanics and Control, 3rd ed.,
+Upper Saddle River, NJ, USA: Pearson Education, 2004.
+[36] R. M. Murray, Z. Li, and S. S. Sastry, A Mathematical Introduction to
+Robotic Manipulation. Boca Raton, FL, USA: CRC Press, 1994.
+[37] W. D. Callister, Materials Science and Engineering: An Introduction, 2nd
+ed., Hoboken, NJ, USA: Wiley, 2001.
+S. THAMARAISELVAN received the B.Tech.
+degree (Hons.) in robotics and automation from
+the Karunya Institute of Technology and Sciences,
+in 2023, and the M.Tech. degree (Hons.) in
+robotics and automation from the Amrita School of
+Engineering, Bengaluru, in 2025. He has actively
+participated in the IEEE Vehicular Technology
+Society during his academic tenure. He was
+the Presidential Special Aide with the Rotaract
+Club, Karunya University, contributing to student
+leadership and community engagement. He has completed an internship
+with RoboRAM, gaining hands-on experience in industrial robotics and
+Siemens PLC programming. His research interests include automation,
+autonomous mobile robots, and manipulator systems, with a focus on
+intelligent mechatronic solutions and real-time control.
+VIVEK VENUGOPAL received the bachelor’s
+degree in electronics and communication engi-
+neering from the Amrita School of Engineering,
+Coimbatore, India, in 2011, the M.Tech. degree in
+electronics and communication engineering from
+the National Institute of Technology Jalandhar,
+Jalandhar, India, in 2014, and the Ph.D. degree
+from the Department of Electrical and Electron-
+ics Engineering, Indian Institute of Technology
+Guwahati, Guwahati, India, in 2019. He is cur-
+rently an Assistant Professor with the Department of Electronics and
+Communication Engineering, Amrita School of Engineering, Amrita Vishwa
+Vidyapeetham, Bengaluru, India. He has more than 20 publications in
+reputed journals, conferences, and book chapters. His current research
+interests include document analysis and recognition, medical image and
+signal processing, and AI for societal good.
+206136
+VOLUME 13, 2025
+
+
+
+S. Thamaraiselvan et al.: Automated Academic Book Scanner
+SUSMITHA VEKKOT received the Ph.D. degree
+in applied speech processing from Amrita Vishwa
+Vidyapeetham, Bengaluru Campus, India, in 2021.
+She is currently an Assistant Professor (SG)
+with the Department of ECE, Amrita Vishwa
+Vidyapeetham. She was a recipient of the Gov-
+ernment of India’s Visvesvaraya Full-Time Schol-
+arship for pursuing Ph.D. degree. She has been
+an Active Researcher and has published articles
+in several international conferences and journals
+of repute. Her research work has published in reputed international
+journals, such as IEEE ACCESS, Knowledge-Based Systems, International
+Journal of Speech Technology, and Sensors. She has conducted and
+participated in several short-term courses, seminars, and conferences at the
+national/international level. She has more than 15 years of experience in
+teaching and research space. She has more than 50 publications in reputed
+Scopus-indexed journals, conferences, and book chapters. Her primary
+research interests include signal, speech, video, image, and natural language
+processing; and machine learning/deep learning applications of speech and
+image processing in health care and human–computer interaction.
+PRAMOD KUMAR PISHARADY received the
+Ph.D. degree from the National University of
+Singapore (NUS), in 2012. He did his doctoral
+research in the area of computer vision and
+machine learning with. He completed postdoctoral
+training from Massachusetts Institute of Technol-
+ogy (MIT), from 2013 to 2014, where he started
+research in brain image analysis. He is an Assistant
+Professor with the Center for Magnetic Reso-
+nance Research (CMRR), University of Minnesota
+(UMN). His research at CMRR was focused on reconstruction of white
+matter parameters of the brain and spine from diffusion MRI (dMRI) data.
+His current research revolves around translational research projects applying
+dMRI analysis tools for understanding the white matter structural changes in
+neurodegenerative diseases, such as Amyotrophic Lateral Sclerosis (ALS)
+and Parkinson’s Disease. He received several research grants, including
+the Imaging Scientist Grant from the Chan Zuckerberg Initiative (CZI).
+His research work has published in reputed international journals, such
+as International Journal on Computer Vision, Computer Vision and Image
+Understanding, Applied Soft Computing, Neuroimage, Communications
+Medicine, and Magnetic Resonance in Medicine.
+VOLUME 13, 2025
+206137

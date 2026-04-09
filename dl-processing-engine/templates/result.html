@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Processing Results</title>
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+        }
+        .image-row {
+            display: flex;
+            margin-bottom: 40px;
+            gap: 20px;
+        }
+        .image-column {
+            flex: 1;
+            text-align: center;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            padding: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h2>✅ Processed {{ results|length }} file(s)</h2>
+    <div class="container">
+        {% for original, dewarped, predicted in results %}
+        <div class="image-row">
+            <div class="image-column">
+                <h4>Original</h4>
+                <img src="{{ original }}" alt="Original">
+            </div>
+            <div class="image-column">
+                <h4>Dewarped</h4>
+                <img src="{{ dewarped }}" alt="Dewarped">
+            </div>
+            <div class="image-column">
+                <h4>Math Detection</h4>
+                <img src="{{ predicted }}" alt="Detected">
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

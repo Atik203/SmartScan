@@ -1,0 +1,54 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# ===== Virtual Environments =====
+.venv/
+venv/
+ENV/
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Data & Models (large files) =====
+datasets/
+models/*.pt
+models/*.pth
+models/*.onnx
+*.h5
+
+# ===== Processing Outputs =====
+dl-processing-engine/cropped/
+dl-processing-engine/dewarped/
+dl-processing-engine/predicted/
+dl-processing-engine/extracted/
+dl-processing-engine/uploads/
+dl-processing-engine/offline/
+dl-processing-engine/static/
+dl-processing-engine/meta/
+dl-processing-engine/image_queue.txt
+dl-processing-engine/processed_images.txt
+
+# ===== Node.js (Web App) =====
+smartscan-web/node_modules/
+smartscan-web/.next/
+smartscan-web/out/
+
+# ===== Logs =====
+*.log
+logs/

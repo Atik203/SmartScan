@@ -1,0 +1,5 @@
+Scripts used in thsi project
+1.app.py
+2.processing.py
+3.run_on_laptop.py
+4.offline_processing.py
