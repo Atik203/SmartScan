@@ -27,9 +27,9 @@ try:
     dataset = load_dataset("yuntian-deng/im2latex-100k-raw")
 
     print(f"\n[OK] Im2LaTeX dataset loaded!")
-    print(f"     Train    : {len(dataset['train']):,} samples")
-    print(f"     Validate : {len(dataset['validation']):,} samples")
-    print(f"     Test     : {len(dataset['test']):,} samples")
+    print(f"     Train : {len(dataset['train']):,} samples")
+    print(f"     Val   : {len(dataset['val']):,} samples")
+    print(f"     Test  : {len(dataset['test']):,} samples")
 
     # Show a sample
     sample = dataset["train"][0]
@@ -39,12 +39,12 @@ try:
 
     # Create 10% subsets and report sizes
     train_10 = len(dataset["train"]) // 10
-    val_10 = len(dataset["validation"]) // 10
+    val_10 = len(dataset["val"]) // 10
     test_10 = len(dataset["test"]) // 10
-    print(f"\n[INFO] 10% subset sizes:")
-    print(f"       Train    : {train_10:,} samples")
-    print(f"       Validate : {val_10:,} samples")
-    print(f"       Test     : {test_10:,} samples")
+    print(f"\n[INFO] 10% subset sizes (what we will train on):")
+    print(f"       Train : {train_10:,} samples")
+    print(f"       Val   : {val_10:,} samples")
+    print(f"       Test  : {test_10:,} samples")
 
 except Exception as e:
     print(f"[ERROR] Failed to load Im2LaTeX: {e}")
