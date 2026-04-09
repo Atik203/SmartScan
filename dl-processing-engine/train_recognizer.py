@@ -139,18 +139,20 @@ def preprocess(examples):
     return {"pixel_values": pixel_values, "labels": labels}
 
 
-print("[->] Processing training split...")
+print("[->] Processing training split (will be cached for future runs)...")
 train_dataset = train_dataset.map(
-    preprocess, batched=True, batch_size=32,
+    preprocess, batched=True, batch_size=16,
     remove_columns=train_dataset.column_names,
     desc="Train",
+    num_proc=1,
 )
 
 print("[->] Processing validation split...")
 val_dataset = val_dataset.map(
-    preprocess, batched=True, batch_size=32,
+    preprocess, batched=True, batch_size=16,
     remove_columns=val_dataset.column_names,
     desc="Val",
+    num_proc=1,
 )
 
 train_dataset.set_format(type="torch", columns=["pixel_values", "labels"])
@@ -169,6 +171,8 @@ print("=" * 60)
 
 OUTPUT_DIR = os.path.join(MODELS_DIR, "trocr-latex")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+os.environ["TENSORBOARD_LOGGING_DIR"] = os.path.join(OUTPUT_DIR, "logs")
 
 training_args = Seq2SeqTrainingArguments(
     output_dir=OUTPUT_DIR,
@@ -192,7 +196,6 @@ training_args = Seq2SeqTrainingArguments(
     load_best_model_at_end=True,
     metric_for_best_model="eval_loss",
     greater_is_better=False,
-    logging_dir=os.path.join(OUTPUT_DIR, "logs"),
 )
 
 trainer = Seq2SeqTrainer(
@@ -200,7 +203,7 @@ trainer = Seq2SeqTrainer(
     args=training_args,
     train_dataset=train_dataset,
     eval_dataset=val_dataset,
-    tokenizer=processor.tokenizer,
+    processing_class=processor.tokenizer,   # 'tokenizer' was renamed in transformers>=4.46
 )
 
 train_result = trainer.train()

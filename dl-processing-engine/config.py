@@ -76,7 +76,7 @@ IM2LATEX_DATASET_DIR = os.path.join(DATASETS_DIR, "im2latex")
 # ============================================================
 DEVICE = "cuda"  # "cuda" for GPU, "cpu" for CPU
 BATCH_SIZE_DETECTION = 4       # Faster R-CNN on 6GB VRAM
-BATCH_SIZE_RECOGNITION = 16    # TrOCR on 6GB VRAM
+BATCH_SIZE_RECOGNITION = 8     # TrOCR on 6GB VRAM (reduced for safety)
 NUM_WORKERS = 4                # Ryzen 7 5800H has 8 cores
 LEARNING_RATE = 1e-4
 NUM_EPOCHS_DETECTION = 25
