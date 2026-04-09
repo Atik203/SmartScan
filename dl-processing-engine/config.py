@@ -99,7 +99,7 @@ def ensure_dirs():
 
 if __name__ == "__main__":
     ensure_dirs()
-    print(f"[✓] Project root: {PROJECT_ROOT}")
-    print(f"[✓] All directories created successfully.")
-    print(f"[✓] YOLO model expected at: {YOLO_MODEL_PATH}")
-    print(f"[✓] Data directory: {DATA_DIR}")
+    print(f"[OK] Project root: {PROJECT_ROOT}")
+    print(f"[OK] All directories created successfully.")
+    print(f"[OK] YOLO model expected at: {YOLO_MODEL_PATH}")
+    print(f"[OK] Data directory: {DATA_DIR}")
