@@ -81,6 +81,7 @@ from transformers import (
     VisionEncoderDecoderModel,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
+    default_data_collator,
 )
 
 MODEL_NAME = "microsoft/trocr-base-printed"
@@ -196,7 +197,7 @@ trainer = Seq2SeqTrainer(
     args=training_args,
     train_dataset=train_torch_ds,
     eval_dataset=val_torch_ds,
-    processing_class=processor.tokenizer,
+    data_collator=default_data_collator,  # handles pre-padded tensors directly
 )
 
 print("[OK] Trainer ready. Starting training loop...")
