@@ -11,6 +11,12 @@ Usage:
 import os
 import sys
 
+# Redirect all HuggingFace cache to G: drive (200GB free, nothing on C/E)
+os.environ["HF_HOME"]                       = "G:/SmartScan-Cache/hf"
+os.environ["HF_DATASETS_CACHE"]             = "G:/SmartScan-Cache/hf/datasets"
+os.environ["TRANSFORMERS_CACHE"]            = "G:/SmartScan-Cache/hf/transformers"
+os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+
 print("=" * 60)
 print("SmartScan Dataset Downloader")
 print("=" * 60)

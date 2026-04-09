@@ -23,10 +23,10 @@ import torch
 import warnings
 warnings.filterwarnings("ignore")
 
-# ── Redirect HuggingFace cache to E: drive (C: has little space) ──
-os.environ["HF_HOME"]                   = "E:/PROJECT/SmartScan/.cache/hf"
-os.environ["HF_DATASETS_CACHE"]         = "E:/PROJECT/SmartScan/.cache/hf/datasets"
-os.environ["TRANSFORMERS_CACHE"]        = "E:/PROJECT/SmartScan/.cache/hf/transformers"
+# ── Redirect HuggingFace cache to G: drive (200GB free) ──────────────────
+os.environ["HF_HOME"]                       = "G:/SmartScan-Cache/hf"
+os.environ["HF_DATASETS_CACHE"]             = "G:/SmartScan-Cache/hf/datasets"
+os.environ["TRANSFORMERS_CACHE"]            = "G:/SmartScan-Cache/hf/transformers"
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

@@ -34,6 +34,7 @@ models/*.onnx
 
 # ===== Processing Outputs (auto-generated, not tracked) =====
 dl-processing-engine/data/
+dl-processing-engine/.env
 dl-processing-engine/cropped/
 dl-processing-engine/dewarped/
 dl-processing-engine/predicted/
