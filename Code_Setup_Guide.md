@@ -16,20 +16,25 @@ SmartScan/
 │   ├── auto3.py                 # Serial listener (Arduino → Pi)
 │   └── auto_capture_3_updated.py # ADB camera trigger + image pull
 ├── dl-processing-engine/        # (was: PythonProject)
+│   ├── config.py                # [NEW] Centralized configuration (ALL paths here)
 │   ├── app.py                   # Flask offline web interface
 │   ├── processing.py            # Crop / dewarp / YOLO detect (online)
 │   ├── offline_processing.py    # Crop / dewarp / YOLO detect (offline)
 │   ├── run_on_laptop.py         # SSH/SCP listener for Pi images
+│   ├── train_recognizer.py      # [NEW] TrOCR training (HuggingFace)
+│   ├── train_detector.py        # [NEW] Faster R-CNN training (IBEM)
+│   ├── data/                    # [NEW] Auto-created processing data
 │   └── templates/
 │       ├── index.html           # Upload UI
 │       └── result.html          # Results display
-├── smartscan-web/               # [NEW] Next.js web dashboard (to be built)
+├── smartscan-web/               # [NEW] Next.js + shadcn/ui web dashboard (built!)
 ├── datasets/                    # [NEW] Store 10% sampled datasets here
 ├── models/                      # [NEW] Store downloaded model weights here
+├── requirements.txt             # [NEW] Python dependencies (CUDA 12.1)
 ├── Project_Details.md           # Project proposal (single most important file)
 ├── Code_Setup_Guide.md          # ← This file
 ├── WebApp_Plan.md               # Next.js web app development plan
-└── README.md                    # [TO CREATE] GitHub-facing README
+└── .gitignore                   # Git exclusions
 ```
 
 ---
@@ -80,31 +85,27 @@ print(f"Sampled {len(sample)} images for 10% subset")
 | **Task** | Train Vision Encoder-Decoder (TrOCR) to convert math images → LaTeX |
 | **Full Size** | ~100,000 formula image + LaTeX pairs |
 | **Our Target** | ~10,000 pairs (10%) |
-| **Download** | [https://doi.org/10.5281/zenodo.56198](https://doi.org/10.5281/zenodo.56198) |
+| **HuggingFace (Easiest! ✅)** | `yuntian-deng/im2latex-100k-raw` — auto-downloads in Python |
+| **Alt: Zenodo** | [https://doi.org/10.5281/zenodo.56198](https://doi.org/10.5281/zenodo.56198) |
 | **Alt: Kaggle** | [https://www.kaggle.com/datasets/shahrukhkhan/im2latex100k](https://www.kaggle.com/datasets/shahrukhkhan/im2latex100k) |
-| **Helper Tools** | [https://github.com/Miffyli/im2latex-dataset](https://github.com/Miffyli/im2latex-dataset) |
-| **Format** | PNG formula images + `formulas_im2latex.lst` (LaTeX text file) |
+| **Format** | Auto-loaded Image + formula text pairs |
 | **Paper Reference** | Kanervisto, A., Zenodo, 2016 |
 
-> ⚠️ **IMPORTANT:** The `formulas_im2latex.lst` file uses UNIX newlines (`\n`). In Python 3, open with `open("formulas_im2latex.lst", newline="\n")` to avoid line-count mismatches.
+> ✅ **RECOMMENDED:** Use HuggingFace `load_dataset` — no manual download needed!
 
-**10% Sampling Strategy:**
+**Easiest Way — HuggingFace (used in our `train_recognizer.py`):**
 ```python
-import random
-random.seed(42)
+from datasets import load_dataset
 
-with open("datasets/im2latex_full/formulas_im2latex.lst", newline="\n") as f:
-    all_formulas = f.readlines()
+# Auto-downloads ~2GB on first run, cached after that
+dataset = load_dataset("yuntian-deng/im2latex-100k-raw")
 
-# File lists: im2latex_train.lst, im2latex_validate.lst, im2latex_test.lst
-for split in ["train", "validate", "test"]:
-    with open(f"datasets/im2latex_full/im2latex_{split}.lst") as f:
-        lines = f.readlines()
-    sample = random.sample(lines, k=len(lines) // 10)
-    with open(f"datasets/im2latex_10pct/im2latex_{split}.lst", "w") as f:
-        f.writelines(sample)
+# Take 10% subset
+train_10pct = dataset["train"].shuffle(seed=42).select(range(len(dataset["train"]) // 10))
+val_10pct = dataset["validation"].shuffle(seed=42).select(range(len(dataset["validation"]) // 10))
 
-print("10% Im2LaTeX subset created")
+print(f"Train: {len(train_10pct)} | Val: {len(val_10pct)}")
+# Access: train_10pct[0]["image"], train_10pct[0]["formula"]
 ```
 
 ---
@@ -160,68 +161,37 @@ model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-base-printed"
 
 ---
 
-## 🔴 Files That NEED Updates (Hardcoded Paths & Configs)
+## ✅ Path Updates — DONE (Centralized in `config.py`)
 
-### `dl-processing-engine/run_on_laptop.py`
+> All hardcoded `D:/` paths have been replaced. All Python files now import from `dl-processing-engine/config.py`.
+> **The only file you need to edit is `config.py`** — update your Pi IP, Pi username, and phone serial numbers there.
 
-| Line | Current Value | Change To | Purpose |
-|---|---|---|---|
-| 8 | `PI_IP = "192.168.195.170"` | `PI_IP = "<YOUR_PI_IP>"` | Pi's local network IP |
-| 9 | `PI_USER = "tony"` | `PI_USER = "<YOUR_PI_USER>"` | SSH username on the Pi |
-| 10 | `PI_FOLDER = "/home/tony/pmer/captured_images/"` | `PI_FOLDER = "/home/<user>/smartscan/captured_images/"` | Image source on Pi |
-| 11 | `LOCAL_FOLDER = "D:/test1/from_pi/"` | `LOCAL_FOLDER = "./data/from_pi/"` | Use relative paths |
-| 12 | `CROPPED_FOLDER = "D:/test1/cropped/"` | `CROPPED_FOLDER = "./data/cropped/"` | Use relative paths |
-| 13 | `DEWARPED_FOLDER = "D:/test1/dewarped/"` | `DEWARPED_FOLDER = "./data/dewarped/"` | Use relative paths |
-| 14 | `PREDICTED_FOLDER = "D:/test1/selva PMER/"` | `PREDICTED_FOLDER = "./data/predicted/"` | Use relative paths |
-| 15 | `MODEL_PATH = "D:/Math_Formula_Detection/best.pt"` | `MODEL_PATH = "../models/best.pt"` | Point to `models/` folder |
-| 17 | `QUEUE_FILE = "D:/test1/image_queue.txt"` | `QUEUE_FILE = "./data/image_queue.txt"` | Use relative paths |
-| 18 | `PROCESSED_FILE = "D:/test1/processed_images.txt"` | `PROCESSED_FILE = "./data/processed_images.txt"` | Use relative paths |
-| 19 | `CSV_LOG_FILE = "D:/test1/logs/image_log.csv"` | `CSV_LOG_FILE = "./data/logs/image_log.csv"` | Use relative paths |
+### What was fixed:
 
-### `dl-processing-engine/app.py`
-
-| Line | Current Value | Change To | Purpose |
-|---|---|---|---|
-| 22 | `PERM_CROP_FOLDER = "D:/offline/cropped"` | `PERM_CROP_FOLDER = "./data/offline/cropped"` | Use relative paths |
-| 23 | `PERM_DEWARP_FOLDER = "D:/offline/dewarped"` | `PERM_DEWARP_FOLDER = "./data/offline/dewarped"` | Use relative paths |
-| 24 | `PERM_PREDICT_FOLDER = "D:/offline/predicted"` | `PERM_PREDICT_FOLDER = "./data/offline/predicted"` | Use relative paths |
-| 27 | `model = YOLO("D:/Math_Formula_Detection/best.pt")` | `model = YOLO("../models/best.pt")` | Point to `models/` folder |
-
-### `dl-processing-engine/processing.py`
-
-| Line | Current Value | Change To | Purpose |
-|---|---|---|---|
-| 72 | `extract_folder = os.path.join("D:/test1/extracted", ...)` | `extract_folder = os.path.join("./data/extracted", ...)` | Use relative paths |
-
-### `dl-processing-engine/offline_processing.py`
-
-| Line | Current Value | Change To | Purpose |
-|---|---|---|---|
-| 49 | `final_extract_base = "D:/offline/extracted"` | `final_extract_base = "./data/offline/extracted"` | Use relative paths |
-
-### `raspberry-pi-bridge/auto3.py`
-
-| Line | Current Value | Change To | Purpose |
-|---|---|---|---|
-| 8 | `SERIAL_PORT = "/dev/ttyUSB0"` | Verify with `ls /dev/tty*` on your Pi | USB serial port |
-| 12 | `CAPTURE_SCRIPT = "/home/tony/python_program/auto_capture_3_updated.py"` | `CAPTURE_SCRIPT = "/home/<user>/smartscan/auto_capture_3_updated.py"` | Script location on Pi |
-
-### `raspberry-pi-bridge/auto_capture_3_updated.py`
-
-| Line | Current Value | Change To | Purpose |
-|---|---|---|---|
-| 7 | `PI_SAVE_PATH = "/home/tony/pmer/captured_images"` | `PI_SAVE_PATH = "/home/<user>/smartscan/captured_images"` | Image save dir on Pi |
-| 10-13 | `"RZ8M93CFR7Z"`, `"ZD222LM9N3"` | Your phone serial numbers | ADB device IDs |
-| 16-19 | Device labels map | Update to match your devices | Left/right phone assignment |
-
-### `arduino-controller/Complete_automation_code_arduino.ino`
-
-| Line | Current Value | Notes |
+| File | Status | Details |
 |---|---|---|
-| 12-27 | Pin definitions | ✅ **No change needed** — these match standard Arduino Mega wiring |
-| 30 | `FAN_RELAY_PIN = 7` | Verify with your relay wiring |
-| 140-143 | Wait times (ms) | Tune based on your book thickness & mechanics |
-| 151 | `Serial.begin(9600)` | Must match `BAUD_RATE` in `auto3.py` |
+| `dl-processing-engine/config.py` | ✅ **NEW** | All paths, PI credentials, training config centralized here |
+| `dl-processing-engine/run_on_laptop.py` | ✅ Fixed | Imports from `config.py` |
+| `dl-processing-engine/app.py` | ✅ Fixed | Imports from `config.py` |
+| `dl-processing-engine/processing.py` | ✅ Fixed | Imports from `config.py` |
+| `dl-processing-engine/offline_processing.py` | ✅ Fixed | Imports from `config.py` |
+| `raspberry-pi-bridge/auto3.py` | ✅ Fixed | Uses `os.path` relative to script |
+| `raspberry-pi-bridge/auto_capture_3_updated.py` | ✅ Fixed | Uses `os.path.expanduser` |
+| `arduino-controller/*.ino` | ✅ No changes needed | Pin definitions are hardware-specific |
+
+### What YOU need to update in `config.py`:
+
+```python
+# In dl-processing-engine/config.py — update these values:
+PI_IP = "192.168.1.100"          # ← Your Pi's IP address
+PI_USER = "pi"                   # ← Your Pi's SSH username
+
+# In raspberry-pi-bridge/auto_capture_3_updated.py — update these:
+ADB_DEVICE_PATHS = {
+    "YOUR_LEFT_PHONE_SERIAL": "...",   # Run: adb devices
+    "YOUR_RIGHT_PHONE_SERIAL": "...",
+}
+```
 
 ---
 
@@ -278,18 +248,50 @@ pip install pyserial opencv-python-headless
 
 ## 🚀 Getting Started — Quick Checklist
 
+### Step 1: Install Python + CUDA
+```bash
+# Install PyTorch with CUDA 12.1 (for RTX 3060)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# Install all other dependencies
+pip install -r requirements.txt
+```
+
+### Step 2: Create directories
+```bash
+cd E:\PROJECT\SmartScan\dl-processing-engine
+python config.py   # Creates all required directories
+```
+
+### Step 3: Train models
+```bash
+# Recognition model (TrOCR) — auto-downloads Im2LaTeX from HuggingFace!
+python train_recognizer.py
+
+# Detection model (Faster R-CNN) — requires IBEM dataset download first
+python train_detector.py
+```
+
+### Step 4: Run web dashboard
+```bash
+cd E:\PROJECT\SmartScan\smartscan-web
+npm run dev   # Opens at http://localhost:3000
+```
+
+### Full Checklist
 - [ ] Clone this repo
-- [ ] Download IBEM dataset → extract to `datasets/ibem_full/`
-- [ ] Download Im2LaTeX-100K → extract to `datasets/im2latex_full/`
-- [ ] Run the 10% sampling scripts above
-- [ ] Download/train detection model → save as `models/best.pt`
-- [ ] Update all hardcoded paths in the files listed above
-- [ ] Install Python dependencies: `pip install -r requirements.txt`
-- [ ] Install `page-dewarp`: `pip install page-dewarp`
-- [ ] Install Tesseract OCR: [https://github.com/tesseract-ocr/tesseract](https://github.com/tesseract-ocr/tesseract)
+- [ ] Install PyTorch with CUDA 12.1 (see above)
+- [ ] Install dependencies: `pip install -r requirements.txt`
+- [ ] Run `python config.py` to create directories
+- [ ] Edit `config.py` with your Pi IP and phone serial numbers
+- [ ] Train TrOCR: `python train_recognizer.py` (auto-downloads Im2LaTeX!)
+- [ ] Download IBEM dataset → extract to `datasets/ibem/`
+- [ ] Train Faster R-CNN: `python train_detector.py`
+- [ ] Install Tesseract OCR
 - [ ] Flash Arduino sketch via Arduino IDE
 - [ ] Setup Raspberry Pi with ADB + Python serial listener
-- [ ] Test offline web interface: `cd dl-processing-engine && python app.py`
+- [ ] Run web dashboard: `cd smartscan-web && npm run dev`
+- [ ] Test offline Flask UI: `cd dl-processing-engine && python app.py`
 
 ---
 
