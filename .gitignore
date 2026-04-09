@@ -32,7 +32,8 @@ models/*.pth
 models/*.onnx
 *.h5
 
-# ===== Processing Outputs =====
+# ===== Processing Outputs (auto-generated, not tracked) =====
+dl-processing-engine/data/
 dl-processing-engine/cropped/
 dl-processing-engine/dewarped/
 dl-processing-engine/predicted/
@@ -52,3 +53,6 @@ smartscan-web/out/
 # ===== Logs =====
 *.log
 logs/
+
+# ===== HuggingFace Cache =====
+.cache/
