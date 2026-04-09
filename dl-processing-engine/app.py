@@ -7,8 +7,13 @@ from werkzeug.utils import secure_filename
 from ultralytics import YOLO
 import cv2
 import numpy as np
+from config import (
+    YOLO_MODEL_PATH, PERM_CROP_FOLDER, PERM_DEWARP_FOLDER,
+    PERM_PREDICT_FOLDER, ensure_dirs,
+)
 
 # ==== CONFIG ====
+ensure_dirs()
 app = Flask(__name__)
 BASE = os.path.join(os.getcwd(), "static")
 
@@ -18,13 +23,8 @@ DEWARP_FOLDER = os.path.join(BASE, "dewarped")
 PREDICTED_FOLDER = os.path.join(BASE, "predicted")
 EXTRACT_FOLDER = os.path.join("offline", "extracted")
 
-# Permanent storage folders
-PERM_CROP_FOLDER = "D:/offline/cropped"
-PERM_DEWARP_FOLDER = "D:/offline/dewarped"
-PERM_PREDICT_FOLDER = "D:/offline/predicted"
-
 # Load YOLO model
-model = YOLO("D:/Math_Formula_Detection/best.pt")
+model = YOLO(YOLO_MODEL_PATH)
 
 # Create necessary directories
 for folder in [UPLOAD_FOLDER, CROP_FOLDER, DEWARP_FOLDER, PREDICTED_FOLDER,

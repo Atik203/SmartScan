@@ -3,28 +3,18 @@ import time
 import subprocess
 from processing import crop_image, dewarp_image, detect_and_save
 from ultralytics import YOLO
-
-# ==== CONFIG ====
-PI_IP = "192.168.195.170"
-PI_USER = "tony"
-PI_FOLDER = "/home/tony/pmer/captured_images/"
-LOCAL_FOLDER = "D:/test1/from_pi/"
-CROPPED_FOLDER = "D:/test1/cropped/"
-DEWARPED_FOLDER = "D:/test1/dewarped/"
-PREDICTED_FOLDER = "D:/test1/selva PMER/"
-MODEL_PATH = "D:/Math_Formula_Detection/best.pt"
-
-QUEUE_FILE = "D:/test1/image_queue.txt"
-PROCESSED_FILE = "D:/test1/processed_images.txt"
-CSV_LOG_FILE = "D:/test1/logs/image_log.csv"
+from config import (
+    PI_IP, PI_USER, PI_FOLDER,
+    LOCAL_FOLDER, CROPPED_FOLDER, DEWARPED_FOLDER, PREDICTED_FOLDER,
+    YOLO_MODEL_PATH, QUEUE_FILE, PROCESSED_FILE, CSV_LOG_FILE,
+    LOGS_DIR, ensure_dirs,
+)
 
 # ==== Setup ====
-os.makedirs(LOCAL_FOLDER, exist_ok=True)
-os.makedirs(CROPPED_FOLDER, exist_ok=True)
-os.makedirs(DEWARPED_FOLDER, exist_ok=True)
-os.makedirs(PREDICTED_FOLDER, exist_ok=True)
+ensure_dirs()
+os.makedirs(LOGS_DIR, exist_ok=True)
 
-model = YOLO(MODEL_PATH)
+model = YOLO(YOLO_MODEL_PATH)
 
 def load_list(file_path):
     return set(open(file_path).read().splitlines()) if os.path.exists(file_path) else set()
@@ -105,7 +95,7 @@ def main_loop():
     while True:
         update_queue()
         process_one()
-        time.sleep(5)  # Every 10 seconds
+        time.sleep(5)  # Every 5 seconds
 
 if __name__ == "__main__":
     main_loop()

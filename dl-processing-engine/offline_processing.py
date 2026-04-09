@@ -3,6 +3,10 @@ import cv2
 import shutil
 import time
 from ultralytics import YOLO
+from config import PERM_EXTRACT_FOLDER, ensure_dirs
+
+# Ensure directories exist on import
+ensure_dirs()
 
 # --- Cropping ---
 def crop_image(image_path, save_path, top_cm=5, bottom_cm=5, left_cm=5, right_cm=0, dpi=96):
@@ -46,10 +50,9 @@ def dewarp_image(cropped_path, dewarped_path):
 
 # --- Move extracted folder to offline storage ---
 def move_extracted_to_offline(temp_extract_path):
-    final_extract_base = "D:/offline/extracted"
-    os.makedirs(final_extract_base, exist_ok=True)
+    os.makedirs(PERM_EXTRACT_FOLDER, exist_ok=True)
     subdir_name = os.path.basename(temp_extract_path)
-    dest_path = os.path.join(final_extract_base, subdir_name)
+    dest_path = os.path.join(PERM_EXTRACT_FOLDER, subdir_name)
     if os.path.exists(dest_path):
         shutil.rmtree(dest_path)
     shutil.move(temp_extract_path, dest_path)

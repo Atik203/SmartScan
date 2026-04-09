@@ -1,0 +1,45 @@
+# ============================================================
+# SmartScan — Python Dependencies
+# Optimized for: RTX 3060 6GB + CUDA 12.x
+# ============================================================
+
+# --- PyTorch with CUDA 12.1 (RTX 3060 compatible) ---
+# Install separately first:
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# --- Deep Learning Models ---
+transformers>=4.40.0         # HuggingFace TrOCR + Vision Encoder-Decoder
+datasets>=2.19.0             # HuggingFace datasets (load_dataset)
+ultralytics>=8.2.0           # YOLOv8 detection model
+accelerate>=0.30.0           # HuggingFace training acceleration
+
+# --- Image Processing ---
+opencv-python>=4.9.0
+numpy>=1.26.0
+Pillow>=10.3.0
+
+# --- Page Dewarping ---
+page-dewarp>=0.3.0
+
+# --- OCR ---
+pytesseract>=0.3.10
+
+# --- Web Interface (Flask - existing offline UI) ---
+flask>=3.0.0
+werkzeug>=3.0.0
+
+# --- Serial Communication (Raspberry Pi) ---
+pyserial>=3.5
+
+# --- Evaluation Metrics ---
+scikit-learn>=1.4.0
+nltk>=3.8.0                  # BLEU score calculation
+evaluate>=0.4.0              # HuggingFace evaluate library
+
+# --- Visualization & Utilities ---
+matplotlib>=3.8.0
+tqdm>=4.66.0
+tensorboard>=2.16.0          # Training visualization

@@ -4,6 +4,10 @@ import subprocess
 import shutil
 import time
 import numpy as np
+from config import EXTRACTED_FOLDER, ensure_dirs
+
+# Ensure directories exist on import
+ensure_dirs()
 
 # --- Cropping ---
 def crop_image(image_path, save_path, top_cm=10, bottom_cm=10, left_cm=5, right_cm=0, dpi=96):
@@ -69,7 +73,7 @@ def detect_and_save(model, image_path, save_path, conf=0.5, iou=0.75):
     # Extract and save formula crops
     if len(boxes):
         base_name = os.path.splitext(os.path.basename(image_path))[0]
-        extract_folder = os.path.join("D:/test1/extracted", base_name)
+        extract_folder = os.path.join(EXTRACTED_FOLDER, base_name)
         os.makedirs(extract_folder, exist_ok=True)
 
         for i, box in enumerate(boxes.astype(int)):
@@ -83,4 +87,3 @@ def detect_and_save(model, image_path, save_path, conf=0.5, iou=0.75):
         print(f"[✓] Detection done in {elapsed:.2f} sec: {save_path} | {len(boxes)} detected and extracted")
     else:
         print(f"[✓] Detection done in {elapsed:.2f} sec: {save_path} | No detections")
-

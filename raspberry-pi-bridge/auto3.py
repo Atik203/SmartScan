@@ -5,11 +5,12 @@ import sys
 import os
 
 # === CONFIGURATION ===
-SERIAL_PORT = "/dev/ttyUSB0"
+# Update these for your Raspberry Pi setup
+SERIAL_PORT = "/dev/ttyUSB0"    # Verify with: ls /dev/tty* on your Pi
 BAUD_RATE = 9600
 
-# Only this remains now
-CAPTURE_SCRIPT = "/home/tony/python_program/auto_capture_3_updated.py"
+# Path to the capture script on the Pi
+CAPTURE_SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "auto_capture_3_updated.py")
 
 def capture_and_process():
     print("[INFO] Trigger received. Capturing and saving images...")
@@ -45,4 +46,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n[INFO] Program interrupted manually. Exiting.")
         sys.exit(0)
-
