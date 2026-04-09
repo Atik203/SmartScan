@@ -144,7 +144,6 @@ train_dataset = train_dataset.map(
     preprocess, batched=True, batch_size=16,
     remove_columns=train_dataset.column_names,
     desc="Train",
-    num_proc=1,
 )
 
 print("[->] Processing validation split...")
@@ -152,7 +151,6 @@ val_dataset = val_dataset.map(
     preprocess, batched=True, batch_size=16,
     remove_columns=val_dataset.column_names,
     desc="Val",
-    num_proc=1,
 )
 
 train_dataset.set_format(type="torch", columns=["pixel_values", "labels"])
