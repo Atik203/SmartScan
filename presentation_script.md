@@ -1,30 +1,34 @@
 # 🎤 SmartScan Presentation Script
+
 **CSE 4326 — Project Proposal | Group 6 — Team: Phantom Devs**
 **Total Time: 10 Minutes | 2 Minutes per Speaker**
 
 ---
 
 > **How to use this script:**
+>
 > - Read the **English** version for meaning; speak from the **Bangla** version naturally
 > - Bold text = emphasize these words
-> - *(pause)* = 1–2 second pause for effect
+> - _(pause)_ = 1–2 second pause for effect
 > - `[Slide X]` = advance to the next slide at this point
 
 ---
 
-## 🎙️ Speaker 1 — Md. Atikur Rahaman (Team Leader)
+## 🎙️ Speaker 1 — Sourov
+
 ### Slides: 1 (Title) → 2 (Introduction) → 3 (Expected Prototype)
+
 ### ⏱️ Time: 0:00 – 2:00
 
 ---
 
 ### 🇧🇩 Bangla Version
 
-আসসালামু আলাইকুম। আমি **মোঃ আতিকুর রাহামান**, আমাদের দলের Team Leader।
+আসসালামু আলাইকুম। আমি **মোঃ সারোয়ার আলম সৌরভ**।
 আমরা হলাম **Group 6 — Team Phantom Devs**, এবং আমাদের প্রজেক্টের নাম **SmartScan** —
 একটি Automated Book Digitizer এবং LaTeX Extractor।
 
-*(pause)*
+_(pause)_
 
 `[Slide 2 — Introduction]`
 
@@ -38,7 +42,7 @@ SmartScan হলো একটি low-cost mechatronic এবং AI-integrated sy
 **Raspberry Pi** — communication bridge হিসেবে, এবং
 **Laptop + AI Model** — intelligent processing এর জন্য।
 
-*(pause)*
+_(pause)_
 
 `[Slide 3 — Expected Prototype]`
 
@@ -51,10 +55,10 @@ SmartScan হলো একটি low-cost mechatronic এবং AI-integrated sy
 
 ### 🇬🇧 English Version
 
-Assalamu Alaikum. I am **Md. Atikur Rahaman**, the Team Leader of Group 6 — **Team Phantom Devs**.
+Assalamu Alaikum. I am **Md. Sarowar Alam Sourov**, from Group 6 — **Team Phantom Devs**.
 Our project is called **SmartScan** — an Automated Book Digitizer and LaTeX Extractor.
 
-*(pause)*
+_(pause)_
 
 `[Slide 2 — Introduction]`
 
@@ -65,7 +69,7 @@ The system follows a clear architecture:
 **Arduino** handles physical muscle work, **Raspberry Pi** acts as the communication bridge,
 and the **laptop with AI models** serves as the intelligent brain.
 
-*(pause)*
+_(pause)_
 
 `[Slide 3 — Expected Prototype]`
 
@@ -75,10 +79,13 @@ the flipper arm turns it over, and finally the Raspberry Pi triggers both camera
 This is the heart of our **page-turning automation**.
 
 ---
+
 ---
 
-## 🎙️ Speaker 2 — Md. Sarowar Alam Sourov
+## 🎙️ Speaker 2 — Abdullah Al Noor
+
 ### Slides: 4 (Problem Statement) → 5 (Motivation)
+
 ### ⏱️ Time: 2:00 – 4:00
 
 ---
@@ -87,7 +94,7 @@ This is the heart of our **page-turning automation**.
 
 `[Slide 4 — Problem Statement]`
 
-আমি **মোঃ সারোয়ার আলম সৌরভ**। আমি আলোচনা করবো আমরা **কোন সমস্যা সমাধান করতে চাইছি**।
+আমি **আব্দুল্লাহ আল নূর**। আমি আলোচনা করবো আমরা **কোন সমস্যা সমাধান করতে চাইছি**।
 
 বর্তমানে academic textbook digitize করার ক্ষেত্রে **চারটি বড় সমস্যা** আছে।
 
@@ -97,7 +104,7 @@ This is the heart of our **page-turning automation**.
 এবং সবচেয়ে গুরুত্বপূর্ণ — **existing OCR tools mathematical equations ঠিকমতো capture করতে পারে না** —
 output এ equation structure হারিয়ে যায় এবং manually সংশোধন করতে হয়।
 
-*(pause)*
+_(pause)_
 
 `[Slide 5 — Motivation]`
 
@@ -113,7 +120,7 @@ Practical দিক থেকে, এটি engineering content এর জন্
 
 `[Slide 4 — Problem Statement]`
 
-I am **Md. Sarowar Alam Sourov**, and I will explain the **problem we are solving**.
+I am **Abdullah Al Noor**, and I will explain the **problem we are solving**.
 
 There are four critical failures in how academic books are currently digitized.
 
@@ -122,7 +129,7 @@ There are four critical failures in how academic books are currently digitized.
 **Third**, commercial scanning systems are **prohibitively expensive** — from $5,000 to $50,000 — completely out of reach for a student lab.
 And most importantly, **existing OCR tools fail at mathematical notation** — equations lose their structure and require full manual correction.
 
-*(pause)*
+_(pause)_
 
 `[Slide 5 — Motivation]`
 
@@ -133,10 +140,13 @@ These are exactly the problems that motivated us to propose **SmartScan**.
 **From a research perspective**, we are extending an **IEEE Access 2025 paper** and building a reproducible, validatable system baseline.
 
 ---
+
 ---
 
-## 🎙️ Speaker 3 — Abdullah Al Noor
+## 🎙️ Speaker 3 — Md. Atikur Rahaman (Team Leader)
+
 ### Slides: 6 (Objectives) → 7 (Feature Set) → 8 (System Architecture)
+
 ### ⏱️ Time: 4:00 – 6:00
 
 ---
@@ -145,7 +155,7 @@ These are exactly the problems that motivated us to propose **SmartScan**.
 
 `[Slide 6 — Objectives]`
 
-আমি **আব্দুল্লাহ আল নূর**। এখন আমি আমাদের **project এর objectives** এবং **core features** নিয়ে কথা বলবো।
+আমি **মোঃ আতিকুর রাহামান**, আমাদের দলের Team Leader। এখন আমি আমাদের **project এর objectives** এবং **core features** নিয়ে কথা বলবো।
 
 আমাদের পাঁচটি মূল objective আছে।
 প্রথমত, একটি **stable V-cradle platform** তৈরি করা gripper এবং flipper mechanism সহ।
@@ -154,7 +164,7 @@ These are exactly the problems that motivated us to propose **SmartScan**.
 চতুর্থত, একটি **web-based monitoring dashboard** তৈরি করা।
 এবং পঞ্চমত, **performance এবং budget feasibility** সম্পূর্ণরূপে validate করা।
 
-*(pause)*
+_(pause)_
 
 `[Slide 7 — Feature Set]`
 
@@ -176,7 +186,7 @@ Architecture টি তিনটি layer এ বিভক্ত।
 
 `[Slide 6 — Objectives]`
 
-I am **Abdullah Al Noor**. I will now cover our **project objectives** and the key features that support them.
+I am **Md. Atikur Rahaman**, Team Leader of Group 6. I will now cover our **project objectives** and the key features that support them.
 
 We have five concrete objectives.
 First — build a **stable V-cradle platform** with coordinated gripper and flipper arms.
@@ -185,7 +195,7 @@ Third — run a **complete AI processing pipeline** from raw image to LaTeX outp
 Fourth — deliver a **web-based dashboard** for monitoring and validating results.
 Fifth — **validate our targets** for accuracy, throughput, and budget feasibility with data-driven evaluation.
 
-*(pause)*
+_(pause)_
 
 `[Slide 7 — Feature Set]`
 
@@ -204,10 +214,13 @@ The system is organized in **three layers**:
 **Layer 3 — Brain**: the Laptop runs all AI inference and hosts the web dashboard.
 
 ---
+
 ---
 
 ## 🎙️ Speaker 4 — Md. Salman Rohoman Nayeem
+
 ### Slides: 9 (Architecture Diagram) → 10 (Flowchart) → 11 (AI Pipeline)
+
 ### ⏱️ Time: 6:00 – 8:00
 
 ---
@@ -226,7 +239,7 @@ Text region গুলো mask করে deep **bidirectional LSTM** layer দি
 Detected crop → **Vision Transformer Encoder** → **Transformer Decoder** → LaTeX tokens।
 Output এ embedded এবং isolated formula দুটো category দেখানো হচ্ছে।
 
-*(pause)*
+_(pause)_
 
 `[Slide 10 — Automation Flowchart]`
 
@@ -258,7 +271,7 @@ Text regions are masked and processed through a deep **bidirectional LSTM** tran
 On the **right side** is the **Recognition and Extraction Framework**.
 Each detected crop passes through a **Vision Transformer Encoder** and **Transformer Decoder** to produce the final **LaTeX token sequence**.
 
-*(pause)*
+_(pause)_
 
 `[Slide 10 — Automation Flowchart]`
 
@@ -277,10 +290,13 @@ The bottom image shows the **full 5-stage flow on a real textbook page**:
 Original → Cropped → Dewarped → Text+Math Detected → Math Extracted.
 
 ---
+
 ---
 
 ## 🎙️ Speaker 5 — Pratay Paul
+
 ### Slides: 12 (Dataset) → 13 (Performance) → 14 (Budget) → 15 (Conclusion) → 16 (Thank You)
+
 ### ⏱️ Time: 8:00 – 10:00
 
 ---
@@ -295,7 +311,7 @@ Detection model এর জন্য আমরা **full IBEM dataset** ব্য
 Recognition model এর জন্য **Im2LaTeX-100K dataset** ব্যবহার করবো।
 Data augmentation এবং compute-aware schedule দিয়ে training student timeline এর মধ্যে শেষ করবো।
 
-*(pause)*
+_(pause)_
 
 `[Slide 13 — Expected Performance]`
 
@@ -335,7 +351,7 @@ For the detection model, we train on the **full IBEM dataset**.
 For recognition, we fine-tune using **Im2LaTeX-100K**.
 Data augmentation and a compute-aware schedule will keep training within our student timeline.
 
-*(pause)*
+_(pause)_
 
 `[Slide 13 — Expected Performance]`
 
@@ -370,20 +386,20 @@ We are fully prepared to answer any questions you may have.
 
 ## 📌 Quick Speaker Reference Card
 
-| # | Speaker | Student ID | Slides | Key Topics |
-|---|---------|------------|--------|-----------|
-| 1 | Md. Atikur Rahaman *(Leader)* | 011-231-0298 | 1 → 2 → 3 | Project intro, what SmartScan is, prototype |
-| 2 | Md. Sarowar Alam Sourov | 011-231-0302 | 4 → 5 | Problems with current solutions, motivation |
-| 3 | Abdullah Al Noor | 011-231-0479 | 6 → 7 → 8 | Objectives, 6 features, 3-layer architecture |
-| 4 | Md. Salman Rohoman Nayeem | 011-231-0484 | 9 → 10 → 11 | AI diagram, flowchart, AI pipeline details |
-| 5 | Pratay Paul | 011-231-0163 | 12 → 13 → 14 → 15 → 16 | Dataset, performance, budget, conclusion |
+| #   | Speaker                          | Student ID   | Slides                  | Key Topics                                    |
+| --- | -------------------------------- | ------------ | ----------------------- | --------------------------------------------- |
+| 1   | Md. Sarowar Alam Sourov          | 011-231-0302 | 1 → 2 → 3               | Project intro, what SmartScan is, prototype   |
+| 2   | Abdullah Al Noor                 | 011-231-0479 | 4 → 5                   | Problems with current solutions, motivation   |
+| 3   | Md. Atikur Rahaman _(Leader)_    | 011-231-0298 | 6 → 7 → 8               | Objectives, 6 features, 3-layer architecture |
+| 4   | Md. Salman Rohoman Nayeem        | 011-231-0484 | 9 → 10 → 11             | AI diagram, flowchart, AI pipeline details    |
+| 5   | Pratay Paul                      | 011-231-0163 | 12 → 13 → 14 → 15 → 16  | Dataset, performance, budget, conclusion      |
 
 ## ⏱️ Timing Bar
 
 ```
 0:00 ────── 2:00 ────── 4:00 ────── 6:00 ────── 8:00 ────── 10:00
 [Speaker 1]  [Speaker 2]  [Speaker 3]  [Speaker 4]  [Speaker 5]
-  Atikur      Sarowar      Abdullah     Salman        Pratay
-Title+Intro  Problem+Mot  Obj+Feat+Arch  Diag+Flow  Dataset+Budget
+  Sourov      Abdullah     Atikur       Salman        Pratay
+Title+Intro  Problem+Mot  Obj+Feat+Arch  Diag+Flow   Dataset+Budget
 +Prototype                               +Pipeline    +Conclusion
 ```
