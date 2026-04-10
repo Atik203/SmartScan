@@ -44,67 +44,73 @@ type Slide = {
 };
 
 const teamMembers: TeamMember[] = [
-  { name: "Member 1 Name", id: "ID 01" },
-  { name: "Member 2 Name", id: "ID 02" },
-  { name: "Member 3 Name", id: "ID 03" },
-  { name: "Member 4 Name", id: "ID 04" },
-  { name: "Member 5 Name", id: "ID 05" },
+  { name: "Md. Atikur Rahaman (Team Leader)", id: "011-231-0298" },
+  { name: "Md. Sarowar Alam Sourov", id: "011-231-0302" },
+  { name: "Abdullah Al Noor", id: "011-231-0479" },
+  { name: "Md. Salman Rohoman Nayeem", id: "011-231-0484" },
+  { name: "Pratay Paul", id: "011-231-0163" },
 ];
 
 const themes: SlideTheme[] = [
   {
+    // Deep Ocean Blue — Title, Architecture, Flowchart
     shell:
-      "bg-[radial-gradient(circle_at_20%_20%,#e0f2fe_0%,#f8fafc_40%,#f1f5f9_100%)]",
-    panel: "bg-white/85",
-    heading: "text-slate-900",
-    text: "text-slate-800",
-    badge: "bg-cyan-100 text-cyan-900",
-    border: "border-cyan-300/80",
+      "bg-[radial-gradient(ellipse_at_top_left,#0369a1_0%,#075985_40%,#0c4a6e_100%)]",
+    panel: "bg-white/98",
+    heading: "text-sky-900",
+    text: "text-sky-800",
+    badge: "bg-sky-600 text-white",
+    border: "border-sky-500",
   },
   {
+    // Deep Ember Gold — Introduction, AI Pipeline, Conclusion
     shell:
-      "bg-[radial-gradient(circle_at_80%_10%,#fde68a_0%,#fff7ed_35%,#fefce8_100%)]",
-    panel: "bg-white/85",
-    heading: "text-amber-950",
-    text: "text-amber-900",
-    badge: "bg-amber-100 text-amber-950",
-    border: "border-amber-300/80",
+      "bg-[radial-gradient(ellipse_at_top_right,#b45309_0%,#92400e_40%,#78350f_100%)]",
+    panel: "bg-white/98",
+    heading: "text-amber-900",
+    text: "text-amber-800",
+    badge: "bg-amber-600 text-white",
+    border: "border-amber-500",
   },
   {
+    // Deep Royal Violet — Problem Statement, Dataset
     shell:
-      "bg-[radial-gradient(circle_at_15%_20%,#ddd6fe_0%,#fdf4ff_45%,#f8fafc_100%)]",
-    panel: "bg-white/85",
-    heading: "text-violet-950",
-    text: "text-violet-900",
-    badge: "bg-violet-100 text-violet-950",
-    border: "border-violet-300/80",
+      "bg-[radial-gradient(ellipse_at_top_left,#7c3aed_0%,#6d28d9_40%,#4c1d95_100%)]",
+    panel: "bg-white/98",
+    heading: "text-violet-900",
+    text: "text-violet-800",
+    badge: "bg-violet-600 text-white",
+    border: "border-violet-500",
   },
   {
+    // Deep Forest Emerald — Motivation, Performance
     shell:
-      "bg-[radial-gradient(circle_at_80%_10%,#bbf7d0_0%,#ecfeff_35%,#f8fafc_100%)]",
-    panel: "bg-white/85",
-    heading: "text-emerald-950",
-    text: "text-emerald-900",
-    badge: "bg-emerald-100 text-emerald-950",
-    border: "border-emerald-300/80",
+      "bg-[radial-gradient(ellipse_at_top_right,#059669_0%,#047857_40%,#065f46_100%)]",
+    panel: "bg-white/98",
+    heading: "text-emerald-900",
+    text: "text-emerald-800",
+    badge: "bg-emerald-600 text-white",
+    border: "border-emerald-500",
   },
   {
+    // Deep Crimson Rose — Objectives, Budget
     shell:
-      "bg-[radial-gradient(circle_at_20%_20%,#fed7aa_0%,#fff1f2_42%,#f8fafc_100%)]",
-    panel: "bg-white/85",
-    heading: "text-rose-950",
-    text: "text-rose-900",
-    badge: "bg-rose-100 text-rose-950",
-    border: "border-rose-300/80",
+      "bg-[radial-gradient(ellipse_at_top_left,#e11d48_0%,#be123c_40%,#9f1239_100%)]",
+    panel: "bg-white/98",
+    heading: "text-rose-900",
+    text: "text-rose-800",
+    badge: "bg-rose-600 text-white",
+    border: "border-rose-500",
   },
   {
+    // Deep Midnight Indigo — Features, Architecture Diagram, Prototype
     shell:
-      "bg-[radial-gradient(circle_at_80%_20%,#bfdbfe_0%,#eef2ff_45%,#f8fafc_100%)]",
-    panel: "bg-white/85",
-    heading: "text-indigo-950",
-    text: "text-indigo-900",
-    badge: "bg-indigo-100 text-indigo-950",
-    border: "border-indigo-300/80",
+      "bg-[radial-gradient(ellipse_at_top_right,#4f46e5_0%,#4338ca_40%,#3730a3_100%)]",
+    panel: "bg-white/98",
+    heading: "text-indigo-900",
+    text: "text-indigo-800",
+    badge: "bg-indigo-600 text-white",
+    border: "border-indigo-500",
   },
 ];
 
@@ -116,7 +122,7 @@ const slides: Slide[] = [
     body: (
       <div className="space-y-8">
         <div className="grid gap-5 lg:grid-cols-3">
-          <div className="rounded-2xl border border-cyan-300 bg-cyan-50/80 p-5 lg:col-span-2">
+          <div className="rounded-2xl border border-sky-500 bg-sky-100/90 p-5 lg:col-span-2">
             <p className="text-[clamp(1.2rem,1.9vw,1.8rem)] font-bold text-slate-900">
               Project Proposal Presentation
             </p>
@@ -127,7 +133,7 @@ const slides: Slide[] = [
               United International University (UIU)
             </p>
           </div>
-          <div className="rounded-2xl border border-cyan-300 bg-white/90 p-5">
+          <div className="rounded-2xl border border-sky-500 bg-white/90 p-5">
             <p className="text-[clamp(1rem,1.5vw,1.25rem)] font-bold text-slate-900">
               Group No: 6
             </p>
@@ -140,17 +146,17 @@ const slides: Slide[] = [
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-cyan-300 bg-white/95 p-4">
+        <div className="overflow-x-auto rounded-2xl border border-sky-500 bg-white/98 p-4">
           <table className="w-full border-collapse text-left">
             <thead>
               <tr>
-                <th className="border border-cyan-300 bg-cyan-50 p-3 text-[clamp(0.95rem,1.3vw,1.1rem)] font-extrabold text-slate-900">
+                <th className="border border-sky-500 bg-sky-100 p-3 text-[clamp(0.95rem,1.3vw,1.1rem)] font-extrabold text-slate-900">
                   No.
                 </th>
-                <th className="border border-cyan-300 bg-cyan-50 p-3 text-[clamp(0.95rem,1.3vw,1.1rem)] font-extrabold text-slate-900">
+                <th className="border border-sky-500 bg-sky-100 p-3 text-[clamp(0.95rem,1.3vw,1.1rem)] font-extrabold text-slate-900">
                   Name
                 </th>
-                <th className="border border-cyan-300 bg-cyan-50 p-3 text-[clamp(0.95rem,1.3vw,1.1rem)] font-extrabold text-slate-900">
+                <th className="border border-sky-500 bg-sky-100 p-3 text-[clamp(0.95rem,1.3vw,1.1rem)] font-extrabold text-slate-900">
                   Student ID
                 </th>
               </tr>
@@ -158,13 +164,13 @@ const slides: Slide[] = [
             <tbody>
               {teamMembers.map((member, index) => (
                 <tr key={member.id}>
-                  <td className="border border-cyan-200 p-3 text-[clamp(0.95rem,1.3vw,1.1rem)] font-semibold text-slate-800">
+                  <td className="border border-sky-400 p-3 text-[clamp(0.95rem,1.3vw,1.1rem)] font-semibold text-slate-800">
                     {index + 1}
                   </td>
-                  <td className="border border-cyan-200 p-3 text-[clamp(0.95rem,1.3vw,1.1rem)] font-semibold text-slate-800">
+                  <td className="border border-sky-400 p-3 text-[clamp(0.95rem,1.3vw,1.1rem)] font-semibold text-slate-800">
                     {member.name}
                   </td>
-                  <td className="border border-cyan-200 p-3 text-[clamp(0.95rem,1.3vw,1.1rem)] font-semibold text-slate-800">
+                  <td className="border border-sky-400 p-3 text-[clamp(0.95rem,1.3vw,1.1rem)] font-semibold text-slate-800">
                     {member.id}
                   </td>
                 </tr>
@@ -190,7 +196,7 @@ const slides: Slide[] = [
         ].map((line) => (
           <div
             key={line}
-            className="rounded-2xl border border-amber-300 bg-white/95 p-4 text-[clamp(1.03rem,1.45vw,1.4rem)] font-semibold text-amber-950"
+            className="rounded-2xl border border-amber-500 bg-white/98 p-4 text-[clamp(1.18rem,1.52vw,1.48rem)] font-semibold text-amber-950"
           >
             {line}
           </div>
@@ -204,11 +210,11 @@ const slides: Slide[] = [
     theme: themes[5],
     body: (
       <div className="space-y-5">
-        <div className="rounded-2xl border border-indigo-300 bg-white/95 p-5">
+        <div className="rounded-2xl border border-indigo-500 bg-white/98 p-5">
           <p className="text-lg font-extrabold text-indigo-950">
             Expected prototype overview
           </p>
-          <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(1rem,1.3vw,1.2rem)] font-semibold text-indigo-900">
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(1.18rem,1.45vw,1.38rem)] font-semibold text-indigo-900">
             <li>
               The figure consolidates four key visual sections of the proposed
               system in one panel.
@@ -224,7 +230,7 @@ const slides: Slide[] = [
           </ul>
         </div>
 
-        <div className="rounded-2xl border border-indigo-300 bg-white/95 p-3">
+        <div className="rounded-2xl border border-indigo-500 bg-white/98 p-3">
           <Image
             src="/image.png"
             alt="Expected prototype collage from research paper"
@@ -267,15 +273,15 @@ const slides: Slide[] = [
         ].map((item) => (
           <div
             key={item.h}
-            className="rounded-2xl border border-violet-300 bg-white/95 p-5"
+            className="rounded-2xl border border-violet-500 bg-white/98 p-5"
           >
             <p className="text-[clamp(1.05rem,1.5vw,1.35rem)] font-extrabold text-violet-950">
               {item.h}
             </p>
-            <p className="mt-2 text-[clamp(0.95rem,1.25vw,1.12rem)] font-semibold text-violet-900">
+            <p className="mt-2 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-violet-900">
               {item.b}
             </p>
-            <p className="mt-2 text-[clamp(0.95rem,1.2vw,1.08rem)] font-bold text-violet-950">
+            <p className="mt-2 text-[clamp(1.18rem,1.42vw,1.35rem)] font-bold text-violet-950">
               {item.c}
             </p>
           </div>
@@ -317,12 +323,12 @@ const slides: Slide[] = [
         ].map((item) => (
           <div
             key={item.h}
-            className="rounded-2xl border border-emerald-300 bg-white/95 p-5"
+            className="rounded-2xl border border-emerald-500 bg-white/98 p-5"
           >
             <p className="text-[clamp(1.05rem,1.45vw,1.3rem)] font-extrabold text-emerald-950">
               {item.h}
             </p>
-            <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(0.95rem,1.2vw,1.08rem)] font-semibold text-emerald-900">
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-emerald-900">
               {item.points.map((point) => (
                 <li key={point}>{point}</li>
               ))}
@@ -343,31 +349,31 @@ const slides: Slide[] = [
             title: "Objective 1 - Mechanical Automation Core",
             detail:
               "Build a stable V-cradle platform with coordinated gripper and flipper mechanisms for repeatable page handling.",
-            accent: "border-rose-300 bg-rose-50/60 text-rose-950",
+            accent: "border-rose-500 bg-rose-100 text-rose-950",
           },
           {
             title: "Objective 2 - Embedded Control and Capture Sync",
             detail:
               "Implement Arduino-based servo control and synchronized dual-camera capture using Raspberry Pi bridge communication.",
-            accent: "border-orange-300 bg-orange-50/60 text-orange-950",
+            accent: "border-orange-500 bg-orange-100 text-orange-950",
           },
           {
             title: "Objective 3 - Image and AI Processing Pipeline",
             detail:
               "Run preprocessing, math region detection, and LaTeX recognition in an integrated pipeline suitable for academic documents.",
-            accent: "border-amber-300 bg-amber-50/60 text-amber-950",
+            accent: "border-amber-500 bg-amber-100 text-amber-950",
           },
           {
             title: "Objective 4 - Web-based Monitoring and Results",
             detail:
               "Provide clear dashboard views for processing status, detection outputs, and formula rendering for presentation and validation.",
-            accent: "border-fuchsia-300 bg-fuchsia-50/60 text-fuchsia-950",
+            accent: "border-fuchsia-500 bg-fuchsia-100 text-fuchsia-950",
           },
           {
             title: "Objective 5 - Feasibility and Performance Validation",
             detail:
               "Demonstrate practical accuracy, throughput, and budget feasibility with complete data-driven evaluation.",
-            accent: "border-violet-300 bg-violet-50/60 text-violet-950",
+            accent: "border-violet-500 bg-violet-100 text-violet-950",
           },
         ].map((item) => (
           <div
@@ -377,7 +383,7 @@ const slides: Slide[] = [
             <p className="text-[clamp(1rem,1.35vw,1.18rem)] font-extrabold">
               {item.title}
             </p>
-            <p className="mt-2 text-[clamp(0.96rem,1.2vw,1.08rem)] font-semibold">
+            <p className="mt-2 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold">
               {item.detail}
             </p>
           </div>
@@ -396,37 +402,37 @@ const slides: Slide[] = [
             layer: "Feature 1 - Autonomous Page Flipping",
             name: "4-stage mechatronic cycle",
             desc: "Grip, hold, flip, and reset sequence is designed for repeatable page handling with minimal human intervention.",
-            accent: "border-fuchsia-300 bg-fuchsia-50/60 text-fuchsia-950",
+            accent: "border-fuchsia-500 bg-fuchsia-100 text-fuchsia-950",
           },
           {
             layer: "Feature 2 - Synchronized Dual Capture",
             name: "Raspberry Pi + ADB trigger",
             desc: "Pi listens for CAPTURE command and triggers both phones to capture left and right pages in sync.",
-            accent: "border-sky-300 bg-sky-50/60 text-sky-950",
+            accent: "border-sky-500 bg-sky-100 text-sky-950",
           },
           {
             layer: "Feature 3 - Page Dewarp and Enhancement",
             name: "Curved to flat page transformation",
             desc: "Image preprocessing removes margins and curvature so models receive clean, readable page content.",
-            accent: "border-emerald-300 bg-emerald-50/60 text-emerald-950",
+            accent: "border-emerald-500 bg-emerald-100 text-emerald-950",
           },
           {
             layer: "Feature 4 - Math Region Detection",
             name: "Faster R-CNN (ResNet50 + FPN)",
             desc: "Detector localizes equations from dense textbook layouts with strong precision and recall targets.",
-            accent: "border-amber-300 bg-amber-50/60 text-amber-950",
+            accent: "border-amber-500 bg-amber-100 text-amber-950",
           },
           {
             layer: "Feature 5 - LaTeX Generation",
             name: "TrOCR-based recognition",
             desc: "Detected formula crops are converted into editable LaTeX sequences for academic reuse.",
-            accent: "border-violet-300 bg-violet-50/60 text-violet-950",
+            accent: "border-violet-500 bg-violet-100 text-violet-950",
           },
           {
             layer: "Feature 6 - Real-time Dashboard",
             name: "Next.js presentation interface",
             desc: "Tracks pipeline status, shows outputs, and supports structured proposal-to-demo communication.",
-            accent: "border-rose-300 bg-rose-50/60 text-rose-950",
+            accent: "border-rose-500 bg-rose-100 text-rose-950",
           },
         ].map((item) => (
           <div
@@ -436,10 +442,10 @@ const slides: Slide[] = [
             <p className="text-[clamp(1.02rem,1.4vw,1.22rem)] font-extrabold">
               {item.layer}
             </p>
-            <p className="text-[clamp(0.95rem,1.2vw,1.08rem)] font-bold">
+            <p className="text-[clamp(1.18rem,1.42vw,1.35rem)] font-bold">
               {item.name}
             </p>
-            <p className="mt-1 text-[clamp(0.95rem,1.17vw,1.05rem)] font-semibold">
+            <p className="mt-1 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold">
               {item.desc}
             </p>
           </div>
@@ -453,7 +459,7 @@ const slides: Slide[] = [
     theme: themes[0],
     body: (
       <div className="space-y-5">
-        <div className="rounded-2xl border border-cyan-300 bg-cyan-50/65 p-4 text-[clamp(1rem,1.25vw,1.12rem)] font-semibold text-cyan-950">
+        <div className="rounded-2xl border border-sky-500 bg-sky-100/80 p-4 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-cyan-950">
           The architecture is organized as Muscle, Bridge, and Brain to separate
           physical actuation, communication, and intelligent processing
           responsibilities.
@@ -477,7 +483,7 @@ const slides: Slide[] = [
         ].map((item) => (
           <div
             key={item.layer}
-            className="rounded-2xl border border-cyan-300 bg-white/95 p-5"
+            className="rounded-2xl border border-sky-500 bg-white/98 p-5"
           >
             <p className="text-[clamp(1.08rem,1.52vw,1.34rem)] font-extrabold text-slate-900">
               {item.layer}
@@ -485,13 +491,13 @@ const slides: Slide[] = [
             <p className="text-[clamp(1rem,1.32vw,1.14rem)] font-bold text-slate-900">
               {item.name}
             </p>
-            <p className="mt-2 text-[clamp(0.98rem,1.24vw,1.1rem)] font-semibold text-slate-800">
+            <p className="mt-2 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-slate-800">
               {item.desc}
             </p>
           </div>
         ))}
 
-        <div className="rounded-2xl border border-dashed border-cyan-300 bg-cyan-50/70 p-4 text-[clamp(0.98rem,1.2vw,1.08rem)] font-semibold text-slate-800">
+        <div className="rounded-2xl border border-dashed border-sky-500 bg-sky-100/80 p-4 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-slate-800">
           Architecture flow: Arduino layer to Raspberry Pi bridge to Processing
           engine to Dashboard output.
         </div>
@@ -504,11 +510,11 @@ const slides: Slide[] = [
     theme: themes[5],
     body: (
       <div className="space-y-4">
-        <div className="rounded-2xl border border-indigo-300 bg-indigo-50/60 p-4 text-[clamp(1rem,1.25vw,1.12rem)] font-semibold text-indigo-950">
+        <div className="rounded-2xl border border-indigo-500 bg-indigo-100/80 p-4 text-[clamp(1rem,1.25vw,1.12rem)] font-semibold text-indigo-950">
           This figure presents the complete multi-layer architecture and
           communication path of the SmartScan system.
         </div>
-        <div className="rounded-2xl border border-indigo-300 bg-white/95 p-3">
+        <div className="rounded-2xl border border-indigo-500 bg-white/98 p-3">
           <div className="grid items-center gap-3 lg:grid-cols-12">
             <div className="lg:col-span-5">
               <Image
@@ -542,11 +548,11 @@ const slides: Slide[] = [
     theme: themes[0],
     body: (
       <div className="space-y-4">
-        <div className="rounded-2xl border border-cyan-300 bg-cyan-50/60 p-4 text-[clamp(1rem,1.25vw,1.12rem)] font-semibold text-cyan-950">
+        <div className="rounded-2xl border border-sky-500 bg-sky-100/80 p-4 text-[clamp(1rem,1.25vw,1.12rem)] font-semibold text-cyan-950">
           This flowchart shows the operational sequence, state checks, and reset
           logic for the automated page-turning and capture process.
         </div>
-        <div className="rounded-2xl border border-cyan-300 bg-white/95 p-3">
+        <div className="rounded-2xl border border-sky-500 bg-white/98 p-3">
           <Image
             src="/system_flowchart.jpeg"
             alt="System flowchart with process decisions"
@@ -564,11 +570,11 @@ const slides: Slide[] = [
     theme: themes[1],
     body: (
       <div className="grid gap-5 lg:grid-cols-2">
-        <div className="rounded-2xl border border-amber-300 bg-white/95 p-5">
+        <div className="rounded-2xl border border-amber-500 bg-white/98 p-5">
           <p className="text-[clamp(1.05rem,1.45vw,1.25rem)] font-extrabold text-amber-950">
             Stage A: Faster R-CNN Detection
           </p>
-          <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(0.95rem,1.16vw,1.05rem)] font-semibold text-amber-900">
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-amber-900">
             <li>Locates mathematical expressions in dense textbook pages.</li>
             <li>Trained with full IBEM detection annotations.</li>
             <li>Outputs bounding boxes for targeted recognition.</li>
@@ -577,11 +583,11 @@ const slides: Slide[] = [
             </li>
           </ul>
         </div>
-        <div className="rounded-2xl border border-amber-300 bg-white/95 p-5">
+        <div className="rounded-2xl border border-amber-500 bg-white/98 p-5">
           <p className="text-[clamp(1.05rem,1.45vw,1.25rem)] font-extrabold text-amber-950">
             Stage B: TrOCR Recognition
           </p>
-          <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(0.95rem,1.16vw,1.05rem)] font-semibold text-amber-900">
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-amber-900">
             <li>Converts detected formula image into LaTeX tokens.</li>
             <li>
               Fine-tuned with full Im2LaTeX dataset for stronger coverage.
@@ -594,8 +600,8 @@ const slides: Slide[] = [
           </ul>
         </div>
 
-        <div className="rounded-2xl border border-amber-300 bg-white/95 p-3 lg:col-span-2">
-          <p className="mb-2 text-[clamp(0.98rem,1.2vw,1.08rem)] font-bold text-amber-900">
+        <div className="rounded-2xl border border-amber-500 bg-white/98 p-3 lg:col-span-2">
+          <p className="mb-2 text-[clamp(1.18rem,1.42vw,1.35rem)] font-bold text-amber-900">
             Detection output sample for presentation
           </p>
           <Image
@@ -605,7 +611,7 @@ const slides: Slide[] = [
             height={850}
             className="h-[38vh] w-full rounded-xl object-contain md:h-[42vh]"
           />
-          <p className="mt-2 text-[clamp(0.95rem,1.12vw,1.02rem)] font-semibold text-amber-900">
+          <p className="mt-2 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-amber-900">
             Explain this as localization first, then crop each region and send
             to TrOCR for final LaTeX generation.
           </p>
@@ -619,11 +625,11 @@ const slides: Slide[] = [
     theme: themes[2],
     body: (
       <div className="grid gap-5 lg:grid-cols-5">
-        <div className="rounded-2xl border border-violet-300 bg-white/95 p-5 lg:col-span-3">
+        <div className="rounded-2xl border border-violet-500 bg-white/98 p-5 lg:col-span-3">
           <p className="text-[clamp(1.02rem,1.4vw,1.22rem)] font-extrabold text-violet-950">
             Practical data plan
           </p>
-          <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(0.95rem,1.16vw,1.05rem)] font-semibold text-violet-900">
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-violet-900">
             <li>
               Full IBEM dataset for detection model training and validation.
             </li>
@@ -637,17 +643,17 @@ const slides: Slide[] = [
           </ul>
         </div>
 
-        <div className="rounded-2xl border border-violet-300 bg-white/95 p-5 lg:col-span-2">
+        <div className="rounded-2xl border border-violet-500 bg-white/98 p-5 lg:col-span-2">
           <p className="text-[clamp(1.02rem,1.35vw,1.16rem)] font-extrabold text-violet-950">
             Estimation snapshot
           </p>
-          <p className="mt-2 text-[clamp(0.95rem,1.15vw,1.04rem)] font-semibold text-violet-900">
+          <p className="mt-2 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-violet-900">
             Detection model uses complete available detection annotations.
           </p>
-          <p className="mt-1 text-[clamp(0.95rem,1.15vw,1.04rem)] font-semibold text-violet-900">
+          <p className="mt-1 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-violet-900">
             Recognition model uses complete paired formula and LaTeX data.
           </p>
-          <p className="mt-3 text-[clamp(0.95rem,1.15vw,1.04rem)] font-semibold text-violet-900">
+          <p className="mt-3 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-violet-900">
             This maximizes formula diversity and improves real-world
             generalization.
           </p>
@@ -680,12 +686,12 @@ const slides: Slide[] = [
         ].map(([k, v]) => (
           <div
             key={k}
-            className="rounded-2xl border border-emerald-300 bg-white/95 p-4"
+            className="rounded-2xl border border-emerald-500 bg-white/98 p-4"
           >
             <p className="text-[clamp(1rem,1.32vw,1.12rem)] font-extrabold text-emerald-950">
               {k}
             </p>
-            <p className="mt-1 text-[clamp(0.95rem,1.16vw,1.04rem)] font-semibold text-emerald-900">
+            <p className="mt-1 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-emerald-900">
               {v}
             </p>
           </div>
@@ -699,25 +705,25 @@ const slides: Slide[] = [
     theme: themes[4],
     body: (
       <div className="grid gap-5 lg:grid-cols-3">
-        <div className="rounded-2xl border border-rose-300 bg-white/95 p-5 lg:col-span-2">
+        <div className="rounded-2xl border border-rose-500 bg-white/98 p-5 lg:col-span-2">
           <p className="text-[clamp(1.02rem,1.4vw,1.22rem)] font-extrabold text-rose-950">
             Cost optimization decisions
           </p>
-          <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(0.95rem,1.16vw,1.05rem)] font-semibold text-rose-900">
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-rose-900">
             <li>Use existing smartphones for camera system.</li>
             <li>Use local components and student-manufactured parts.</li>
             <li>Use modular architecture to reduce replacement cost risk.</li>
             <li>Focus on reproducibility in university lab environment.</li>
           </ul>
         </div>
-        <div className="rounded-2xl border border-rose-300 bg-white/95 p-5">
+        <div className="rounded-2xl border border-rose-500 bg-white/98 p-5">
           <p className="text-[clamp(1.02rem,1.35vw,1.16rem)] font-extrabold text-rose-950">
             Expected budget
           </p>
           <p className="mt-2 text-[clamp(1rem,1.45vw,1.3rem)] font-extrabold text-rose-950">
             Approximately 20,000 BDT (excluding Raspberry Pi 5)
           </p>
-          <p className="mt-3 text-[clamp(0.95rem,1.15vw,1.02rem)] font-semibold text-rose-900">
+          <p className="mt-3 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-rose-900">
             Cost remains significantly lower than commercial academic scanning
             systems.
           </p>
@@ -731,12 +737,12 @@ const slides: Slide[] = [
     theme: themes[1],
     body: (
       <div className="space-y-5">
-        <div className="rounded-2xl border border-amber-300 bg-white/95 p-6 text-[clamp(1.2rem,1.6vw,1.45rem)] font-semibold text-amber-900">
+        <div className="rounded-2xl border border-amber-500 bg-white/98 p-6 text-[clamp(1.2rem,1.6vw,1.45rem)] font-semibold text-amber-900">
           SmartScan is a feasible, low-cost, and academically strong proposal
           that integrates embedded control, image processing, and deep learning
           for real textbook digitization with math-aware LaTeX output.
         </div>
-        <div className="rounded-2xl border border-amber-300 bg-white/95 p-6 text-[clamp(1.2rem,1.6vw,1.45rem)] font-semibold text-amber-900">
+        <div className="rounded-2xl border border-amber-500 bg-white/98 p-6 text-[clamp(1.2rem,1.6vw,1.45rem)] font-semibold text-amber-900">
           The architecture, roadmap, and risk strategy make it suitable for a
           structured university implementation timeline.
         </div>
@@ -749,7 +755,7 @@ const slides: Slide[] = [
     theme: themes[2],
     body: (
       <div className="flex min-h-[56vh] items-center justify-center">
-        <div className="w-full max-w-4xl rounded-2xl border border-violet-300 bg-white/95 p-8 text-center">
+        <div className="w-full max-w-4xl rounded-2xl border border-violet-500 bg-white/98 p-8 text-center">
           <p className="text-[clamp(1.35rem,2vw,1.9rem)] font-extrabold text-violet-950">
             Team Extra Current
           </p>
@@ -993,7 +999,7 @@ export default function SlidePage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -12, scale: 0.995 }}
               transition={{ duration: 0.28, ease: "easeOut" }}
-              className={`${isFullscreen ? "min-h-[calc(100vh-2rem)] rounded-2xl" : "min-h-[calc(100vh-155px)] rounded-3xl"} border ${activeSlide.theme.border} ${activeSlide.theme.panel} p-6 shadow-[0_12px_40px_rgba(15,23,42,0.08)] md:p-10`}
+              className={`${isFullscreen ? "min-h-[calc(100vh-2rem)] rounded-2xl" : "min-h-[calc(100vh-155px)] rounded-3xl"} border ${activeSlide.theme.border} ${activeSlide.theme.panel} p-6 shadow-[0_16px_64px_rgba(0,0,0,0.32)] md:p-10`}
             >
               <div className="mb-6 space-y-2">
                 <h1
@@ -1010,7 +1016,7 @@ export default function SlidePage() {
                 )}
               </div>
 
-              <div className="pb-2 [&_li]:text-[clamp(1.05rem,1.45vw,1.35rem)] [&_p]:text-[clamp(1.05rem,1.45vw,1.35rem)] [&_td]:text-[clamp(1rem,1.38vw,1.25rem)] [&_th]:text-[clamp(1rem,1.38vw,1.25rem)]">
+              <div className="pb-2 [&_li]:text-[clamp(1.18rem,1.6vw,1.5rem)] [&_p]:text-[clamp(1.18rem,1.6vw,1.5rem)] [&_td]:text-[clamp(1.15rem,1.52vw,1.45rem)] [&_th]:text-[clamp(1.15rem,1.52vw,1.45rem)]">
                 {activeSlide.body}
               </div>
             </motion.section>
