@@ -661,7 +661,9 @@ const slides: Slide[] = [
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-[clamp(1.1rem,1.32vw,1.22rem)] font-semibold text-amber-900">
             <li>Converts detected formula image into LaTeX tokens.</li>
-            <li>Fine-tuned with full Im2LaTeX dataset for stronger coverage.</li>
+            <li>
+              Fine-tuned with full Im2LaTeX dataset for stronger coverage.
+            </li>
             <li>Produces editable output for reports and lecture notes.</li>
             <li>Rendered preview lets faculty verify output quickly.</li>
           </ul>
@@ -789,51 +791,62 @@ const slides: Slide[] = [
     subtitle: "~20,000 BDT total — far below commercial alternatives",
     theme: themes[4],
     body: (
-      <div className="grid gap-5 lg:grid-cols-3">
-        <div className="rounded-2xl border border-rose-500 bg-white/98 p-5 lg:col-span-2">
-          <p className="mb-3 text-[clamp(1.12rem,1.45vw,1.3rem)] font-extrabold text-rose-950">
-            Components used
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {[
-              "Arduino Mega 2560",
-              "Raspberry Pi 5 (8GB)",
-              "MG996R Servo Motors ×4",
-              "6000 RPM Blower Fan",
-              "PC Fan (80mm)",
-              "5V DC Relay Module",
-              "LM2596 Buck Converter",
-              "500W SMPS Power Supply",
-              "V-Cradle Wooden Frame",
-              "3D Printed PLA+ Parts",
-              "Android Smartphones ×2",
-              "Wires, Potentiometers, LEDs",
-            ].map((c) => (
-              <span
-                key={c}
-                className="rounded-full border border-rose-400 bg-rose-50 px-4 py-2 text-[clamp(1.05rem,1.28vw,1.18rem)] font-semibold text-rose-900"
-              >
-                {c}
-              </span>
-            ))}
+      <div className="space-y-3">
+        <div className="grid gap-3 lg:grid-cols-3">
+          <div className="rounded-2xl border border-rose-500 bg-white/98 p-4 lg:col-span-2">
+            <p className="mb-2 text-[clamp(1.05rem,1.35vw,1.2rem)] font-extrabold text-rose-950">
+              Hardware Components
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                "Arduino Mega 2560","Raspberry Pi 5 (8GB)","MG996R Servo ×4",
+                "Blower Fan 6000RPM","PC Fan 80mm","5V Relay Module",
+                "Buck Converter","500W SMPS","V-Cradle Frame",
+                "3D Printed PLA+","Android Phones ×2","Wires & LEDs",
+              ].map((c) => (
+                <span key={c} className="rounded-full border border-rose-400 bg-rose-50 px-3 py-1 text-[clamp(0.92rem,1.05vw,0.98rem)] font-semibold text-rose-900">
+                  {c}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col justify-center gap-3 rounded-2xl border border-rose-500 bg-white/98 p-4">
+            <div className="rounded-xl border border-rose-400 bg-rose-100 p-3 text-center">
+              <p className="text-[clamp(0.98rem,1.28vw,1.12rem)] font-extrabold text-rose-950">Total Estimated Cost</p>
+              <p className="mt-1 text-[clamp(1.6rem,2.2vw,2rem)] font-black text-rose-700">~20,000 BDT</p>
+              <p className="text-[clamp(0.9rem,1.05vw,0.98rem)] font-semibold text-rose-800">(≈ $180 USD)</p>
+            </div>
+            <p className="text-[clamp(0.98rem,1.18vw,1.08rem)] font-semibold text-rose-900">
+              Commercial scanners cost $5,000–$50,000+. SmartScan delivers the same capability for under $200.
+            </p>
           </div>
         </div>
-        <div className="flex flex-col justify-center gap-4 rounded-2xl border border-rose-500 bg-white/98 p-5">
-          <div className="rounded-xl border border-rose-400 bg-rose-100 p-4 text-center">
-            <p className="text-[clamp(1rem,1.35vw,1.18rem)] font-extrabold text-rose-950">
-              Total Estimated Cost
-            </p>
-            <p className="mt-1 text-[clamp(1.8rem,2.5vw,2.4rem)] font-black text-rose-700">
-              ~20,000 BDT
-            </p>
-            <p className="mt-1 text-[clamp(1rem,1.2vw,1.1rem)] font-semibold text-rose-800">
-              (≈ $180 USD)
-            </p>
+
+        <div className="grid gap-3 md:grid-cols-3">
+          <div className="rounded-2xl border border-violet-500 bg-violet-50 p-3">
+            <p className="mb-2 text-[clamp(1rem,1.28vw,1.12rem)] font-extrabold text-violet-950">🧠 Deep Learning</p>
+            <div className="flex flex-wrap gap-1.5">
+              {["Python","PyTorch","Faster R-CNN","ResNet-50 + FPN","TrOCR","Hugging Face","OpenCV","Albumentations"].map((t) => (
+                <span key={t} className="rounded-full bg-violet-200 px-3 py-0.5 text-[clamp(0.83rem,0.96vw,0.92rem)] font-semibold text-violet-900">{t}</span>
+              ))}
+            </div>
           </div>
-          <p className="text-[clamp(1.1rem,1.35vw,1.22rem)] font-semibold text-rose-900">
-            Commercial academic scanners cost $5,000–$50,000+. SmartScan
-            delivers the same capability for under $200.
-          </p>
+          <div className="rounded-2xl border border-sky-500 bg-sky-50 p-3">
+            <p className="mb-2 text-[clamp(1rem,1.28vw,1.12rem)] font-extrabold text-sky-950">🌐 Web &amp; Backend</p>
+            <div className="flex flex-wrap gap-1.5">
+              {["Next.js 15","TypeScript","Tailwind CSS","FastAPI","REST API","Framer Motion"].map((t) => (
+                <span key={t} className="rounded-full bg-sky-200 px-3 py-0.5 text-[clamp(0.83rem,0.96vw,0.92rem)] font-semibold text-sky-900">{t}</span>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-emerald-500 bg-emerald-50 p-3">
+            <p className="mb-2 text-[clamp(1rem,1.28vw,1.12rem)] font-extrabold text-emerald-950">⚙️ Embedded &amp; Tools</p>
+            <div className="flex flex-wrap gap-1.5">
+              {["Arduino IDE (C++)","Raspberry Pi OS","ADB","SSH","Git","VS Code"].map((t) => (
+                <span key={t} className="rounded-full bg-emerald-200 px-3 py-0.5 text-[clamp(0.83rem,0.96vw,0.92rem)] font-semibold text-emerald-900">{t}</span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     ),
@@ -864,7 +877,7 @@ const slides: Slide[] = [
       <div className="flex min-h-[56vh] items-center justify-center">
         <div className="w-full max-w-4xl rounded-2xl border border-violet-500 bg-white/98 p-8 text-center">
           <p className="text-[clamp(1.35rem,2vw,1.9rem)] font-extrabold text-violet-950">
-            Team Extra Current
+            Team Phantom Devs
           </p>
 
           <p className="mt-6 text-[clamp(1.05rem,1.45vw,1.28rem)] font-semibold text-violet-900">
