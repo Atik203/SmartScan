@@ -1,34 +1,36 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Upload,
-  Image as ImageIcon,
-  Sigma,
-  Settings,
-  BookOpen,
-  Sun,
-  Moon,
-} from "lucide-react";
-import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import {
+  BookOpen,
+  Image as ImageIcon,
+  LayoutDashboard,
+  Moon,
+  Presentation,
+  Settings,
+  Sigma,
+  Sun,
+  Upload,
+} from "lucide-react";
+import { useTheme } from "next-themes";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navItems = [
   { title: "Dashboard", href: "/", icon: LayoutDashboard },
+  { title: "Proposal Slides", href: "/slide", icon: Presentation },
   { title: "Batch Processor", href: "/batch", icon: Upload },
   { title: "Detection Gallery", href: "/gallery", icon: ImageIcon },
   { title: "LaTeX Preview", href: "/latex", icon: Sigma },
@@ -76,7 +78,10 @@ export function AppSidebar() {
                           : "hover:bg-muted/50"
                       }
                       render={
-                        <Link href={item.href} className="flex items-center gap-3">
+                        <Link
+                          href={item.href}
+                          className="flex items-center gap-3"
+                        >
                           <item.icon className="h-4 w-4" />
                           <span>{item.title}</span>
                         </Link>
