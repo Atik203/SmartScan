@@ -11,15 +11,58 @@ Usage:
 import os
 import sys
 
-# Redirect all HuggingFace cache to G: drive (200GB free, nothing on C/E)
-os.environ["HF_HOME"]                       = "G:/SmartScan-Cache/hf"
-os.environ["HF_DATASETS_CACHE"]             = "G:/SmartScan-Cache/hf/datasets"
-os.environ["TRANSFORMERS_CACHE"]            = "G:/SmartScan-Cache/hf/transformers"
-os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+def _load_env_file(env_path):
+    """Lightweight .env loader (no extra dependency required)."""
+    if not os.path.exists(env_path):
+        return
+    with open(env_path, "r", encoding="utf-8") as f:
+        for raw_line in f:
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+
+def _configure_hf_environment():
+    """Route all HF/Torch caches to G drive and initialize optional HF token."""
+    cache_root = os.environ.get("SMARTSCAN_CACHE_ROOT", "G:/SmartScan-Cache")
+    hf_home = f"{cache_root}/hf"
+
+    os.environ["HF_HOME"] = hf_home
+    os.environ["HF_DATASETS_CACHE"] = f"{hf_home}/datasets"
+    os.environ["TRANSFORMERS_CACHE"] = f"{hf_home}/transformers"
+    os.environ["HUGGINGFACE_HUB_CACHE"] = f"{hf_home}/hub"
+    os.environ["TORCH_HOME"] = f"{cache_root}/torch"
+    os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    _load_env_file(env_path)
+
+    token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGINGFACE_HUB_TOKEN")
+    if token:
+        os.environ.setdefault("HUGGINGFACE_HUB_TOKEN", token)
+        try:
+            from huggingface_hub import login
+            login(token=token, add_to_git_credential=False)
+            print("[OK] HuggingFace token detected and session login initialized.")
+        except Exception as exc:
+            print(f"[WARN] Token found but HuggingFace login skipped: {exc}")
+    else:
+        print("[INFO] HF token not found in environment; continuing with public access.")
+
+    return hf_home
+
+
+HF_HOME_PATH = _configure_hf_environment()
 
 print("=" * 60)
 print("SmartScan Dataset Downloader")
 print("=" * 60)
+print(f"Cache root: {HF_HOME_PATH}")
 
 # ── Step 1: Im2LaTeX via HuggingFace ─────────────────────────
 print("\n[1/2] Downloading Im2LaTeX-100K from HuggingFace...")
