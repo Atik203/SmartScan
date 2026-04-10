@@ -12,26 +12,35 @@ Usage:
     python train_detector.py
 """
 
+import json
 import os
 import sys
-import json
+import time
+
+import numpy as np
 import torch
 import torchvision
-import numpy as np
 from PIL import Image
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms as T
-from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2, FasterRCNN_ResNet50_FPN_V2_Weights
+from torchvision.models.detection import (
+    FasterRCNN_ResNet50_FPN_V2_Weights,
+    fasterrcnn_resnet50_fpn_v2,
+)
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from tqdm import tqdm
-import time
 
 # Add parent directory to path for config import
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import (
-    MODELS_DIR, DEVICE, BATCH_SIZE_DETECTION,
-    NUM_EPOCHS_DETECTION, LEARNING_RATE, NUM_WORKERS,
-    IBEM_DATASET_DIR, ensure_dirs,
+    BATCH_SIZE_DETECTION,
+    DEVICE,
+    IBEM_DATASET_DIR,
+    LEARNING_RATE,
+    MODELS_DIR,
+    NUM_EPOCHS_DETECTION,
+    NUM_WORKERS,
+    ensure_dirs,
 )
 
 ensure_dirs()
@@ -68,12 +77,13 @@ IBEM_IMAGES_DIR = os.path.join(IBEM_DATASET_DIR, "images")
 IBEM_ANNOTATIONS_DIR = os.path.join(IBEM_DATASET_DIR, "annotations")
 
 if not os.path.exists(IBEM_IMAGES_DIR):
-    print(f"""
+    print(
+        f"""
 [⚠️] IBEM dataset not found at: {IBEM_DATASET_DIR}
 
 Please download it manually:
-  1. Go to: https://zenodo.org/records/4756857
-  2. Download the dataset ZIP
+    1. Go to: https://zenodo.org/records/4757865
+    2. Download the dataset archive
   3. Extract to: {IBEM_DATASET_DIR}
   4. Ensure structure:
      {IBEM_DATASET_DIR}/
@@ -83,12 +93,14 @@ Please download it manually:
 
 Alternative: You can also use YOLOv8 for detection (simpler).
   See: https://docs.ultralytics.com/tasks/detect/
-""")
+"""
+    )
     # --- Fallback: Use YOLOv8 with pre-trained model ---
     print("=" * 60)
     print("🔄 FALLBACK: Training YOLOv8 instead (simpler approach)...")
     print("=" * 60)
-    print("""
+    print(
+        """
 To train YOLOv8 on your own data:
 
 1. Prepare your data in YOLO format:
@@ -110,7 +122,8 @@ To train YOLOv8 on your own data:
 
 For now, you can use a pre-trained YOLOv8 model for detection.
 The existing `best.pt` file (if you have it) works with the pipeline.
-""")
+"""
+    )
     sys.exit(0)
 
 
@@ -125,16 +138,21 @@ print("=" * 60)
 class IBEMDataset(Dataset):
     """IBEM dataset for math expression detection."""
 
-    def __init__(self, images_dir, annotations_dir, transforms=None, subset_fraction=1.0):
+    def __init__(
+        self, images_dir, annotations_dir, transforms=None, subset_fraction=1.0
+    ):
         self.images_dir = images_dir
         self.annotations_dir = annotations_dir
         self.transforms = transforms
 
         # Get all image files
-        self.image_files = sorted([
-            f for f in os.listdir(images_dir)
-            if f.lower().endswith(('.png', '.jpg', '.jpeg'))
-        ])
+        self.image_files = sorted(
+            [
+                f
+                for f in os.listdir(images_dir)
+                if f.lower().endswith((".png", ".jpg", ".jpeg"))
+            ]
+        )
 
         # Take subset
         if subset_fraction < 1.0:
@@ -154,10 +172,11 @@ class IBEMDataset(Dataset):
 
         # Load image
         image = Image.open(img_path).convert("RGB")
+        img_w, img_h = image.size
 
-        # Load annotation (try JSON then XML)
+        # Load annotation (try JSON, XML, then IBEM TXT)
         ann_name = os.path.splitext(img_name)[0]
-        boxes, labels = self._load_annotation(ann_name)
+        boxes, labels = self._load_annotation(ann_name, img_w, img_h)
 
         # If no annotations found, create empty
         if len(boxes) == 0:
@@ -178,15 +197,15 @@ class IBEMDataset(Dataset):
 
         return image, target
 
-    def _load_annotation(self, ann_name):
-        """Try to load annotation from JSON or XML format."""
+    def _load_annotation(self, ann_name, img_w, img_h):
+        """Try to load annotation from JSON, XML, or IBEM TXT format."""
         boxes = []
         labels = []
 
         # Try JSON
         json_path = os.path.join(self.annotations_dir, ann_name + ".json")
         if os.path.exists(json_path):
-            with open(json_path) as f:
+            with open(json_path, "r", encoding="utf-8") as f:
                 ann = json.load(f)
             for obj in ann.get("objects", ann.get("annotations", [])):
                 if "bbox" in obj:
@@ -202,6 +221,7 @@ class IBEMDataset(Dataset):
         xml_path = os.path.join(self.annotations_dir, ann_name + ".xml")
         if os.path.exists(xml_path):
             import xml.etree.ElementTree as ET
+
             tree = ET.parse(xml_path)
             root = tree.getroot()
             for obj in root.findall("object"):
@@ -215,22 +235,78 @@ class IBEMDataset(Dataset):
                     labels.append(1)
             return boxes, labels
 
+        # Try TXT (IBEM format: x_rel y_rel width height class; values are percentages)
+        txt_path = self._resolve_txt_annotation_path(ann_name)
+        if txt_path and os.path.exists(txt_path):
+            with open(txt_path, "r", encoding="utf-8", errors="ignore") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+
+                    parts = line.split()
+                    if len(parts) < 5:
+                        continue
+
+                    try:
+                        x_rel = float(parts[0])
+                        y_rel = float(parts[1])
+                        w_rel = float(parts[2])
+                        h_rel = float(parts[3])
+                    except ValueError:
+                        continue
+
+                    x1 = (x_rel / 100.0) * img_w
+                    y1 = (y_rel / 100.0) * img_h
+                    x2 = x1 + (w_rel / 100.0) * img_w
+                    y2 = y1 + (h_rel / 100.0) * img_h
+
+                    x1 = max(0.0, min(x1, img_w - 1.0))
+                    y1 = max(0.0, min(y1, img_h - 1.0))
+                    x2 = max(0.0, min(x2, img_w - 1.0))
+                    y2 = max(0.0, min(y2, img_h - 1.0))
+
+                    # Keep only valid boxes with non-zero area.
+                    if x2 > x1 and y2 > y1:
+                        boxes.append([x1, y1, x2, y2])
+                        labels.append(1)
+
+            return boxes, labels
+
         return boxes, labels
+
+    def _resolve_txt_annotation_path(self, ann_name):
+        """Resolve IBEM TXT filename variants for a given image stem."""
+        candidates = [
+            ann_name + ".txt",
+            ann_name.replace("-page", "-color_page") + ".txt",
+        ]
+
+        for candidate in candidates:
+            path = os.path.join(self.annotations_dir, candidate)
+            if os.path.exists(path):
+                return path
+        return None
 
 
 # Data transforms
-train_transforms = T.Compose([
-    T.ToTensor(),
-    T.RandomHorizontalFlip(0.5),
-])
+train_transforms = T.Compose(
+    [
+        T.ToTensor(),
+        T.RandomHorizontalFlip(0.5),
+    ]
+)
 
-val_transforms = T.Compose([
-    T.ToTensor(),
-])
+val_transforms = T.Compose(
+    [
+        T.ToTensor(),
+    ]
+)
 
 # Create datasets
 full_dataset = IBEMDataset(
-    IBEM_IMAGES_DIR, IBEM_ANNOTATIONS_DIR,
+    IBEM_IMAGES_DIR,
+    IBEM_ANNOTATIONS_DIR,
     transforms=train_transforms,
     subset_fraction=SUBSET_FRACTION,
 )
@@ -239,8 +315,7 @@ full_dataset = IBEMDataset(
 train_size = int(0.8 * len(full_dataset))
 val_size = len(full_dataset) - train_size
 train_dataset, val_dataset = torch.utils.data.random_split(
-    full_dataset, [train_size, val_size],
-    generator=torch.Generator().manual_seed(42)
+    full_dataset, [train_size, val_size], generator=torch.Generator().manual_seed(42)
 )
 
 print(f"[✓] Train: {len(train_dataset)} | Val: {len(val_dataset)}")
@@ -351,7 +426,9 @@ for epoch in range(NUM_EPOCHS_DETECTION):
     avg_loss = epoch_loss / max(num_batches, 1)
     lr_scheduler.step()
 
-    print(f"  Epoch {epoch+1}: Avg Loss = {avg_loss:.4f}, LR = {lr_scheduler.get_last_lr()[0]:.6f}")
+    print(
+        f"  Epoch {epoch+1}: Avg Loss = {avg_loss:.4f}, LR = {lr_scheduler.get_last_lr()[0]:.6f}"
+    )
 
     # --- Save best model ---
     if avg_loss < best_loss:
