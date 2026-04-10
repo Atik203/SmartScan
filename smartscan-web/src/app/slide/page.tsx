@@ -205,7 +205,7 @@ const slides: Slide[] = [
     body: (
       <div className="space-y-5">
         <div className="rounded-2xl border border-indigo-300 bg-white/95 p-5">
-          <p className="text-[clamp(1.15rem,1.7vw,1.5rem)] font-extrabold text-indigo-950">
+          <p className="text-lg font-extrabold text-indigo-950">
             Expected prototype overview
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(1rem,1.3vw,1.2rem)] font-semibold text-indigo-900">
