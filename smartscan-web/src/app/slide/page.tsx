@@ -138,10 +138,7 @@ const slides: Slide[] = [
               Group No: 6
             </p>
             <p className="mt-2 text-[clamp(1rem,1.5vw,1.25rem)] font-bold text-slate-900">
-              Team: Team Extra Current
-            </p>
-            <p className="mt-4 text-[clamp(0.95rem,1.3vw,1.1rem)] font-semibold text-slate-700">
-              Based on IEEE Access, 2025
+              Team: Phantom Devs
             </p>
           </div>
         </div>
@@ -212,24 +209,47 @@ const slides: Slide[] = [
       <div className="space-y-4">
         <div className="grid gap-3 md:grid-cols-4">
           {[
-            { n: "Stage 1", label: "Resting / Ready",   desc: "Gripper and flipper arms at home position. Book open on V-cradle." },
-            { n: "Stage 2", label: "Gripper Down",       desc: "Gripper servo lowers to isolate and hold a single page edge." },
-            { n: "Stage 3", label: "Flip in Progress",  desc: "Blower fan activates; flipper arm lifts and turns the isolated page." },
-            { n: "Stage 4", label: "Return & Capture",  desc: "Arms reset. Pi triggers both cameras via ADB for synchronized capture." },
+            {
+              n: "Stage 1",
+              label: "Resting / Ready",
+              desc: "Gripper and flipper arms at home position. Book open on V-cradle.",
+            },
+            {
+              n: "Stage 2",
+              label: "Gripper Down",
+              desc: "Gripper servo lowers to isolate and hold a single page edge.",
+            },
+            {
+              n: "Stage 3",
+              label: "Flip in Progress",
+              desc: "Blower fan activates; flipper arm lifts and turns the isolated page.",
+            },
+            {
+              n: "Stage 4",
+              label: "Return & Capture",
+              desc: "Arms reset. Pi triggers both cameras via ADB for synchronized capture.",
+            },
           ].map((s) => (
-            <div key={s.n} className="rounded-xl border border-indigo-500 bg-indigo-100/80 p-3">
-              <p className="text-[clamp(1.1rem,1.4vw,1.28rem)] font-extrabold text-indigo-800">{s.n} — {s.label}</p>
-              <p className="mt-1 text-[clamp(1.05rem,1.3vw,1.18rem)] font-semibold text-indigo-900">{s.desc}</p>
+            <div
+              key={s.n}
+              className="rounded-xl border border-indigo-500 bg-indigo-100/80 p-3"
+            >
+              <p className="text-[clamp(1.1rem,1.4vw,1.28rem)] font-extrabold text-indigo-800">
+                {s.n} — {s.label}
+              </p>
+              <p className="mt-1 text-[clamp(1.05rem,1.3vw,1.18rem)] font-semibold text-indigo-900">
+                {s.desc}
+              </p>
             </div>
           ))}
         </div>
-        <div className="rounded-2xl border border-indigo-500 bg-white/98 p-3">
+        <div className="rounded-2xl border border-indigo-500 bg-white/98 p-2">
           <Image
             src="/image.png"
             alt="4-stage page flip physical prototype"
             width={1400}
             height={1000}
-            className="h-[58vh] w-full rounded-xl object-contain"
+            className="h-[46vh] w-full rounded-xl object-contain"
             priority
           />
         </div>
@@ -505,15 +525,23 @@ const slides: Slide[] = [
       <div className="space-y-3">
         <div className="grid gap-3 md:grid-cols-2">
           <div className="rounded-xl border border-indigo-500 bg-indigo-100/80 px-4 py-2">
-            <p className="text-[clamp(1.12rem,1.42vw,1.3rem)] font-extrabold text-indigo-900">Left — Expression Detection</p>
+            <p className="text-[clamp(1.12rem,1.42vw,1.3rem)] font-extrabold text-indigo-900">
+              Left — Expression Detection
+            </p>
             <p className="text-[clamp(1.05rem,1.28vw,1.18rem)] font-semibold text-indigo-800">
-              Input image → Faster R-CNN (ResNet-50 + FPN + RPN + RoI Pooling) → bounding boxes. Text regions masked for OCR via deep LSTM transcription layer.
+              Input image → Faster R-CNN (ResNet-50 + FPN + RPN + RoI Pooling) →
+              bounding boxes. Text regions masked for OCR via deep LSTM
+              transcription layer.
             </p>
           </div>
           <div className="rounded-xl border border-indigo-500 bg-indigo-100/80 px-4 py-2">
-            <p className="text-[clamp(1.12rem,1.42vw,1.3rem)] font-extrabold text-indigo-900">Right — Recognition & Extraction</p>
+            <p className="text-[clamp(1.12rem,1.42vw,1.3rem)] font-extrabold text-indigo-900">
+              Right — Recognition & Extraction
+            </p>
             <p className="text-[clamp(1.05rem,1.28vw,1.18rem)] font-semibold text-indigo-800">
-              Detected crop → Vision Transformer Encoder + Transformer Decoder → LaTeX tokens. Output panel shows embedded and isolated formula classes on web server.
+              Detected crop → Vision Transformer Encoder + Transformer Decoder →
+              LaTeX tokens. Output panel shows embedded and isolated formula
+              classes on web server.
             </p>
           </div>
         </div>
@@ -525,12 +553,14 @@ const slides: Slide[] = [
                 alt="Faster R-CNN detection framework and text detection"
                 width={900}
                 height={1300}
-                className="h-[58vh] w-full rounded-xl object-contain"
+                className="h-[48vh] w-full rounded-xl object-contain"
               />
             </div>
             <div className="flex flex-col items-center justify-center gap-1 lg:col-span-1">
               <span className="text-3xl font-black text-indigo-600">→</span>
-              <span className="text-center text-xs font-bold text-indigo-600">detected crops</span>
+              <span className="text-center text-xs font-bold text-indigo-600">
+                detected crops
+              </span>
             </div>
             <div className="lg:col-span-5">
               <Image
@@ -538,7 +568,7 @@ const slides: Slide[] = [
                 alt="TrOCR recognition framework and extraction output"
                 width={900}
                 height={1300}
-                className="h-[58vh] w-full rounded-xl object-contain"
+                className="h-[48vh] w-full rounded-xl object-contain"
               />
             </div>
           </div>
@@ -554,14 +584,45 @@ const slides: Slide[] = [
       <div className="grid gap-3 lg:grid-cols-3">
         <div className="space-y-3 lg:col-span-1">
           {[
-            { label: "Calibration Phase",  color: "border-sky-500 bg-sky-100",     text: "text-sky-900",     desc: "Set Gripper POS1 & POS2, then Flipper POS1 & POS2 using potentiometer. Both positions must be saved before automation starts." },
-            { label: "Automation Loop",    color: "border-emerald-500 bg-emerald-100", text: "text-emerald-900", desc: "Page Gripper grips one page → Pi triggers ADB camera capture → images sent to laptop for preprocessing and AI detection." },
-            { label: "Flipper Mechanism",  color: "border-amber-500 bg-amber-100",  text: "text-amber-900",  desc: "PC fan activates near end of flip to separate pages. Fan turns off on return. Loop continues until reset is pressed." },
-            { label: "Reset Condition",    color: "border-rose-500 bg-rose-100",    text: "text-rose-900",   desc: "If reset button pressed → stop all motion and erase saved positions. Otherwise continue cycle automatically." },
+            {
+              label: "Calibration Phase",
+              color: "border-sky-500 bg-sky-100",
+              text: "text-sky-900",
+              desc: "Set Gripper POS1 & POS2, then Flipper POS1 & POS2 using potentiometer. Both positions must be saved before automation starts.",
+            },
+            {
+              label: "Automation Loop",
+              color: "border-emerald-500 bg-emerald-100",
+              text: "text-emerald-900",
+              desc: "Page Gripper grips one page → Pi triggers ADB camera capture → images sent to laptop for preprocessing and AI detection.",
+            },
+            {
+              label: "Flipper Mechanism",
+              color: "border-amber-500 bg-amber-100",
+              text: "text-amber-900",
+              desc: "PC fan activates near end of flip to separate pages. Fan turns off on return. Loop continues until reset is pressed.",
+            },
+            {
+              label: "Reset Condition",
+              color: "border-rose-500 bg-rose-100",
+              text: "text-rose-900",
+              desc: "If reset button pressed → stop all motion and erase saved positions. Otherwise continue cycle automatically.",
+            },
           ].map((item) => (
-            <div key={item.label} className={`rounded-xl border px-4 py-3 ${item.color}`}>
-              <p className={`text-[clamp(1.1rem,1.38vw,1.25rem)] font-extrabold ${item.text}`}>{item.label}</p>
-              <p className={`mt-1 text-[clamp(1.05rem,1.28vw,1.18rem)] font-semibold ${item.text}`}>{item.desc}</p>
+            <div
+              key={item.label}
+              className={`rounded-xl border px-4 py-3 ${item.color}`}
+            >
+              <p
+                className={`text-[clamp(1.1rem,1.38vw,1.25rem)] font-extrabold ${item.text}`}
+              >
+                {item.label}
+              </p>
+              <p
+                className={`mt-1 text-[clamp(1.05rem,1.28vw,1.18rem)] font-semibold ${item.text}`}
+              >
+                {item.desc}
+              </p>
             </div>
           ))}
         </div>
@@ -571,7 +632,7 @@ const slides: Slide[] = [
             alt="Arduino control flowchart"
             width={900}
             height={1300}
-            className="h-[76vh] w-full rounded-xl object-contain"
+            className="h-[62vh] w-full rounded-xl object-contain"
           />
         </div>
       </div>
@@ -625,8 +686,19 @@ const slides: Slide[] = [
             className="h-[34vh] w-full rounded-xl object-contain md:h-[38vh]"
           />
           <div className="mt-2 grid grid-cols-5 gap-1">
-            {["① Original","② Cropped","③ Dewarped","④ Text + Math Detected","⑤ Math Extracted"].map((s) => (
-              <p key={s} className="rounded-lg bg-amber-100 px-2 py-1 text-center text-[clamp(0.9rem,1.08vw,1rem)] font-bold text-amber-900">{s}</p>
+            {[
+              "① Original",
+              "② Cropped",
+              "③ Dewarped",
+              "④ Text + Math Detected",
+              "⑤ Math Extracted",
+            ].map((s) => (
+              <p
+                key={s}
+                className="rounded-lg bg-amber-100 px-2 py-1 text-center text-[clamp(0.9rem,1.08vw,1rem)] font-bold text-amber-900"
+              >
+                {s}
+              </p>
             ))}
           </div>
         </div>
@@ -686,17 +758,23 @@ const slides: Slide[] = [
             "Detection Precision",
             "Paper: 95.71% — Our target: 88–92% (trained on 10% IBEM subset)",
           ],
-          [
-            "Detection Recall",
-            "Paper: 91.77% — Our target: 85–90%",
-          ],
+          ["Detection Recall", "Paper: 91.77% — Our target: 85–90%"],
           [
             "Recognition BLEU Score",
             "Paper: 86.44 — Our target: 78–83 (10% Im2LaTeX-100K)",
           ],
-          ["Page Cycle Time", "Paper: 10–12 sec/page — Our target: 12–15 sec/page"],
-          ["Inference Latency", "Paper: ~0.34 sec/image — Our target: ~0.5 sec/image"],
-          ["Page Throughput", "Paper: 300–400 pages/hr — Our target: 200–300 pages/hr"],
+          [
+            "Page Cycle Time",
+            "Paper: 10–12 sec/page — Our target: 12–15 sec/page",
+          ],
+          [
+            "Inference Latency",
+            "Paper: ~0.34 sec/image — Our target: ~0.5 sec/image",
+          ],
+          [
+            "Page Throughput",
+            "Paper: 300–400 pages/hr — Our target: 200–300 pages/hr",
+          ],
         ].map(([k, v]) => (
           <div
             key={k}
@@ -715,38 +793,53 @@ const slides: Slide[] = [
   },
   {
     title: "Budget and Feasibility",
-    subtitle: "Under 15,000 BDT — all-in, using student phones",
+    subtitle: "~20,000 BDT total — far below commercial alternatives",
     theme: themes[4],
     body: (
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="rounded-2xl border border-rose-500 bg-white/98 p-5 lg:col-span-2">
-          <p className="text-[clamp(1.12rem,1.45vw,1.3rem)] font-extrabold text-rose-950">
-            Key cost breakdown
+          <p className="mb-3 text-[clamp(1.12rem,1.45vw,1.3rem)] font-extrabold text-rose-950">
+            Components used
           </p>
-          <div className="mt-3 space-y-2">
+          <div className="flex flex-wrap gap-2">
             {[
-              ["Arduino Mega 2560", "1,200 BDT"],
-              ["Raspberry Pi 5 (8GB)", "7,000 BDT"],
-              ["4× MG996R Servo Motors", "1,200 BDT"],
-              ["Fans, Relay, Buck Converter, SMPS", "1,350 BDT"],
-              ["Wood frame + 3D Printed PLA+ parts", "2,000 BDT"],
-              ["Android Smartphones (×2)", "0 BDT — existing student phones"],
-            ].map(([item, cost]) => (
-              <div key={item} className="flex items-center justify-between rounded-lg border border-rose-300 bg-rose-50 px-4 py-2">
-                <span className="text-[clamp(1.08rem,1.35vw,1.22rem)] font-semibold text-rose-900">{item}</span>
-                <span className="text-[clamp(1.08rem,1.35vw,1.22rem)] font-extrabold text-rose-800">{cost}</span>
-              </div>
+              "Arduino Mega 2560",
+              "Raspberry Pi 5 (8GB)",
+              "MG996R Servo Motors ×4",
+              "6000 RPM Blower Fan",
+              "PC Fan (80mm)",
+              "5V DC Relay Module",
+              "LM2596 Buck Converter",
+              "500W SMPS Power Supply",
+              "V-Cradle Wooden Frame",
+              "3D Printed PLA+ Parts",
+              "Android Smartphones ×2",
+              "Wires, Potentiometers, LEDs",
+            ].map((c) => (
+              <span
+                key={c}
+                className="rounded-full border border-rose-400 bg-rose-50 px-4 py-2 text-[clamp(1.05rem,1.28vw,1.18rem)] font-semibold text-rose-900"
+              >
+                {c}
+              </span>
             ))}
           </div>
         </div>
         <div className="flex flex-col justify-center gap-4 rounded-2xl border border-rose-500 bg-white/98 p-5">
           <div className="rounded-xl border border-rose-400 bg-rose-100 p-4 text-center">
-            <p className="text-[clamp(1rem,1.35vw,1.18rem)] font-extrabold text-rose-950">Total Estimated Cost</p>
-            <p className="mt-1 text-[clamp(1.5rem,2.2vw,2rem)] font-black text-rose-700">~13,250 BDT</p>
-            <p className="mt-1 text-[clamp(1rem,1.2vw,1.1rem)] font-semibold text-rose-800">(≈ $115 USD)</p>
+            <p className="text-[clamp(1rem,1.35vw,1.18rem)] font-extrabold text-rose-950">
+              Total Estimated Cost
+            </p>
+            <p className="mt-1 text-[clamp(1.8rem,2.5vw,2.4rem)] font-black text-rose-700">
+              ~20,000 BDT
+            </p>
+            <p className="mt-1 text-[clamp(1rem,1.2vw,1.1rem)] font-semibold text-rose-800">
+              (≈ $180 USD)
+            </p>
           </div>
           <p className="text-[clamp(1.1rem,1.35vw,1.22rem)] font-semibold text-rose-900">
-            Commercial academic scanners cost $5,000–$50,000+. SmartScan achieves the same goal at a fraction of the price.
+            Commercial academic scanners cost $5,000–$50,000+. SmartScan
+            delivers the same capability for under $200.
           </p>
         </div>
       </div>
@@ -780,9 +873,7 @@ const slides: Slide[] = [
           <p className="text-[clamp(1.35rem,2vw,1.9rem)] font-extrabold text-violet-950">
             Team Extra Current
           </p>
-          <p className="mt-3 text-[clamp(1.05rem,1.45vw,1.28rem)] font-semibold text-violet-900">
-            Group 6 | CSE 4326 | SmartScan Proposal
-          </p>
+
           <p className="mt-6 text-[clamp(1.05rem,1.45vw,1.28rem)] font-semibold text-violet-900">
             Thank you for your attention.
           </p>
