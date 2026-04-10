@@ -8,8 +8,21 @@ Usage:
     .venv\\Scripts\\python.exe download_dataset.py
 """
 
+import json
 import os
+import shutil
 import sys
+import tarfile
+import tempfile
+import urllib.request
+import zipfile
+
+IBEM_RECORD_APIS = [
+    "https://zenodo.org/api/records/4757865",  # IBEM Mathematical Formula Detection Dataset
+    "https://zenodo.org/api/records/4756857",  # legacy link seen in old docs (often not IBEM)
+]
+IBEM_ARCHIVE_EXTENSIONS = (".zip", ".tar.gz", ".tgz", ".tar")
+
 
 def _load_env_file(env_path):
     """Lightweight .env loader (no extra dependency required)."""
@@ -47,17 +60,183 @@ def _configure_hf_environment():
         os.environ.setdefault("HUGGINGFACE_HUB_TOKEN", token)
         try:
             from huggingface_hub import login
+
             login(token=token, add_to_git_credential=False)
             print("[OK] HuggingFace token detected and session login initialized.")
         except Exception as exc:
             print(f"[WARN] Token found but HuggingFace login skipped: {exc}")
     else:
-        print("[INFO] HF token not found in environment; continuing with public access.")
+        print(
+            "[INFO] HF token not found in environment; continuing with public access."
+        )
 
     return hf_home
 
 
 HF_HOME_PATH = _configure_hf_environment()
+
+
+def _download_file(url, output_path, chunk_size=1024 * 1024):
+    """Download a file with simple progress output."""
+    with urllib.request.urlopen(url) as response:
+        total = response.headers.get("Content-Length")
+        total_bytes = int(total) if total else None
+
+        downloaded = 0
+        with open(output_path, "wb") as f:
+            while True:
+                chunk = response.read(chunk_size)
+                if not chunk:
+                    break
+                f.write(chunk)
+                downloaded += len(chunk)
+                if total_bytes:
+                    pct = (downloaded / total_bytes) * 100
+                    print(
+                        f"      Downloaded: {downloaded / 1e6:.1f}MB / {total_bytes / 1e6:.1f}MB ({pct:.1f}%)",
+                        end="\r",
+                    )
+                else:
+                    print(f"      Downloaded: {downloaded / 1e6:.1f}MB", end="\r")
+        print()
+
+
+def _extract_archive(archive_path, extract_to):
+    """Extract ZIP or TAR archive."""
+    if zipfile.is_zipfile(archive_path):
+        with zipfile.ZipFile(archive_path, "r") as zip_ref:
+            zip_ref.extractall(extract_to)
+        return
+
+    if tarfile.is_tarfile(archive_path):
+        with tarfile.open(archive_path, "r:*") as tar_ref:
+            tar_ref.extractall(extract_to)
+        return
+
+    raise ValueError(f"Unsupported archive format: {archive_path}")
+
+
+def _has_ibem_structure(path):
+    """Return True when path has images/ and annotations/ folders."""
+    return os.path.isdir(os.path.join(path, "images")) and os.path.isdir(
+        os.path.join(path, "annotations")
+    )
+
+
+def _find_ibem_root(search_root):
+    """Find directory containing images/ and annotations/."""
+    if _has_ibem_structure(search_root):
+        return search_root
+
+    for root, dirs, _ in os.walk(search_root):
+        lower_dir_map = {d.lower(): d for d in dirs}
+        if "images" in lower_dir_map and "annotations" in lower_dir_map:
+            return root
+
+    return None
+
+
+def _select_ibem_archive(record_json):
+    """Pick best candidate archive file from Zenodo metadata."""
+    files = record_json.get("files", [])
+    if not files:
+        raise RuntimeError("No files were found in the Zenodo record.")
+
+    candidates = []
+    for item in files:
+        key = item.get("key", "")
+        links = item.get("links", {})
+        link = links.get("self") or links.get("download")
+        if not link:
+            continue
+
+        size = item.get("size", 0)
+        key_lower = key.lower()
+        if key_lower.endswith(IBEM_ARCHIVE_EXTENSIONS):
+            candidates.append((size, key, link))
+
+    if not candidates:
+        raise RuntimeError(
+            "Record does not contain archive files (.zip/.tar/.tgz/.tar.gz)."
+        )
+
+    candidates.sort(key=lambda x: x[0], reverse=True)
+    return candidates[0]
+
+
+def _download_ibem_dataset(target_dir):
+    """Download IBEM from Zenodo and normalize into target_dir/images + annotations."""
+    os.makedirs(target_dir, exist_ok=True)
+
+    if _has_ibem_structure(target_dir):
+        print(f"[OK] IBEM already available at: {target_dir}")
+        return True
+
+    print("[AUTO] IBEM not found locally. Starting automatic download from Zenodo...")
+
+    record_json = None
+    selection_error = None
+    for api_url in IBEM_RECORD_APIS:
+        try:
+            with urllib.request.urlopen(api_url) as response:
+                candidate_record = json.loads(response.read().decode("utf-8"))
+            size, filename, download_url = _select_ibem_archive(candidate_record)
+            record_json = candidate_record
+            break
+        except Exception as exc:
+            selection_error = exc
+            continue
+
+    if record_json is None:
+        raise RuntimeError(
+            f"Unable to find a valid IBEM archive in known records: {selection_error}"
+        )
+
+    record_id = record_json.get("id", "unknown")
+    print(f"[AUTO] Resolved Zenodo record id: {record_id}")
+    print(f"[AUTO] Selected file: {filename} ({size / 1e6:.1f} MB)")
+
+    with tempfile.TemporaryDirectory(prefix="ibem_download_") as temp_dir:
+        archive_path = os.path.join(temp_dir, filename)
+        extract_dir = os.path.join(temp_dir, "extracted")
+        os.makedirs(extract_dir, exist_ok=True)
+
+        print(f"[AUTO] Downloading IBEM archive...")
+        _download_file(download_url, archive_path)
+
+        print("[AUTO] Extracting archive...")
+        _extract_archive(archive_path, extract_dir)
+
+        ibem_root = _find_ibem_root(extract_dir)
+        if not ibem_root:
+            raise RuntimeError(
+                "Downloaded archive does not contain expected images/ and annotations/ folders."
+            )
+
+        src_images = os.path.join(ibem_root, "images")
+        src_annotations = os.path.join(ibem_root, "annotations")
+        dst_images = os.path.join(target_dir, "images")
+        dst_annotations = os.path.join(target_dir, "annotations")
+
+        if os.path.exists(dst_images):
+            shutil.rmtree(dst_images)
+        if os.path.exists(dst_annotations):
+            shutil.rmtree(dst_annotations)
+
+        shutil.copytree(src_images, dst_images)
+        shutil.copytree(src_annotations, dst_annotations)
+
+    print(f"[OK] IBEM downloaded and prepared at: {target_dir}")
+    return True
+
+
+def _count_files(folder_path, extensions):
+    """Count files with given extensions inside a folder."""
+    if not os.path.exists(folder_path):
+        return 0
+    lower_ext = tuple(ext.lower() for ext in extensions)
+    return len([f for f in os.listdir(folder_path) if f.lower().endswith(lower_ext)])
+
 
 print("=" * 60)
 print("SmartScan Dataset Downloader")
@@ -108,28 +287,37 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import IBEM_DATASET_DIR
 
 ibem_images = os.path.join(IBEM_DATASET_DIR, "images")
-ibem_anns   = os.path.join(IBEM_DATASET_DIR, "annotations")
+ibem_anns = os.path.join(IBEM_DATASET_DIR, "annotations")
 
 if os.path.exists(ibem_images):
-    count = len([f for f in os.listdir(ibem_images) if f.lower().endswith(('.png','.jpg','.jpeg'))])
+    count = _count_files(ibem_images, (".png", ".jpg", ".jpeg"))
+    ann_count = _count_files(ibem_anns, (".xml", ".json"))
     print(f"[OK] IBEM images found: {count} images at {ibem_images}")
+    print(f"[OK] IBEM annotations found: {ann_count} files at {ibem_anns}")
 else:
-    print(f"[MISSING] IBEM not yet downloaded.")
-    print(f"\n  Manual download required:")
-    print(f"  1. Go to: https://zenodo.org/records/4756857")
-    print(f"  2. Download the ZIP file")
-    print(f"  3. Extract to: {IBEM_DATASET_DIR}")
-    print(f"  4. Ensure structure:")
-    print(f"       {IBEM_DATASET_DIR}/")
-    print(f"         images/       <- .png or .jpg files")
-    print(f"         annotations/  <- .xml or .json files")
-    print(f"\n  Re-run this script after extracting.")
+    try:
+        _download_ibem_dataset(IBEM_DATASET_DIR)
+        count = _count_files(ibem_images, (".png", ".jpg", ".jpeg"))
+        ann_count = _count_files(ibem_anns, (".xml", ".json"))
+        print(f"[OK] IBEM images found: {count} images at {ibem_images}")
+        print(f"[OK] IBEM annotations found: {ann_count} files at {ibem_anns}")
+    except Exception as exc:
+        print(f"[MISSING] Automatic IBEM download failed: {exc}")
+        print("\n  Manual download fallback:")
+        print("  1. Go to: https://zenodo.org/records/4757865")
+        print("  2. Download the archive file")
+        print(f"  3. Extract to: {IBEM_DATASET_DIR}")
+        print("  4. Ensure structure:")
+        print(f"       {IBEM_DATASET_DIR}/")
+        print("         images/       <- .png or .jpg files")
+        print("         annotations/  <- .xml or .json files")
 
 # ── Step 3: Check CUDA ──────────────────────────────────────
 print("\n" + "=" * 60)
 print("[3/3] Verifying GPU setup...")
 print("=" * 60)
 import torch
+
 print(f"[OK] PyTorch   : {torch.__version__}")
 print(f"[OK] CUDA      : {torch.cuda.is_available()}")
 if torch.cuda.is_available():
