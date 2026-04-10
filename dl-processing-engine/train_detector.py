@@ -326,11 +326,15 @@ def collate_fn(batch):
     return tuple(zip(*batch))
 
 
+# Windows + top-level training loop can fail with multiprocessing DataLoader spawn.
+effective_num_workers = 0 if os.name == "nt" else NUM_WORKERS
+
+
 train_loader = DataLoader(
     train_dataset,
     batch_size=BATCH_SIZE_DETECTION,
     shuffle=True,
-    num_workers=NUM_WORKERS,
+    num_workers=effective_num_workers,
     collate_fn=collate_fn,
     pin_memory=True,
 )
@@ -339,7 +343,7 @@ val_loader = DataLoader(
     val_dataset,
     batch_size=BATCH_SIZE_DETECTION,
     shuffle=False,
-    num_workers=NUM_WORKERS,
+    num_workers=effective_num_workers,
     collate_fn=collate_fn,
     pin_memory=True,
 )
