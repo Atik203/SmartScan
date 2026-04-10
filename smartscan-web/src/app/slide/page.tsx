@@ -135,10 +135,10 @@ const slides: Slide[] = [
           </div>
           <div className="rounded-2xl border border-sky-500 bg-white/90 p-5">
             <p className="text-[clamp(1rem,1.5vw,1.25rem)] font-bold text-slate-900">
-              Group No: 6
+              Team: Phantom Devs
             </p>
             <p className="mt-2 text-[clamp(1rem,1.5vw,1.25rem)] font-bold text-slate-900">
-              Team: Phantom Devs
+              Group No: 06
             </p>
           </div>
         </div>
@@ -558,7 +558,7 @@ const slides: Slide[] = [
             </div>
             <div className="flex flex-col items-center justify-center gap-1 lg:col-span-1">
               <span className="text-3xl font-black text-indigo-600">→</span>
-              <span className="text-center text-xs font-bold text-indigo-600">
+              <span className="text-center text-base font-bold text-indigo-600">
                 detected crops
               </span>
             </div>
@@ -643,39 +643,32 @@ const slides: Slide[] = [
     subtitle: "Detection first, recognition next",
     theme: themes[1],
     body: (
-      <div className="grid gap-5 lg:grid-cols-2">
-        <div className="rounded-2xl border border-amber-500 bg-white/98 p-5">
+      <div className="grid gap-3 lg:grid-cols-2">
+        <div className="rounded-2xl border border-amber-500 bg-white/98 p-3">
           <p className="text-[clamp(1.05rem,1.45vw,1.25rem)] font-extrabold text-amber-950">
             Stage A: Faster R-CNN Detection
           </p>
-          <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-amber-900">
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-[clamp(1.1rem,1.32vw,1.22rem)] font-semibold text-amber-900">
             <li>Locates mathematical expressions in dense textbook pages.</li>
             <li>Trained with full IBEM detection annotations.</li>
             <li>Outputs bounding boxes for targeted recognition.</li>
-            <li>
-              Backbone and FPN help robust detection at multiple formula scales.
-            </li>
+            <li>ResNet-50 + FPN backbone for multi-scale formula detection.</li>
           </ul>
         </div>
-        <div className="rounded-2xl border border-amber-500 bg-white/98 p-5">
+        <div className="rounded-2xl border border-amber-500 bg-white/98 p-3">
           <p className="text-[clamp(1.05rem,1.45vw,1.25rem)] font-extrabold text-amber-950">
             Stage B: TrOCR Recognition
           </p>
-          <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(1.18rem,1.42vw,1.35rem)] font-semibold text-amber-900">
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-[clamp(1.1rem,1.32vw,1.22rem)] font-semibold text-amber-900">
             <li>Converts detected formula image into LaTeX tokens.</li>
-            <li>
-              Fine-tuned with full Im2LaTeX dataset for stronger coverage.
-            </li>
+            <li>Fine-tuned with full Im2LaTeX dataset for stronger coverage.</li>
             <li>Produces editable output for reports and lecture notes.</li>
-            <li>
-              Supports rendered preview so faculty can verify semantic
-              correctness quickly.
-            </li>
+            <li>Rendered preview lets faculty verify output quickly.</li>
           </ul>
         </div>
 
         <div className="rounded-2xl border border-amber-500 bg-white/98 p-3 lg:col-span-2">
-          <p className="mb-2 text-[clamp(1.18rem,1.42vw,1.35rem)] font-bold text-amber-900">
+          <p className="mb-1 text-[clamp(1.1rem,1.32vw,1.22rem)] font-bold text-amber-900">
             End-to-end pipeline — 5 stages on a real textbook page
           </p>
           <Image
@@ -683,9 +676,9 @@ const slides: Slide[] = [
             alt="5-stage pipeline: original → cropped → dewarped → detected → extracted"
             width={1400}
             height={850}
-            className="h-[34vh] w-full rounded-xl object-contain md:h-[38vh]"
+            className="h-[30vh] w-full rounded-xl object-contain"
           />
-          <div className="mt-2 grid grid-cols-5 gap-1">
+          <div className="mt-1 grid grid-cols-5 gap-1">
             {[
               "① Original",
               "② Cropped",
@@ -695,7 +688,7 @@ const slides: Slide[] = [
             ].map((s) => (
               <p
                 key={s}
-                className="rounded-lg bg-amber-100 px-2 py-1 text-center text-[clamp(0.9rem,1.08vw,1rem)] font-bold text-amber-900"
+                className="rounded-lg bg-amber-100 px-1 py-1 text-center text-[clamp(0.82rem,0.95vw,0.92rem)] font-bold text-amber-900 leading-tight"
               >
                 {s}
               </p>
@@ -1102,7 +1095,7 @@ export default function SlidePage() {
       <main className="mx-auto w-full max-w-[1700px] px-5 pb-5 pt-4">
         <div
           ref={slideViewportRef}
-          className={`relative ${isFullscreen ? `${activeSlide.theme.shell} h-screen w-screen p-4 md:p-6` : ""}`}
+          className={`relative ${isFullscreen ? `${activeSlide.theme.shell} h-screen w-screen overflow-hidden p-4 md:p-5` : ""}`}
         >
           <AnimatePresence mode="wait">
             <motion.section
@@ -1111,17 +1104,17 @@ export default function SlidePage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -12, scale: 0.995 }}
               transition={{ duration: 0.28, ease: "easeOut" }}
-              className={`${isFullscreen ? "min-h-[calc(100vh-2rem)] rounded-2xl" : "min-h-[calc(100vh-155px)] rounded-3xl"} border ${activeSlide.theme.border} ${activeSlide.theme.panel} p-6 shadow-[0_16px_64px_rgba(0,0,0,0.32)] md:p-10`}
+              className={`${isFullscreen ? "h-[calc(100vh-2.5rem)] overflow-hidden rounded-2xl" : "min-h-[calc(100vh-155px)] rounded-3xl"} border ${activeSlide.theme.border} ${activeSlide.theme.panel} ${isFullscreen ? "p-4 md:p-6" : "p-6 md:p-10"} shadow-[0_16px_64px_rgba(0,0,0,0.32)]`}
             >
-              <div className="mb-6 space-y-2">
+              <div className={`${isFullscreen ? "mb-3" : "mb-6"} space-y-1`}>
                 <h1
-                  className={`text-[clamp(2.35rem,4.9vw,4.6rem)] font-black leading-[1.08] ${activeSlide.theme.heading}`}
+                  className={`${isFullscreen ? "text-[clamp(1.7rem,3.2vw,2.9rem)]" : "text-[clamp(2.35rem,4.9vw,4.6rem)]"} font-black leading-[1.08] ${activeSlide.theme.heading}`}
                 >
                   {activeSlide.title}
                 </h1>
                 {activeSlide.subtitle && (
                   <p
-                    className={`text-[clamp(1.25rem,2.2vw,2rem)] font-bold ${activeSlide.theme.text}`}
+                    className={`${isFullscreen ? "text-[clamp(1rem,1.4vw,1.3rem)]" : "text-[clamp(1.25rem,2.2vw,2rem)]"} font-bold ${activeSlide.theme.text}`}
                   >
                     {activeSlide.subtitle}
                   </p>
