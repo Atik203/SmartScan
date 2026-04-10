@@ -748,15 +748,15 @@ const slides: Slide[] = [
     subtitle: "Questions and feedback are welcome",
     theme: themes[2],
     body: (
-      <div className="grid gap-6">
-        <div className="rounded-2xl border border-violet-300 bg-white/95 p-6">
-          <p className="text-[clamp(1.1rem,1.6vw,1.45rem)] font-extrabold text-violet-950">
+      <div className="flex min-h-[56vh] items-center justify-center">
+        <div className="w-full max-w-4xl rounded-2xl border border-violet-300 bg-white/95 p-8 text-center">
+          <p className="text-[clamp(1.35rem,2vw,1.9rem)] font-extrabold text-violet-950">
             Team Extra Current
           </p>
-          <p className="mt-2 text-[clamp(0.95rem,1.2vw,1.08rem)] font-semibold text-violet-900">
+          <p className="mt-3 text-[clamp(1.05rem,1.45vw,1.28rem)] font-semibold text-violet-900">
             Group 6 | CSE 4326 | SmartScan Proposal
           </p>
-          <p className="mt-5 text-[clamp(0.95rem,1.15vw,1.02rem)] font-semibold text-violet-900">
+          <p className="mt-6 text-[clamp(1.05rem,1.45vw,1.28rem)] font-semibold text-violet-900">
             Thank you for your attention.
           </p>
         </div>
