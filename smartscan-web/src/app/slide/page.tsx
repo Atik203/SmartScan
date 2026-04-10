@@ -187,6 +187,8 @@ const slides: Slide[] = [
             "SmartScan is a low-cost mechatronic and AI system for digitizing academic books.",
             "The proposed pipeline is fully integrated: page handling, synchronized capture, image correction, and math-aware recognition.",
             "The core innovation is converting printed mathematical regions into reusable LaTeX, not just plain OCR text.",
+            "The architecture follows the paper direction: Arduino as control muscle, Raspberry Pi as bridge, and laptop as AI brain.",
+            "Target operation is practical for academic workflows where page throughput and equation quality both matter.",
           ].map((line) => (
             <div
               key={line}
@@ -213,31 +215,34 @@ const slides: Slide[] = [
     subtitle: "Reference design view from paper",
     theme: themes[5],
     body: (
-      <div className="grid gap-5 lg:grid-cols-5">
-        <div className="rounded-2xl border border-indigo-300 bg-white/95 p-5 lg:col-span-3">
-          <p className="text-[clamp(1rem,1.4vw,1.22rem)] font-extrabold text-indigo-950">
-            Prototype expectation
+      <div className="space-y-5">
+        <div className="rounded-2xl border border-indigo-300 bg-white/95 p-5">
+          <p className="text-[clamp(1.15rem,1.7vw,1.5rem)] font-extrabold text-indigo-950">
+            Prototype expectation from the research paper
           </p>
-          <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(0.95rem,1.16vw,1.05rem)] font-semibold text-indigo-900">
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(1rem,1.3vw,1.2rem)] font-semibold text-indigo-900">
             <li>
-              This figure summarizes the expected physical and pipeline setup.
+              This single figure already includes four visual sections in one
+              image.
             </li>
             <li>
-              It includes four visual views from the reference paper in one
-              frame.
+              Use this slide to communicate expected build quality before live
+              demonstration.
             </li>
             <li>
-              This helps faculty quickly understand mechanical and system scope.
+              It supports quick faculty understanding of mechanics, capture
+              setup, and integrated workflow.
             </li>
           </ul>
         </div>
-        <div className="rounded-2xl border border-indigo-300 bg-white/95 p-3 lg:col-span-2">
+
+        <div className="rounded-2xl border border-indigo-300 bg-white/95 p-3">
           <Image
             src="/image.png"
             alt="Expected prototype collage from research paper"
             width={1400}
             height={1000}
-            className="h-full w-full rounded-xl object-contain"
+            className="h-[52vh] w-full rounded-xl object-contain md:h-[58vh]"
             priority
           />
         </div>
@@ -295,6 +300,7 @@ const slides: Slide[] = [
             points: [
               "Combines embedded systems, robotics, and AI in one capstone-level workflow.",
               "Demonstrates practical use of microcontroller timing and control theory.",
+              "Connects classroom theory with measurable system-level performance metrics.",
             ],
           },
           {
@@ -302,6 +308,7 @@ const slides: Slide[] = [
             points: [
               "Supports low-cost digitization for engineering and mathematics content.",
               "Preserves books while making knowledge reusable.",
+              "Reduces manual scanning burden for libraries and student resource preparation.",
             ],
           },
           {
@@ -309,6 +316,7 @@ const slides: Slide[] = [
             points: [
               "Extends IEEE paper idea with modern web-based monitoring and presentation.",
               "Builds foundation for future handwriting and multilingual support.",
+              "Provides a reproducible baseline for future dataset scaling and model comparison.",
             ],
           },
         ].map((item) => (
@@ -361,26 +369,41 @@ const slides: Slide[] = [
     ),
   },
   {
-    title: "System Architecture",
-    subtitle: "Three-layer coordinated pipeline",
+    title: "Feature Set",
+    subtitle: "Most important features with numbered focus",
     theme: themes[5],
     body: (
-      <div className="space-y-4">
+      <div className="grid gap-5 md:grid-cols-2">
         {[
           {
-            layer: "Layer 1 - Muscle",
-            name: "Arduino Mega 2560",
-            desc: "Controls gripper and flipper servos, handles relay logic, emits CAPTURE signal.",
+            layer: "Feature 1 - Autonomous Page Flipping",
+            name: "4-stage mechatronic cycle",
+            desc: "Grip, hold, flip, and reset sequence is designed for repeatable page handling with minimal human intervention.",
           },
           {
-            layer: "Layer 2 - Bridge",
-            name: "Raspberry Pi 5",
-            desc: "Receives CAPTURE event, runs ADB camera trigger, pulls and forwards images.",
+            layer: "Feature 2 - Synchronized Dual Capture",
+            name: "Raspberry Pi + ADB trigger",
+            desc: "Pi listens for CAPTURE command and triggers both phones to capture left and right pages in sync.",
           },
           {
-            layer: "Layer 3 - Brain",
-            name: "Laptop Processing + Web",
-            desc: "Executes dewarp, OCR, Faster R-CNN, TrOCR, and dashboard presentation workflow.",
+            layer: "Feature 3 - Page Dewarp and Enhancement",
+            name: "Curved to flat page transformation",
+            desc: "Image preprocessing removes margins and curvature so models receive clean, readable page content.",
+          },
+          {
+            layer: "Feature 4 - Math Region Detection",
+            name: "Faster R-CNN (ResNet50 + FPN)",
+            desc: "Detector localizes equations from dense textbook layouts with strong precision and recall targets.",
+          },
+          {
+            layer: "Feature 5 - LaTeX Generation",
+            name: "TrOCR-based recognition",
+            desc: "Detected formula crops are converted into editable LaTeX sequences for academic reuse.",
+          },
+          {
+            layer: "Feature 6 - Real-time Dashboard",
+            name: "Next.js presentation interface",
+            desc: "Tracks pipeline status, shows outputs, and supports structured proposal-to-demo communication.",
           },
         ].map((item) => (
           <div
@@ -398,50 +421,52 @@ const slides: Slide[] = [
             </p>
           </div>
         ))}
-
-        <div className="rounded-2xl border border-dashed border-indigo-300 bg-indigo-50/70 p-4 text-[clamp(0.95rem,1.12vw,1.02rem)] font-semibold text-indigo-900">
-          Add architecture block image here for visual flow: Arduino to
-          Raspberry Pi to Processing Engine to Dashboard.
-        </div>
       </div>
     ),
   },
   {
-    title: "Feature Set",
-    subtitle: "What makes SmartScan presentation-ready",
+    title: "System Architecture",
+    subtitle: "Three-layer coordinated pipeline",
     theme: themes[0],
     body: (
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="space-y-4">
         {[
-          [
-            "Autonomous page turning",
-            "Repeatable grip-hold-flip-reset cycle designed for stable operation.",
-          ],
-          [
-            "Synchronized dual camera capture",
-            "Both pages are captured with low-cost smartphone setup using ADB.",
-          ],
-          [
-            "Image quality correction",
-            "Crop and dewarp steps convert curved pages to clean model input.",
-          ],
-          [
-            "Math-aware extraction",
-            "Equation detection and LaTeX conversion preserve structure and usability.",
-          ],
-        ].map(([title, desc]) => (
+          {
+            layer: "Layer 1 - Muscle",
+            name: "Arduino Mega 2560",
+            desc: "Controls gripper and flipper servos, handles relay logic, and emits CAPTURE signal at hold stage.",
+          },
+          {
+            layer: "Layer 2 - Bridge",
+            name: "Raspberry Pi 5",
+            desc: "Receives CAPTURE event, runs ADB trigger for both phones, rotates and transfers collected images.",
+          },
+          {
+            layer: "Layer 3 - Brain",
+            name: "Laptop Processing + Web",
+            desc: "Runs crop, dewarp, OCR, Faster R-CNN detection, TrOCR recognition, and dashboard reporting.",
+          },
+        ].map((item) => (
           <div
-            key={title}
+            key={item.layer}
             className="rounded-2xl border border-cyan-300 bg-white/95 p-5"
           >
-            <p className="text-[clamp(1rem,1.38vw,1.2rem)] font-extrabold text-slate-900">
-              {title}
+            <p className="text-[clamp(1.08rem,1.52vw,1.34rem)] font-extrabold text-slate-900">
+              {item.layer}
             </p>
-            <p className="mt-2 text-[clamp(0.95rem,1.18vw,1.05rem)] font-semibold text-slate-800">
-              {desc}
+            <p className="text-[clamp(1rem,1.32vw,1.14rem)] font-bold text-slate-900">
+              {item.name}
+            </p>
+            <p className="mt-2 text-[clamp(0.98rem,1.24vw,1.1rem)] font-semibold text-slate-800">
+              {item.desc}
             </p>
           </div>
         ))}
+
+        <div className="rounded-2xl border border-dashed border-cyan-300 bg-cyan-50/70 p-4 text-[clamp(0.98rem,1.2vw,1.08rem)] font-semibold text-slate-800">
+          Architecture flow: Arduino layer to Raspberry Pi bridge to Processing
+          engine to Dashboard output.
+        </div>
       </div>
     ),
   },
@@ -459,6 +484,9 @@ const slides: Slide[] = [
             <li>Locates mathematical expressions in dense textbook pages.</li>
             <li>Fine-tuned using IBEM subset for proposal feasibility.</li>
             <li>Outputs bounding boxes for targeted recognition.</li>
+            <li>
+              Backbone and FPN help robust detection at multiple formula scales.
+            </li>
           </ul>
         </div>
         <div className="rounded-2xl border border-amber-300 bg-white/95 p-5">
@@ -469,6 +497,10 @@ const slides: Slide[] = [
             <li>Converts detected formula image into LaTeX tokens.</li>
             <li>Fine-tuned using Im2LaTeX subset to manage training cost.</li>
             <li>Produces editable output for reports and lecture notes.</li>
+            <li>
+              Supports rendered preview so faculty can verify semantic
+              correctness quickly.
+            </li>
           </ul>
         </div>
 
@@ -494,6 +526,10 @@ const slides: Slide[] = [
             <li>Im2LaTeX subset for recognition model fine-tuning.</li>
             <li>Data augmentation for better robustness and generalization.</li>
             <li>Compute-aware schedule to complete within student timeline.</li>
+            <li>
+              Evaluation includes precision, recall, F1, and LaTeX output
+              quality checks.
+            </li>
           </ul>
         </div>
 
@@ -522,9 +558,18 @@ const slides: Slide[] = [
     body: (
       <div className="grid gap-4 md:grid-cols-2">
         {[
-          ["Detection precision", "Target: high 80s to low 90s"],
-          ["Detection recall", "Target: mid 80s to around 90"],
-          ["Recognition quality", "Target: usable LaTeX with solid BLEU trend"],
+          [
+            "Detection precision",
+            "Paper 95.71 percent | Proposal target high 80s to low 90s",
+          ],
+          [
+            "Detection recall",
+            "Paper 91.77 percent | Proposal target mid 80s to around 90",
+          ],
+          [
+            "Recognition quality",
+            "Paper BLEU 86.44 | Proposal target usable LaTeX with strong BLEU trend",
+          ],
           ["Cycle time", "Target: practical classroom throughput"],
           ["Inference speed", "Target: near real-time per page"],
           ["Budget", "Target: around 13K to 15K BDT total"],
@@ -838,11 +883,11 @@ export default function SlidePage() {
         <div className="mx-auto flex w-full max-w-[1700px] flex-wrap items-center justify-between gap-3 px-5 py-3">
           <div className="flex items-center gap-3">
             <div
-              className={`rounded-xl px-3 py-1 text-sm font-bold ${activeSlide.theme.badge}`}
+              className={`rounded-xl px-3 py-1 text-base font-bold ${activeSlide.theme.badge}`}
             >
               SmartScan Proposal Deck
             </div>
-            <p className="text-[clamp(0.92rem,1.2vw,1rem)] font-semibold text-slate-700">
+            <p className="text-[clamp(1rem,1.35vw,1.15rem)] font-semibold text-slate-700">
               Slide {currentSlide + 1} of {totalSlides}
             </p>
           </div>
@@ -877,7 +922,7 @@ export default function SlidePage() {
                 value={pageInput}
                 onChange={(event) => setPageInput(event.target.value)}
                 aria-label="Go to slide number"
-                className="h-9 w-20 border-slate-300 bg-white/95 text-center text-base font-bold text-slate-900"
+                className="h-9 w-20 caret-transparent border-slate-300 bg-white/95 text-center text-base font-bold text-slate-900"
               />
               <Button
                 type="submit"
@@ -941,20 +986,22 @@ export default function SlidePage() {
             >
               <div className="mb-6 space-y-2">
                 <h1
-                  className={`text-[clamp(2rem,4.2vw,4rem)] font-black leading-[1.08] ${activeSlide.theme.heading}`}
+                  className={`text-[clamp(2.35rem,4.9vw,4.6rem)] font-black leading-[1.08] ${activeSlide.theme.heading}`}
                 >
                   {activeSlide.title}
                 </h1>
                 {activeSlide.subtitle && (
                   <p
-                    className={`text-[clamp(1rem,1.8vw,1.6rem)] font-bold ${activeSlide.theme.text}`}
+                    className={`text-[clamp(1.25rem,2.2vw,2rem)] font-bold ${activeSlide.theme.text}`}
                   >
                     {activeSlide.subtitle}
                   </p>
                 )}
               </div>
 
-              <div className="pb-2">{activeSlide.body}</div>
+              <div className="pb-2 [&_li]:text-[clamp(1.05rem,1.45vw,1.35rem)] [&_p]:text-[clamp(1.05rem,1.45vw,1.35rem)] [&_td]:text-[clamp(1rem,1.38vw,1.25rem)] [&_th]:text-[clamp(1rem,1.38vw,1.25rem)]">
+                {activeSlide.body}
+              </div>
             </motion.section>
           </AnimatePresence>
 
@@ -973,7 +1020,7 @@ export default function SlidePage() {
                 key={slide.title}
                 type="button"
                 onClick={() => setCurrentSlide(index)}
-                className={`rounded-lg border px-3 py-2 text-sm font-bold transition-colors ${
+                className={`rounded-lg border px-3 py-2 text-base font-bold transition-colors ${
                   isActive
                     ? "border-slate-800 bg-slate-800 text-white"
                     : "border-slate-300 bg-white/90 text-slate-700 hover:bg-slate-100"
@@ -986,7 +1033,7 @@ export default function SlidePage() {
           })}
         </div>
 
-        <p className="mt-3 text-sm font-semibold text-slate-700">
+        <p className="mt-3 text-base font-semibold text-slate-700">
           Keyboard: Left and Right arrows, Up and Down arrows, PageUp, PageDown,
           Home, End, F for full screen
         </p>
