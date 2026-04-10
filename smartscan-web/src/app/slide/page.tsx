@@ -10,7 +10,6 @@ import {
   ChevronsRight,
   Expand,
   Minimize,
-  Sparkles,
 } from "lucide-react";
 import Image from "next/image";
 import {
@@ -181,32 +180,21 @@ const slides: Slide[] = [
     subtitle: "Why this project matters now",
     theme: themes[1],
     body: (
-      <div className="grid gap-5 lg:grid-cols-5">
-        <div className="space-y-4 lg:col-span-3">
-          {[
-            "SmartScan is a low-cost mechatronic and AI system for digitizing academic books.",
-            "The proposed pipeline is fully integrated: page handling, synchronized capture, image correction, and math-aware recognition.",
-            "The core innovation is converting printed mathematical regions into reusable LaTeX, not just plain OCR text.",
-            "The architecture follows the paper direction: Arduino as control muscle, Raspberry Pi as bridge, and laptop as AI brain.",
-            "Target operation is practical for academic workflows where page throughput and equation quality both matter.",
-          ].map((line) => (
-            <div
-              key={line}
-              className="rounded-2xl border border-amber-300 bg-white/95 p-4 text-[clamp(1.03rem,1.45vw,1.4rem)] font-semibold text-amber-950"
-            >
-              {line}
-            </div>
-          ))}
-        </div>
-        <div className="rounded-2xl border border-amber-300 bg-white/95 p-5 lg:col-span-2">
-          <p className="text-[clamp(1rem,1.45vw,1.25rem)] font-extrabold text-amber-950">
-            Visual Placeholder
-          </p>
-          <div className="mt-3 rounded-xl border border-dashed border-amber-300 bg-amber-50 p-4 text-[clamp(0.95rem,1.2vw,1.05rem)] font-semibold text-amber-900">
-            Add a high-quality system image here (hardware + software dashboard)
-            for strong first impression.
+      <div className="space-y-4">
+        {[
+          "SmartScan is a low-cost mechatronic and AI system for digitizing academic books.",
+          "The proposed pipeline is fully integrated: page handling, synchronized capture, image correction, and math-aware recognition.",
+          "The core innovation is converting printed mathematical regions into reusable LaTeX, not just plain OCR text.",
+          "The architecture follows the paper direction: Arduino as control muscle, Raspberry Pi as bridge, and laptop as AI brain.",
+          "Target operation is practical for academic workflows where page throughput and equation quality both matter.",
+        ].map((line) => (
+          <div
+            key={line}
+            className="rounded-2xl border border-amber-300 bg-white/95 p-4 text-[clamp(1.03rem,1.45vw,1.4rem)] font-semibold text-amber-950"
+          >
+            {line}
           </div>
-        </div>
+        ))}
       </div>
     ),
   },
@@ -218,20 +206,20 @@ const slides: Slide[] = [
       <div className="space-y-5">
         <div className="rounded-2xl border border-indigo-300 bg-white/95 p-5">
           <p className="text-[clamp(1.15rem,1.7vw,1.5rem)] font-extrabold text-indigo-950">
-            Prototype expectation from the research paper
+            Expected prototype overview
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(1rem,1.3vw,1.2rem)] font-semibold text-indigo-900">
             <li>
-              This single figure already includes four visual sections in one
-              image.
+              The figure consolidates four key visual sections of the proposed
+              system in one panel.
             </li>
             <li>
-              Use this slide to communicate expected build quality before live
-              demonstration.
+              It presents the expected mechanical quality and integration level
+              before final live operation.
             </li>
             <li>
-              It supports quick faculty understanding of mechanics, capture
-              setup, and integrated workflow.
+              It helps evaluators quickly understand mechanical design, capture
+              setup, and end-to-end workflow.
             </li>
           </ul>
         </div>
@@ -258,19 +246,23 @@ const slides: Slide[] = [
         {[
           {
             h: "Manual effort is high",
-            b: "Traditional scanning is slow and impractical for full semester books.",
+            b: "Traditional scanning is slow and impractical for full semester books. Large-volume course materials require extensive human effort and time.",
+            c: "Impact: low throughput and high operator fatigue.",
           },
           {
             h: "Book safety is poor",
-            b: "Flatbed pressure can damage binding and spine, especially for thicker books.",
+            b: "Flatbed pressure can damage binding and spine, especially for thicker books and older editions.",
+            c: "Impact: risk of permanent physical damage to academic resources.",
           },
           {
             h: "Commercial systems are costly",
-            b: "Professional scanners are expensive for student lab environments.",
+            b: "Professional scanning systems are often outside student-lab budgets and hard to scale.",
+            c: "Impact: low accessibility for departmental or classroom deployment.",
           },
           {
             h: "Math OCR quality is weak",
-            b: "Generic OCR tools lose equation structure and cannot produce quality LaTeX.",
+            b: "Generic OCR tools lose equation structure and produce text that is not directly usable in technical documents.",
+            c: "Impact: equations require manual correction and re-typing.",
           },
         ].map((item) => (
           <div
@@ -282,6 +274,9 @@ const slides: Slide[] = [
             </p>
             <p className="mt-2 text-[clamp(0.95rem,1.25vw,1.12rem)] font-semibold text-violet-900">
               {item.b}
+            </p>
+            <p className="mt-2 text-[clamp(0.95rem,1.2vw,1.08rem)] font-bold text-violet-950">
+              {item.c}
             </p>
           </div>
         ))}
@@ -344,24 +339,46 @@ const slides: Slide[] = [
     body: (
       <div className="grid gap-4 md:grid-cols-2">
         {[
-          "Design a safe V-cradle with page-flip mechanism.",
-          "Control multi-servo motion with Arduino Mega.",
-          "Trigger dual smartphone capture via Raspberry Pi bridge.",
-          "Implement crop and dewarp pipeline for page correction.",
-          "Train Faster R-CNN for equation region detection.",
-          "Fine-tune TrOCR for math image to LaTeX conversion.",
-          "Build a modern web UI for status and output review.",
-          "Establish measurable performance targets and feasibility.",
-        ].map((item, index) => (
+          {
+            title: "Objective 1 - Mechanical Automation Core",
+            detail:
+              "Build a stable V-cradle platform with coordinated gripper and flipper mechanisms for repeatable page handling.",
+            accent: "border-rose-300 bg-rose-50/60 text-rose-950",
+          },
+          {
+            title: "Objective 2 - Embedded Control and Capture Sync",
+            detail:
+              "Implement Arduino-based servo control and synchronized dual-camera capture using Raspberry Pi bridge communication.",
+            accent: "border-orange-300 bg-orange-50/60 text-orange-950",
+          },
+          {
+            title: "Objective 3 - Image and AI Processing Pipeline",
+            detail:
+              "Run preprocessing, math region detection, and LaTeX recognition in an integrated pipeline suitable for academic documents.",
+            accent: "border-amber-300 bg-amber-50/60 text-amber-950",
+          },
+          {
+            title: "Objective 4 - Web-based Monitoring and Results",
+            detail:
+              "Provide clear dashboard views for processing status, detection outputs, and formula rendering for presentation and validation.",
+            accent: "border-fuchsia-300 bg-fuchsia-50/60 text-fuchsia-950",
+          },
+          {
+            title: "Objective 5 - Feasibility and Performance Validation",
+            detail:
+              "Demonstrate practical accuracy, throughput, and budget feasibility with complete data-driven evaluation.",
+            accent: "border-violet-300 bg-violet-50/60 text-violet-950",
+          },
+        ].map((item) => (
           <div
-            key={item}
-            className="rounded-2xl border border-rose-300 bg-white/95 p-4"
+            key={item.title}
+            className={`rounded-2xl border p-5 ${item.accent}`}
           >
-            <p className="text-[clamp(0.98rem,1.28vw,1.12rem)] font-extrabold text-rose-950">
-              Objective {index + 1}
+            <p className="text-[clamp(1rem,1.35vw,1.18rem)] font-extrabold">
+              {item.title}
             </p>
-            <p className="mt-1 text-[clamp(0.95rem,1.17vw,1.06rem)] font-semibold text-rose-900">
-              {item}
+            <p className="mt-2 text-[clamp(0.96rem,1.2vw,1.08rem)] font-semibold">
+              {item.detail}
             </p>
           </div>
         ))}
@@ -379,44 +396,50 @@ const slides: Slide[] = [
             layer: "Feature 1 - Autonomous Page Flipping",
             name: "4-stage mechatronic cycle",
             desc: "Grip, hold, flip, and reset sequence is designed for repeatable page handling with minimal human intervention.",
+            accent: "border-fuchsia-300 bg-fuchsia-50/60 text-fuchsia-950",
           },
           {
             layer: "Feature 2 - Synchronized Dual Capture",
             name: "Raspberry Pi + ADB trigger",
             desc: "Pi listens for CAPTURE command and triggers both phones to capture left and right pages in sync.",
+            accent: "border-sky-300 bg-sky-50/60 text-sky-950",
           },
           {
             layer: "Feature 3 - Page Dewarp and Enhancement",
             name: "Curved to flat page transformation",
             desc: "Image preprocessing removes margins and curvature so models receive clean, readable page content.",
+            accent: "border-emerald-300 bg-emerald-50/60 text-emerald-950",
           },
           {
             layer: "Feature 4 - Math Region Detection",
             name: "Faster R-CNN (ResNet50 + FPN)",
             desc: "Detector localizes equations from dense textbook layouts with strong precision and recall targets.",
+            accent: "border-amber-300 bg-amber-50/60 text-amber-950",
           },
           {
             layer: "Feature 5 - LaTeX Generation",
             name: "TrOCR-based recognition",
             desc: "Detected formula crops are converted into editable LaTeX sequences for academic reuse.",
+            accent: "border-violet-300 bg-violet-50/60 text-violet-950",
           },
           {
             layer: "Feature 6 - Real-time Dashboard",
             name: "Next.js presentation interface",
             desc: "Tracks pipeline status, shows outputs, and supports structured proposal-to-demo communication.",
+            accent: "border-rose-300 bg-rose-50/60 text-rose-950",
           },
         ].map((item) => (
           <div
             key={item.layer}
-            className="rounded-2xl border border-indigo-300 bg-white/95 p-5"
+            className={`rounded-2xl border p-5 ${item.accent}`}
           >
-            <p className="text-[clamp(1.02rem,1.4vw,1.22rem)] font-extrabold text-indigo-950">
+            <p className="text-[clamp(1.02rem,1.4vw,1.22rem)] font-extrabold">
               {item.layer}
             </p>
-            <p className="text-[clamp(0.95rem,1.2vw,1.08rem)] font-bold text-indigo-900">
+            <p className="text-[clamp(0.95rem,1.2vw,1.08rem)] font-bold">
               {item.name}
             </p>
-            <p className="mt-1 text-[clamp(0.95rem,1.17vw,1.05rem)] font-semibold text-indigo-900">
+            <p className="mt-1 text-[clamp(0.95rem,1.17vw,1.05rem)] font-semibold">
               {item.desc}
             </p>
           </div>
@@ -429,22 +452,27 @@ const slides: Slide[] = [
     subtitle: "Three-layer coordinated pipeline",
     theme: themes[0],
     body: (
-      <div className="space-y-4">
+      <div className="space-y-5">
+        <div className="rounded-2xl border border-cyan-300 bg-cyan-50/65 p-4 text-[clamp(1rem,1.25vw,1.12rem)] font-semibold text-cyan-950">
+          The architecture is organized as Muscle, Bridge, and Brain to separate
+          physical actuation, communication, and intelligent processing
+          responsibilities.
+        </div>
         {[
           {
             layer: "Layer 1 - Muscle",
             name: "Arduino Mega 2560",
-            desc: "Controls gripper and flipper servos, handles relay logic, and emits CAPTURE signal at hold stage.",
+            desc: "Executes calibrated servo trajectories for gripper/flipper, controls fan relay events, and emits CAPTURE signal at the stable hold stage.",
           },
           {
             layer: "Layer 2 - Bridge",
             name: "Raspberry Pi 5",
-            desc: "Receives CAPTURE event, runs ADB trigger for both phones, rotates and transfers collected images.",
+            desc: "Receives serial trigger, issues synchronized ADB camera commands, manages orientation and naming, then transfers images to processing node.",
           },
           {
             layer: "Layer 3 - Brain",
             name: "Laptop Processing + Web",
-            desc: "Runs crop, dewarp, OCR, Faster R-CNN detection, TrOCR recognition, and dashboard reporting.",
+            desc: "Runs crop/dewarp preprocessing, OCR extraction, Faster R-CNN detection, TrOCR LaTeX decoding, and dashboard-level output visualization.",
           },
         ].map((item) => (
           <div
@@ -471,6 +499,66 @@ const slides: Slide[] = [
     ),
   },
   {
+    title: "Architecture Diagram",
+    subtitle: "Full view from reference paper",
+    theme: themes[5],
+    body: (
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-indigo-300 bg-indigo-50/60 p-4 text-[clamp(1rem,1.25vw,1.12rem)] font-semibold text-indigo-950">
+          This figure presents the complete multi-layer architecture and
+          communication path of the SmartScan system.
+        </div>
+        <div className="rounded-2xl border border-indigo-300 bg-white/95 p-3">
+          <div className="grid items-center gap-3 lg:grid-cols-12">
+            <div className="lg:col-span-5">
+              <Image
+                src="/architecture1.jpeg"
+                alt="Architecture diagram part 1"
+                width={900}
+                height={1300}
+                className="h-[64vh] w-full rounded-xl object-contain"
+              />
+            </div>
+            <div className="flex items-center justify-center lg:col-span-2">
+              <span className="text-4xl font-black text-indigo-700">-&gt;</span>
+            </div>
+            <div className="lg:col-span-5">
+              <Image
+                src="/architecture2.jpeg"
+                alt="Architecture diagram part 2"
+                width={900}
+                height={1300}
+                className="h-[64vh] w-full rounded-xl object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    title: "Automation Flowchart",
+    subtitle: "Control logic and process states",
+    theme: themes[0],
+    body: (
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-cyan-300 bg-cyan-50/60 p-4 text-[clamp(1rem,1.25vw,1.12rem)] font-semibold text-cyan-950">
+          This flowchart shows the operational sequence, state checks, and reset
+          logic for the automated page-turning and capture process.
+        </div>
+        <div className="rounded-2xl border border-cyan-300 bg-white/95 p-3">
+          <Image
+            src="/system_flowchart.jpeg"
+            alt="System flowchart with process decisions"
+            width={900}
+            height={1300}
+            className="h-[72vh] w-full rounded-xl object-contain"
+          />
+        </div>
+      </div>
+    ),
+  },
+  {
     title: "AI Pipeline",
     subtitle: "Detection first, recognition next",
     theme: themes[1],
@@ -482,7 +570,7 @@ const slides: Slide[] = [
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(0.95rem,1.16vw,1.05rem)] font-semibold text-amber-900">
             <li>Locates mathematical expressions in dense textbook pages.</li>
-            <li>Fine-tuned using IBEM subset for proposal feasibility.</li>
+            <li>Trained with full IBEM detection annotations.</li>
             <li>Outputs bounding boxes for targeted recognition.</li>
             <li>
               Backbone and FPN help robust detection at multiple formula scales.
@@ -495,7 +583,9 @@ const slides: Slide[] = [
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(0.95rem,1.16vw,1.05rem)] font-semibold text-amber-900">
             <li>Converts detected formula image into LaTeX tokens.</li>
-            <li>Fine-tuned using Im2LaTeX subset to manage training cost.</li>
+            <li>
+              Fine-tuned with full Im2LaTeX dataset for stronger coverage.
+            </li>
             <li>Produces editable output for reports and lecture notes.</li>
             <li>
               Supports rendered preview so faculty can verify semantic
@@ -504,16 +594,28 @@ const slides: Slide[] = [
           </ul>
         </div>
 
-        <div className="rounded-2xl border border-dashed border-amber-300 bg-amber-50/70 p-4 text-[clamp(0.95rem,1.12vw,1.02rem)] font-semibold text-amber-900 lg:col-span-2">
-          Add visual pipeline strip here: Raw page to Dewarped page to Detection
-          boxes to Formula crops to LaTeX output.
+        <div className="rounded-2xl border border-amber-300 bg-white/95 p-3 lg:col-span-2">
+          <p className="mb-2 text-[clamp(0.98rem,1.2vw,1.08rem)] font-bold text-amber-900">
+            Detection output sample for presentation
+          </p>
+          <Image
+            src="/detection.jpeg"
+            alt="Detection result showing math regions"
+            width={1400}
+            height={850}
+            className="h-[38vh] w-full rounded-xl object-contain md:h-[42vh]"
+          />
+          <p className="mt-2 text-[clamp(0.95rem,1.12vw,1.02rem)] font-semibold text-amber-900">
+            Explain this as localization first, then crop each region and send
+            to TrOCR for final LaTeX generation.
+          </p>
         </div>
       </div>
     ),
   },
   {
     title: "Dataset and Training Strategy",
-    subtitle: "Balanced for limited compute and strong output",
+    subtitle: "Full-data training for maximum model quality",
     theme: themes[2],
     body: (
       <div className="grid gap-5 lg:grid-cols-5">
@@ -522,8 +624,10 @@ const slides: Slide[] = [
             Practical data plan
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-5 text-[clamp(0.95rem,1.16vw,1.05rem)] font-semibold text-violet-900">
-            <li>IBEM subset for detection model training and validation.</li>
-            <li>Im2LaTeX subset for recognition model fine-tuning.</li>
+            <li>
+              Full IBEM dataset for detection model training and validation.
+            </li>
+            <li>Full Im2LaTeX-100K for recognition model fine-tuning.</li>
             <li>Data augmentation for better robustness and generalization.</li>
             <li>Compute-aware schedule to complete within student timeline.</li>
             <li>
@@ -538,14 +642,14 @@ const slides: Slide[] = [
             Estimation snapshot
           </p>
           <p className="mt-2 text-[clamp(0.95rem,1.15vw,1.04rem)] font-semibold text-violet-900">
-            Detection data: about 10 percent IBEM.
+            Detection model uses complete available detection annotations.
           </p>
           <p className="mt-1 text-[clamp(0.95rem,1.15vw,1.04rem)] font-semibold text-violet-900">
-            Recognition data: about 10 percent Im2LaTeX-100K.
+            Recognition model uses complete paired formula and LaTeX data.
           </p>
           <p className="mt-3 text-[clamp(0.95rem,1.15vw,1.04rem)] font-semibold text-violet-900">
-            This preserves proposal feasibility while keeping architecture
-            identical to full-scale training.
+            This maximizes formula diversity and improves real-world
+            generalization.
           </p>
         </div>
       </div>
@@ -608,96 +712,16 @@ const slides: Slide[] = [
         </div>
         <div className="rounded-2xl border border-rose-300 bg-white/95 p-5">
           <p className="text-[clamp(1.02rem,1.35vw,1.16rem)] font-extrabold text-rose-950">
-            Total plan
+            Expected budget
           </p>
           <p className="mt-2 text-[clamp(1rem,1.45vw,1.3rem)] font-extrabold text-rose-950">
-            Approximately 13,250 BDT
+            Approximately 20,000 BDT (excluding Raspberry Pi 5)
           </p>
           <p className="mt-3 text-[clamp(0.95rem,1.15vw,1.02rem)] font-semibold text-rose-900">
-            Strong value compared with commercial alternatives.
+            Cost remains significantly lower than commercial academic scanning
+            systems.
           </p>
         </div>
-      </div>
-    ),
-  },
-  {
-    title: "Implementation Roadmap",
-    subtitle: "Structured week-by-week execution",
-    theme: themes[5],
-    body: (
-      <div className="grid gap-4 md:grid-cols-2">
-        {[
-          ["Week 1-2", "Mechanical build, wiring, and Arduino calibration"],
-          [
-            "Week 3",
-            "Pi bridge, synchronized camera trigger, transfer scripts",
-          ],
-          ["Week 4", "Image crop and dewarp processing pipeline"],
-          ["Week 5", "Faster R-CNN training and detection validation"],
-          ["Week 6", "TrOCR fine-tuning and LaTeX output checks"],
-          ["Week 7", "Web dashboard integration and end-to-end test"],
-          ["Week 8", "Final verification, report, and presentation prep"],
-          ["Buffer", "Risk handling for hardware and timing uncertainty"],
-        ].map(([week, task]) => (
-          <div
-            key={week}
-            className="rounded-2xl border border-indigo-300 bg-white/95 p-4"
-          >
-            <p className="text-[clamp(1rem,1.3vw,1.12rem)] font-extrabold text-indigo-950">
-              {week}
-            </p>
-            <p className="mt-1 text-[clamp(0.95rem,1.15vw,1.04rem)] font-semibold text-indigo-900">
-              {task}
-            </p>
-          </div>
-        ))}
-      </div>
-    ),
-  },
-  {
-    title: "Risk Management",
-    subtitle: "Prepared for proposal and demo uncertainty",
-    theme: themes[0],
-    body: (
-      <div className="grid gap-5 lg:grid-cols-3">
-        {[
-          {
-            h: "Hardware jam risk",
-            p: "Pause and reset control path, timing tuning, and staged movement diagnostics.",
-          },
-          {
-            h: "Capture sync risk",
-            p: "Serial event logging and fallback recapture procedure for page-level consistency.",
-          },
-          {
-            h: "Model accuracy risk",
-            p: "Incremental retraining and focused augmentation on difficult formula patterns.",
-          },
-          {
-            h: "Demo readiness risk",
-            p: "Backup assets: recorded hardware run and offline inference demonstration set.",
-          },
-          {
-            h: "Time risk",
-            p: "Parallel team ownership by subsystem and weekly milestone checkpoints.",
-          },
-          {
-            h: "Integration risk",
-            p: "Defined data handoff format and directory structure across all modules.",
-          },
-        ].map((item) => (
-          <div
-            key={item.h}
-            className="rounded-2xl border border-cyan-300 bg-white/95 p-5"
-          >
-            <p className="text-[clamp(1rem,1.35vw,1.17rem)] font-extrabold text-slate-900">
-              {item.h}
-            </p>
-            <p className="mt-2 text-[clamp(0.95rem,1.14vw,1.02rem)] font-semibold text-slate-800">
-              {item.p}
-            </p>
-          </div>
-        ))}
       </div>
     ),
   },
@@ -707,12 +731,12 @@ const slides: Slide[] = [
     theme: themes[1],
     body: (
       <div className="space-y-5">
-        <div className="rounded-2xl border border-amber-300 bg-white/95 p-5 text-[clamp(1rem,1.3vw,1.12rem)] font-semibold text-amber-900">
+        <div className="rounded-2xl border border-amber-300 bg-white/95 p-6 text-[clamp(1.2rem,1.6vw,1.45rem)] font-semibold text-amber-900">
           SmartScan is a feasible, low-cost, and academically strong proposal
           that integrates embedded control, image processing, and deep learning
           for real textbook digitization with math-aware LaTeX output.
         </div>
-        <div className="rounded-2xl border border-amber-300 bg-white/95 p-5 text-[clamp(1rem,1.3vw,1.12rem)] font-semibold text-amber-900">
+        <div className="rounded-2xl border border-amber-300 bg-white/95 p-6 text-[clamp(1.2rem,1.6vw,1.45rem)] font-semibold text-amber-900">
           The architecture, roadmap, and risk strategy make it suitable for a
           structured university implementation timeline.
         </div>
@@ -724,8 +748,8 @@ const slides: Slide[] = [
     subtitle: "Questions and feedback are welcome",
     theme: themes[2],
     body: (
-      <div className="grid gap-6 lg:grid-cols-5">
-        <div className="rounded-2xl border border-violet-300 bg-white/95 p-6 lg:col-span-3">
+      <div className="grid gap-6">
+        <div className="rounded-2xl border border-violet-300 bg-white/95 p-6">
           <p className="text-[clamp(1.1rem,1.6vw,1.45rem)] font-extrabold text-violet-950">
             Team Extra Current
           </p>
@@ -733,20 +757,7 @@ const slides: Slide[] = [
             Group 6 | CSE 4326 | SmartScan Proposal
           </p>
           <p className="mt-5 text-[clamp(0.95rem,1.15vw,1.02rem)] font-semibold text-violet-900">
-            Please provide your images later and they can be inserted in the
-            placeholder sections for a polished final delivery.
-          </p>
-        </div>
-        <div className="rounded-2xl border border-violet-300 bg-violet-50/75 p-6 lg:col-span-2">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-violet-700" />
-            <p className="text-[clamp(1rem,1.35vw,1.2rem)] font-extrabold text-violet-950">
-              Ready for presentation
-            </p>
-          </div>
-          <p className="mt-4 text-[clamp(0.95rem,1.15vw,1.02rem)] font-semibold text-violet-900">
-            Use arrow keys, page input, or fullscreen controls during live
-            projection.
+            Thank you for your attention.
           </p>
         </div>
       </div>
@@ -1032,11 +1043,6 @@ export default function SlidePage() {
             );
           })}
         </div>
-
-        <p className="mt-3 text-base font-semibold text-slate-700">
-          Keyboard: Left and Right arrows, Up and Down arrows, PageUp, PageDown,
-          Home, End, F for full screen
-        </p>
       </main>
     </div>
   );
