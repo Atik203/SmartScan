@@ -28,7 +28,7 @@
     - [Feature 2: Synchronized ADB Camera Triggering (Physical Demo)](#feature-2-synchronized-adb-camera-triggering-physical-demo)
     - [Feature 3: Image Dewarping \& Polishing Pipeline (Physical Demo)](#feature-3-image-dewarping--polishing-pipeline-physical-demo)
     - [Feature 4: Deep Learning Math-to-LaTeX Pipeline (DL Showpiece)](#feature-4-deep-learning-math-to-latex-pipeline-dl-showpiece)
-      - [Stage 1: Math Expression Detection (Faster R-CNN)](#stage-1-math-expression-detection-faster-r-cnn)
+      - [Stage 1: Math Expression Detection (YOLOv8)](#stage-1-math-expression-detection-yolov8)
       - [Stage 2: Math Expression Recognition (TrOCR → LaTeX)](#stage-2-math-expression-recognition-trocr--latex)
     - [Feature 5: Real-Time Web Dashboard (Software Demo)](#feature-5-real-time-web-dashboard-software-demo)
   - [📊 Dataset Strategy (10% Subset)](#-dataset-strategy-10-subset)
@@ -42,18 +42,12 @@
   - [❓ Potential Faculty Questions \& Prepared Answers](#-potential-faculty-questions--prepared-answers)
     - [Q1: "Why not just use ChatGPT/Google Lens for math OCR?"](#q1-why-not-just-use-chatgptgoogle-lens-for-math-ocr)
     - [Q2: "Why Arduino Mega instead of ESP32?"](#q2-why-arduino-mega-instead-of-esp32)
-    - [Q3: "What happens if the YOLO/Faster R-CNN misses a formula?"](#q3-what-happens-if-the-yolofaster-r-cnn-misses-a-formula)
+    - [Q3: "What happens if the YOLOv8 misses a formula?"](#q3-what-happens-if-the-yolov8-misses-a-formula)
     - [Q4: "How does this differ from the original paper's work?"](#q4-how-does-this-differ-from-the-original-papers-work)
     - [Q5: "Can this handle handwritten math?"](#q5-can-this-handle-handwritten-math)
     - [Q6: "What if the page-turn mechanism jams?"](#q6-what-if-the-page-turn-mechanism-jams)
     - [Q7: "Why do you need TWO phones?"](#q7-why-do-you-need-two-phones)
     - [Q8: "How does the 10% data strategy affect real-world performance?"](#q8-how-does-the-10-data-strategy-affect-real-world-performance)
-  - [🎤 Presentation Slide Deck (10-Min Format for 5 Speakers)](#-presentation-slide-deck-10-min-format-for-5-speakers)
-    - [Speaker 1: Introduction \& Problem (2 min)](#speaker-1-introduction--problem-2-min)
-    - [Speaker 2: Architecture \& Solution (2 min)](#speaker-2-architecture--solution-2-min)
-    - [Speaker 3: Hardware Implementation (2 min)](#speaker-3-hardware-implementation-2-min)
-    - [Speaker 4: Software \& Deep Learning (2 min)](#speaker-4-software--deep-learning-2-min)
-    - [Speaker 5: Demo, Budget \& Conclusion (2 min)](#speaker-5-demo-budget--conclusion-2-min)
   - [📎 References](#-references)
 
 ---
@@ -62,11 +56,11 @@
 
 **SmartScan** is a cost-effective, open-source **mechatronic book scanner** designed to automate the digitization of academic textbooks. Built for the Microprocessors and Microcontrollers Lab, the system utilizes a **tri-layer architecture**:
 
-|    Layer     | Hardware                                       | Role                                                                                                                               |
-| :----------: | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **① Muscle** | Arduino Mega 2560                              | Controls robotic gripper/slider arms via PWM, manages vacuum suction relay, sends "CAPTURE" signal over USB Serial                 |
-| **② Bridge** | Raspberry Pi 5 (8GB)                           | Listens for "CAPTURE" from Arduino, triggers dual smartphone cameras via ADB, pulls/rotates images, transfers to laptop            |
-| **③ Brain**  | Python/Flask on Laptop + Next.js Web Dashboard | Processes images (crop → dewarp → detect → recognize), runs **Faster R-CNN** for math detection and **TrOCR** for LaTeX generation |
+|    Layer     | Hardware                                       | Role                                                                                                                         |
+| :----------: | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **① Muscle** | Arduino Mega 2560                              | Controls robotic gripper/slider arms via PWM, manages vacuum suction relay, sends "CAPTURE" signal over USB Serial           |
+| **② Bridge** | Raspberry Pi 5 (8GB)                           | Listens for "CAPTURE" from Arduino, triggers dual smartphone cameras via ADB, pulls/rotates images, transfers to laptop      |
+| **③ Brain**  | Python/Flask on Laptop + Next.js Web Dashboard | Processes images (crop → dewarp → detect → recognize), runs **YOLOv8** for math detection and **TrOCR** for LaTeX generation |
 
 **What makes SmartScan special:**
 
@@ -86,7 +80,7 @@ Digitizing academic textbooks—specifically engineering and mathematics books�
 | **Manual Scanning is Tedious**          | A single book takes 2-4 hours of human effort                 | Robotic arms (Gripper & Slider) fully automate page-turning at 300-400 pages/hour |
 | **Book Binding Gets Damaged**           | Flatbed scanners require pressing books flat, cracking spines | 50-degree V-shaped wooden cradle scans books safely without flat-pressing         |
 | **Commercially Scanners are Expensive** | Professional scanners cost $5,000-$50,000+                    | Uses standard Android smartphones + $130 of electronics                           |
-| **Standard OCR Fails at Math**          | Tesseract/Google OCR flatten math semantics, losing structure | Employs Faster R-CNN for detection + TrOCR for LaTeX generation                   |
+| **Standard OCR Fails at Math**          | Tesseract/Google OCR flatten math semantics, losing structure | Employs YOLOv8 for detection + TrOCR for LaTeX generation                         |
 
 ---
 
@@ -96,7 +90,7 @@ Digitizing academic textbooks—specifically engineering and mathematics books�
 2. **Microcontroller Objective:** Automate a full mechanical cycle (grip → lift → hold → flip) using an Arduino Mega 2560 and 4× MG996R high-torque servos
 3. **Communication Objective:** Synchronize dual 45-degree camera captures perfectly with the "holding" phase using Raspberry Pi 5 + ADB bridge
 4. **Image Processing Objective:** Process curved book pages into flat, cropped, and polished digital images using page-dewarp and OpenCV
-5. **Deep Learning Objective:** Extract standard text using Tesseract, route complex pages to **gemini-2.5-flash-lite**, and keep Faster R-CNN + TrOCR as the proof-of-work and offline fallback _(Trained on 10% subsets of IBEM and Im2LaTeX-100K)_
+5. **Deep Learning Objective:** Extract standard text using Tesseract, route complex pages to **gemini-2.5-flash-lite**, and keep YOLOv8 + TrOCR as the proof-of-work and offline fallback _(Trained on 10% subsets of IBEM and Im2LaTeX-100K)_
 6. **Web Dashboard Objective:** Build a modern Next.js web interface for real-time scan monitoring, batch processing, and LaTeX preview
 
 ---
@@ -123,10 +117,10 @@ Digitizing academic textbooks—specifically engineering and mathematics books�
                        ▼ Local Network / Direct File Transfer
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    ③ DEEP LEARNING PROCESSING LAYER                 │
-│  Laptop/PC Backend · Python · OpenCV · Faster R-CNN · TrOCR        │
+│  Laptop/PC Backend · Python · OpenCV · YOLOv8 · TrOCR               │
 │  • page-dewarp: Flattens curved page geometry                      │
 │  • Tesseract OCR: Extracts standard paragraph text                 │
-│  • Faster R-CNN (ResNet50+FPN): Detects math expression regions    │
+│  • YOLOv8 (Ultralytics): Detects math expression regions           │
 │  • TrOCR (Vision Encoder-Decoder): Converts math → LaTeX code      │
 │  • Next.js Web Dashboard: Real-time monitoring + batch processing  │
 └─────────────────────────────────────────────────────────────────────┘
@@ -161,7 +155,7 @@ Digitizing academic textbooks—specifically engineering and mathematics books�
 | **Embedded**     | Arduino IDE + C++                   | 2.x         | Servo PWM, serial comm, relay logic    |
 | **Bridge**       | Python 3 + PySerial + ADB           | 3.11+       | Serial listener, camera trigger, SCP   |
 | **Processing**   | OpenCV, page-dewarp                 | 4.8+        | Image crop, dewarp, deskew             |
-| **Detection**    | Faster R-CNN (ResNet50+FPN)         | PyTorch 2.0 | Math expression bounding box detection |
+| **Detection**    | YOLOv8 (Ultralytics)                | 8.x         | Math expression bounding box detection |
 | **Recognition**  | TrOCR (Vision Encoder-Decoder)      | HuggingFace | Math image → LaTeX text                |
 | **Cloud LLM**    | gemini-2.5-flash-lite               | API         | Mixed text + math LaTeX compilation    |
 | **Text OCR**     | Tesseract OCR                       | 5.x         | Standard text extraction               |
@@ -238,7 +232,7 @@ Arduino Mega                  Raspberry Pi 5                  Smartphones
 ```
 Raw Capture  ──→  Cropped  ──→  Dewarped  ──→  Ready for AI
 (curved + noisy)  (margins     (flat + clean)   (Tesseract +
-                   removed)                      Faster R-CNN)
+                   removed)                      YOLOv8)
 ```
 
 **Demo:** We will show a side-by-side comparison: the original curved photograph vs. the algorithmically flattened result. This will be visible in both the Flask interface and the Next.js dashboard.
@@ -257,7 +251,7 @@ Raw Capture  ──→  Cropped  ──→  Dewarped  ──→  Ready for AI
 
 **What it does:** A two-stage deep learning pipeline that first _detects_ mathematical expressions in a page image, then _recognizes_ and converts each expression into syntactically correct LaTeX code. For mixed-layout pages, the system can route the full page to **gemini-2.5-flash-lite** to preserve reading order and LaTeX structure.
 
-#### Stage 1: Math Expression Detection (Faster R-CNN)
+#### Stage 1: Math Expression Detection (YOLOv8)
 
 | Metric    | Paper's Result  | Our Target (10% data) |
 | --------- | --------------- | --------------------- |
@@ -270,18 +264,17 @@ Raw Capture  ──→  Cropped  ──→  Dewarped  ──→  Ready for AI
 **Architecture:**
 
 ```
-Input Image → ResNet50 Backbone → Feature Pyramid Network (FPN)
-           → Region Proposal Network (RPN) → RoI Pooling
-           → Custom RoI Heads → Bounding Boxes + Confidence
+Input Image → YOLOv8 Backbone (C2f) → PAN/FPN Neck
+           → Decoupled Head → Bounding Boxes + Confidence
            → Non-Maximum Suppression → Final Detections
 ```
 
 **Training Plan:**
 
 - Dataset: 10% of IBEM (~300 images with bounding box annotations)
-- Base: `torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)`
-- Fine-tune with: learning rate scheduler, gradient clipping, data augmentation
-- Expected training time: ~2-3 hours on laptop GPU
+- Base: `yolov8n.pt` (Ultralytics)
+- Fine-tune with: mosaic/mixup, LR scheduling, data augmentation
+- Expected training time: ~1-2 hours on laptop GPU
 
 #### Stage 2: Math Expression Recognition (TrOCR → LaTeX)
 
@@ -332,10 +325,10 @@ Cropped Math Image → Vision Transformer Encoder (DeiT/ViT)
 
 We will use 10% of each dataset to keep training practical while achieving competitive results:
 
-| Dataset           | Full Size      | Our 10%      | Purpose                                  |
-| ----------------- | -------------- | ------------ | ---------------------------------------- |
-| **IBEM**          | ~3,000+ images | ~300 images  | Math expression detection (Faster R-CNN) |
-| **Im2LaTeX-100K** | 100,000 pairs  | 10,000 pairs | Math → LaTeX recognition (TrOCR)         |
+| Dataset           | Full Size      | Our 10%      | Purpose                            |
+| ----------------- | -------------- | ------------ | ---------------------------------- |
+| **IBEM**          | ~3,000+ images | ~300 images  | Math expression detection (YOLOv8) |
+| **Im2LaTeX-100K** | 100,000 pairs  | 10,000 pairs | Math → LaTeX recognition (TrOCR)   |
 
 **Download Links:**
 
@@ -365,7 +358,7 @@ We will use 10% of each dataset to keep training practical while achieving compe
     ├── Step 1: Crop (remove margins)
     ├── Step 2: Dewarp (flatten curvature via page-dewarp)
     ├── Step 3: Text Detection (Tesseract OCR for plain text)
-    ├── Step 4: Math Detection (Faster R-CNN bounding boxes)
+    ├── Step 4: Math Detection (YOLOv8 bounding boxes)
     ├── Step 5: Routing Decision
     │     ├── If math detected: send full page to gemini-2.5-flash-lite
     │     └── Else: continue local OCR-only path
@@ -393,14 +386,14 @@ We will demonstrate the following during the lab presentation:
 | 2    | **Autonomous Flip** — Press automation start, watch 3 pages flip automatically        | Full rig (Arduino + Servos + V-Cradle) |
 | 3    | **Camera Capture** — Show Pi terminal receiving "CAPTURE" and phones taking photos    | Pi SSH terminal + 2 phones             |
 | 4    | **Image Processing** — Show raw→cropped→dewarped transformation on screen             | Laptop terminal/web UI                 |
-| 5    | **Math Detection** — Show Faster R-CNN detecting equations with bounding boxes        | Web dashboard                          |
+| 5    | **Math Detection** — Show YOLOv8 detecting equations with bounding boxes              | Web dashboard                          |
 | 6    | **LaTeX Generation** — Show detected math converted to rendered LaTeX                 | Web dashboard with KaTeX               |
 
 ### Backup Demo (if hardware issues)
 
 - Pre-recorded video of the scanner in operation
 - Offline web interface processing pre-scanned images through the full AI pipeline
-- Live Faster R-CNN + TrOCR inference on pre-captured book images
+- Live YOLOv8 + TrOCR inference on pre-captured book images
 
 ---
 
@@ -445,7 +438,7 @@ We will demonstrate the following during the lab presentation:
 | 2    | Arduino firmware + Pi serial bridge    | Working page-flip automation               |
 | 3    | Camera integration + image pipeline    | End-to-end capture → dewarp working        |
 | 4    | Dataset download + 10% sampling        | IBEM & Im2LaTeX subsets prepared           |
-| 5    | Faster R-CNN training + evaluation     | Detection model with metrics               |
+| 5    | YOLOv8 training + evaluation           | Detection model with metrics               |
 | 6    | TrOCR fine-tuning + evaluation         | Recognition model with BLEU score          |
 | 7    | Next.js web dashboard development      | Working web UI with all pages              |
 | 8    | Integration testing + demo rehearsal   | Full pipeline demo-ready                   |
@@ -456,15 +449,15 @@ We will demonstrate the following during the lab presentation:
 
 ### Q1: "Why not just use ChatGPT/Google Lens for math OCR?"
 
-**A:** General-purpose models like Google Lens or ChatGPT Vision work on isolated, clean images. Our system handles the _entire pipeline_ — from physical page turning to batch processing hundreds of pages with embedded math in mixed-content layouts. The Faster R-CNN first _locates_ where math is on a dense page, then TrOCR converts only those regions. This separation of detection and recognition is what makes it scalable and accurate for full textbooks.
+**A:** General-purpose models like Google Lens or ChatGPT Vision work on isolated, clean images. Our system handles the _entire pipeline_ — from physical page turning to batch processing hundreds of pages with embedded math in mixed-content layouts. YOLOv8 first _locates_ where math is on a dense page, then TrOCR converts only those regions. This separation of detection and recognition is what makes it scalable and accurate for full textbooks.
 
 ### Q2: "Why Arduino Mega instead of ESP32?"
 
 **A:** The Arduino Mega operates at 5V logic, directly matching our MG996R servo signal requirements without level shifters. ESP32 uses 3.3V logic and would require additional circuitry. The Mega also provides more PWM-capable pins (15 vs 16, but with better timer resolution) and much simpler servo library support, critical for first-time servo-intensive projects.
 
-### Q3: "What happens if the YOLO/Faster R-CNN misses a formula?"
+### Q3: "What happens if the YOLOv8 misses a formula?"
 
-**A:** The paper reports 91.77% recall, meaning ~8% of formulas are missed. In our system, undetected formulas fall through to Tesseract OCR, which captures them as plain text (losing structural formatting). The web dashboard's detection gallery allows manual review and re-processing. Future improvement: ensemble detection combining both Faster R-CNN and YOLOv8.
+**A:** The paper reports ~90% recall, meaning a small fraction of formulas can be missed. In our system, undetected formulas fall through to Tesseract OCR, which captures them as plain text (losing structural formatting). The web dashboard's detection gallery allows manual review and re-processing. Future improvement: multi-scale YOLOv8 or ensemble detection.
 
 ### Q4: "How does this differ from the original paper's work?"
 
@@ -487,79 +480,6 @@ We will demonstrate the following during the lab presentation:
 **A:** With 10% data, we expect a ~5-8% drop in precision/recall compared to the paper's numbers. However, this is sufficient to _demonstrate the pipeline works_. For a production deployment, we would train on the full dataset. The architecture and pipeline design are identical — only the training data volume differs.
 
 ---
-
-## 🎤 Presentation Slide Deck (10-Min Format for 5 Speakers)
-
-### Speaker 1: Introduction & Problem (2 min)
-
-**Slide 1: Title Slide**
-
-- Project Title: "SmartScan — Automated Book Digitizer & LaTeX Extractor"
-- Course: CSE 4326 — Microprocessors and Microcontrollers Lab
-- Team members and their names
-
-**Slide 2: The Core Problem**
-
-- Visual: Side-by-side (Human scanning a book vs. Broken OCR math output)
-- Manual flat-bed scanning destroys book bindings
-- Commercial robotic scanners cost thousands of dollars
-- Standard OCR utterly fails at reading complex math equations
-
-### Speaker 2: Architecture & Solution (2 min)
-
-**Slide 3: The SmartScan Concept**
-
-- Visual: Photo/CAD render of the V-Cradle
-- Low-cost mechatronic V-cradle digitizer
-- Protects books at a 50-degree angle
-- Fully autonomous operation
-
-**Slide 4: Tri-Layer Architecture (Block Diagram)**
-
-- Visual: Arduino → Pi → Laptop block diagram
-- Arduino = Muscle, Pi = Bridge, Laptop = Brain
-
-### Speaker 3: Hardware Implementation (2 min)
-
-**Slide 5: Mechanical Design & 3D Printing**
-
-- Visual: Highlights of the PLA+ Gripper and Slider arms
-- 4× MG996R servos provide high torque
-- PLA+ structural joints hold the motors
-
-**Slide 6: The Electronic Control**
-
-- Visual: Circuit schematic — Mega 2560, Relay, Blower Fans
-- Physical page-flip cycle: Vacuum suction → Slider pull → Gripper hold
-- Control panel with potentiometer calibration
-
-### Speaker 4: Software & Deep Learning (2 min)
-
-**Slide 7: The ADB Communication Bridge**
-
-- Visual: Code snippet of `adb shell input keyevent 27`
-- Android phones via ADB save $1000+ in camera costs
-- Auto image pull, rotation, and transfer
-
-**Slide 8: The AI Extraction Pipeline**
-
-- Visual: Raw Image → Dewarped → Faster R-CNN (Boxes) → TrOCR → LaTeX
-- Standard text → Tesseract OCR
-- Math → Faster R-CNN detection → TrOCR recognition → LaTeX
-
-### Speaker 5: Demo, Budget & Conclusion (2 min)
-
-**Slide 9: Cost Analysis**
-
-- Visual: Pie chart (~13,350 BDT total)
-- Cost-saving decisions: recycled PSU, student phones, university 3D printer
-
-**Slide 10: Live Demo & Conclusion**
-
-- Live demonstration of the machine flipping pages
-- Web dashboard showing detection + LaTeX output
-- Future scope: handwritten math, portable version, multilingual support
-- Q&A
 
 ---
 

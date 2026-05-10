@@ -3,6 +3,7 @@ SmartScan — Centralized Configuration
 All paths are relative to the project root: E:\\PROJECT\\SmartScan
 Update the values below to match your setup.
 """
+
 import os
 
 # ============================================================
@@ -46,8 +47,8 @@ PERM_EXTRACT_FOLDER = os.path.join(OFFLINE_DIR, "extracted")
 # ============================================================
 # RASPBERRY PI CONFIG (update for your Pi)
 # ============================================================
-PI_IP = "192.168.1.100"          # ← Update to your Pi's IP
-PI_USER = "pi"                   # ← Update to your Pi's username
+PI_IP = "192.168.1.100"  # ← Update to your Pi's IP
+PI_USER = "pi"  # ← Update to your Pi's username
 PI_FOLDER = "/home/pi/smartscan/captured_images/"
 PI_SERIAL_PORT = "/dev/ttyUSB0"  # ← Verify with: ls /dev/tty*
 PI_BAUD_RATE = 9600
@@ -75,12 +76,13 @@ IM2LATEX_DATASET_DIR = os.path.join(DATASETS_DIR, "im2latex")
 # TRAINING CONFIG (optimized for RTX 3060 6GB + 32GB RAM)
 # ============================================================
 DEVICE = "cuda"  # "cuda" for GPU, "cpu" for CPU
-BATCH_SIZE_DETECTION = 4       # Faster R-CNN on 6GB VRAM
-BATCH_SIZE_RECOGNITION = 8     # TrOCR on 6GB VRAM (reduced for safety)
-NUM_WORKERS = 4                # Ryzen 7 5800H has 8 cores
+BATCH_SIZE_DETECTION = 4  # YOLOv8 on 6GB VRAM
+BATCH_SIZE_RECOGNITION = 8  # TrOCR on 6GB VRAM (reduced for safety)
+NUM_WORKERS = 4  # Ryzen 7 5800H has 8 cores
 LEARNING_RATE = 1e-4
 NUM_EPOCHS_DETECTION = 25
 NUM_EPOCHS_RECOGNITION = 15
+
 
 # ============================================================
 # AUTO-CREATE DIRECTORIES
@@ -88,10 +90,20 @@ NUM_EPOCHS_RECOGNITION = 15
 def ensure_dirs():
     """Create all necessary directories."""
     dirs = [
-        MODELS_DIR, DATA_DIR, LOCAL_FOLDER, CROPPED_FOLDER,
-        DEWARPED_FOLDER, PREDICTED_FOLDER, EXTRACTED_FOLDER,
-        LOGS_DIR, OFFLINE_DIR, PERM_CROP_FOLDER, PERM_DEWARP_FOLDER,
-        PERM_PREDICT_FOLDER, PERM_EXTRACT_FOLDER, DATASETS_DIR,
+        MODELS_DIR,
+        DATA_DIR,
+        LOCAL_FOLDER,
+        CROPPED_FOLDER,
+        DEWARPED_FOLDER,
+        PREDICTED_FOLDER,
+        EXTRACTED_FOLDER,
+        LOGS_DIR,
+        OFFLINE_DIR,
+        PERM_CROP_FOLDER,
+        PERM_DEWARP_FOLDER,
+        PERM_PREDICT_FOLDER,
+        PERM_EXTRACT_FOLDER,
+        DATASETS_DIR,
     ]
     for d in dirs:
         os.makedirs(d, exist_ok=True)
