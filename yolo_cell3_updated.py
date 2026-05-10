@@ -33,7 +33,7 @@ else:
         imgsz=640,
         
         # --- A100 UTILIZATION UPGRADES ---
-        batch=-1,               # AutoBatch: Automatically finds max batch size to fill A100 VRAM
+        batch=128,              # FORCED 128: AutoBatch played it too safe. This will use ~35GB VRAM.
         cache=True,             # Caches images in system RAM (you have 84GB, this makes it SUPER fast)
         workers=16,             # Uses more CPU cores to load data faster
         # ---------------------------------
