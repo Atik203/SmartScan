@@ -96,7 +96,7 @@ Digitizing academic textbooks—specifically engineering and mathematics books�
 2. **Microcontroller Objective:** Automate a full mechanical cycle (grip → lift → hold → flip) using an Arduino Mega 2560 and 4× MG996R high-torque servos
 3. **Communication Objective:** Synchronize dual 45-degree camera captures perfectly with the "holding" phase using Raspberry Pi 5 + ADB bridge
 4. **Image Processing Objective:** Process curved book pages into flat, cropped, and polished digital images using page-dewarp and OpenCV
-5. **Deep Learning Objective:** Extract standard text using Tesseract while isolating and converting math formulas to LaTeX using Faster R-CNN + TrOCR _(Trained on 10% subsets of IBEM and Im2LaTeX-100K)_
+5. **Deep Learning Objective:** Extract standard text using Tesseract, route complex pages to **gemini-2.5-flash-lite**, and keep Faster R-CNN + TrOCR as the proof-of-work and offline fallback _(Trained on 10% subsets of IBEM and Im2LaTeX-100K)_
 6. **Web Dashboard Objective:** Build a modern Next.js web interface for real-time scan monitoring, batch processing, and LaTeX preview
 
 ---
@@ -163,6 +163,7 @@ Digitizing academic textbooks—specifically engineering and mathematics books�
 | **Processing**   | OpenCV, page-dewarp                 | 4.8+        | Image crop, dewarp, deskew             |
 | **Detection**    | Faster R-CNN (ResNet50+FPN)         | PyTorch 2.0 | Math expression bounding box detection |
 | **Recognition**  | TrOCR (Vision Encoder-Decoder)      | HuggingFace | Math image → LaTeX text                |
+| **Cloud LLM**    | gemini-2.5-flash-lite               | API         | Mixed text + math LaTeX compilation    |
 | **Text OCR**     | Tesseract OCR                       | 5.x         | Standard text extraction               |
 | **Web Backend**  | Flask (legacy) / Next.js API Routes | 3.0 / 14+   | REST API, file uploads, processing     |
 | **Web Frontend** | Next.js + shadcn/ui + TailwindCSS   | 14+         | Modern dashboard UI                    |
@@ -254,7 +255,7 @@ Raw Capture  ──→  Cropped  ──→  Dewarped  ──→  Ready for AI
 
 > 🧠 **This is the project's crown jewel — the Deep Learning component.**
 
-**What it does:** A two-stage deep learning pipeline that first _detects_ mathematical expressions in a page image, then _recognizes_ and converts each expression into syntactically correct LaTeX code.
+**What it does:** A two-stage deep learning pipeline that first _detects_ mathematical expressions in a page image, then _recognizes_ and converts each expression into syntactically correct LaTeX code. For mixed-layout pages, the system can route the full page to **gemini-2.5-flash-lite** to preserve reading order and LaTeX structure.
 
 #### Stage 1: Math Expression Detection (Faster R-CNN)
 
@@ -365,9 +366,12 @@ We will use 10% of each dataset to keep training practical while achieving compe
     ├── Step 2: Dewarp (flatten curvature via page-dewarp)
     ├── Step 3: Text Detection (Tesseract OCR for plain text)
     ├── Step 4: Math Detection (Faster R-CNN bounding boxes)
-    ├── Step 5: Math Extraction (crop each detected region)
-    ├── Step 6: Math Recognition (TrOCR → LaTeX strings)
-    └── Step 7: Output Assembly
+    ├── Step 5: Routing Decision
+    │     ├── If math detected: send full page to gemini-2.5-flash-lite
+    │     └── Else: continue local OCR-only path
+    ├── Step 6: Math Extraction (crop each detected region)
+    ├── Step 7: Math Recognition (TrOCR → LaTeX strings)
+    └── Step 8: Output Assembly
          │
          ├── 📄 Plain text file
          ├── 🔢 LaTeX formulas

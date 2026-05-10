@@ -28,14 +28,14 @@ A **single-page web dashboard** that serves as the brain's UI for the SmartScan 
 
 ### Core Goals
 
-| Goal | Description |
-|---|---|
-| **Real-Time Monitoring** | Show live scanner status, page counter, connection health |
-| **Batch Processing** | Upload multiple images, process through crop → dewarp → detect → recognize |
-| **Detection Gallery** | Side-by-side view: Original → Dewarped → Detected (with bounding boxes) |
-| **LaTeX Preview** | Render extracted math expressions as formatted LaTeX using KaTeX |
-| **System Dashboard** | Processing metrics, logs, hardware status indicators |
-| **Demo-Ready** | Should look impressive for the faculty presentation |
+| Goal                     | Description                                                                |
+| ------------------------ | -------------------------------------------------------------------------- |
+| **Real-Time Monitoring** | Show live scanner status, page counter, connection health                  |
+| **Batch Processing**     | Upload multiple images, process through crop → dewarp → detect → recognize |
+| **Detection Gallery**    | Side-by-side view: Original → Dewarped → Detected (with bounding boxes)    |
+| **LaTeX Preview**        | Render extracted math expressions as formatted LaTeX using KaTeX           |
+| **System Dashboard**     | Processing metrics, logs, hardware status indicators                       |
+| **Demo-Ready**           | Should look impressive for the faculty presentation                        |
 
 ---
 
@@ -53,7 +53,8 @@ A **single-page web dashboard** that serves as the brain's UI for the SmartScan 
 │  ┌──────┴─────────────────┴──────────────────┴──────┐        │
 │  │              API ROUTES (app/api/)                │        │
 │  │  /api/upload    /api/process    /api/status       │        │
-│  │  /api/detect    /api/recognize  /api/health       │        │
+│  │  /api/detect    /api/recognize  /api/llm-route    │        │
+│  │  /api/health    /api/usage                         │        │
 │  └──────────────────────┬───────────────────────────┘        │
 └─────────────────────────┼────────────────────────────────────┘
                           │  HTTP / Subprocess
@@ -70,12 +71,14 @@ A **single-page web dashboard** that serves as the brain's UI for the SmartScan 
 
 The Next.js app calls the Python processing engine via one of two approaches:
 
-| Approach | Method | Pros | Cons |
-|---|---|---|---|
-| **A) Python subprocess** | Next.js API routes spawn Python scripts | Simple, no extra server | Slower cold-start |
+| Approach                       | Method                                             | Pros                        | Cons                  |
+| ------------------------------ | -------------------------------------------------- | --------------------------- | --------------------- |
+| **A) Python subprocess**       | Next.js API routes spawn Python scripts            | Simple, no extra server     | Slower cold-start     |
 | **B) Flask API (recommended)** | Keep Flask running as a REST API, Next.js calls it | Fast, concurrent processing | Two servers to manage |
 
 **Recommendation:** Use **Approach B** — Run Flask on port 5000 as a processing API, and Next.js on port 3000 as the frontend. The Next.js API routes act as a proxy.
+
+**LLM Routing Note:** Keep the `gemini-2.5-flash-lite` call server-side (Flask), read API keys from environment variables, and log usage/latency so the dashboard can surface budget health.
 
 ---
 
@@ -123,6 +126,7 @@ npm install framer-motion       # Animations
 **Purpose:** The landing page showing system overview and scanner status.
 
 **Layout:**
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  SIDEBAR  │  HEADER: SmartScan Dashboard                │
@@ -147,6 +151,7 @@ npm install framer-motion       # Animations
 ```
 
 **Components:**
+
 - `StatCard` — Animated counter cards (pages scanned, formulas found, etc.)
 - `ActivityFeed` — Real-time log of processed images
 - `PipelineHealth` — Connection status indicators for Arduino → Pi → Laptop
@@ -159,6 +164,7 @@ npm install framer-motion       # Animations
 **Purpose:** Upload multiple book scan images and process them through the full pipeline.
 
 **Layout:**
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  SIDEBAR  │  HEADER: Batch Image Processor              │
@@ -186,6 +192,7 @@ npm install framer-motion       # Animations
 ```
 
 **Components:**
+
 - `FileDropzone` — react-dropzone with drag-and-drop file upload
 - `ProcessingOptions` — Checkbox toggles for each pipeline stage
 - `ProgressTracker` — Per-file progress bars with status badges
@@ -198,6 +205,7 @@ npm install framer-motion       # Animations
 **Purpose:** Visual comparison of Original → Dewarped → Detected results.
 
 **Layout:**
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  SIDEBAR  │  HEADER: Detection Gallery                  │
@@ -219,6 +227,7 @@ npm install framer-motion       # Animations
 ```
 
 **Components:**
+
 - `ImageTriple` — Three-panel comparison view (original, dewarped, detected)
 - `BoundingBoxOverlay` — Interactive overlay showing detection confidence scores
 - `ImageZoom` — Click to enlarge any panel
@@ -231,6 +240,7 @@ npm install framer-motion       # Animations
 **Purpose:** View extracted math expressions rendered as beautiful LaTeX formulas.
 
 **Layout:**
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  SIDEBAR  │  HEADER: LaTeX Expression Preview           │
@@ -259,6 +269,7 @@ npm install framer-motion       # Animations
 ```
 
 **Components:**
+
 - `FormulaCard` — Shows cropped math image alongside LaTeX code + KaTeX render
 - `LatexEditor` — Editable LaTeX code with live preview
 - `CopyButton` — One-click copy to clipboard
@@ -271,6 +282,7 @@ npm install framer-motion       # Animations
 **Purpose:** System configuration, processing logs, and health monitoring.
 
 **Components:**
+
 - `ConnectionPanel` — Arduino/Pi/Laptop connection status
 - `LogViewer` — Scrollable processing log with filters
 - `ConfigEditor` — Editable paths, thresholds, model settings
@@ -284,34 +296,44 @@ All API routes live in `app/api/` and communicate with the Python processing eng
 
 ```typescript
 // app/api/upload/route.ts
-POST /api/upload
+POST / api / upload;
 // Accept multipart file uploads, save to public/uploads/
 // Returns: { files: [{ name, path, size }] }
 
 // app/api/process/route.ts
-POST /api/process
+POST / api / process;
 // Body: { files: string[], options: { crop, dewarp, detect, recognize } }
 // Calls Python processing pipeline (Flask API or subprocess)
 // Returns: { results: [{ original, cropped, dewarped, detected, expressions }] }
 
 // app/api/status/route.ts
-GET /api/status
+GET / api / status;
 // Returns current processing status, queue length, recent activity
 
 // app/api/detect/route.ts
-POST /api/detect
+POST / api / detect;
 // Run Faster R-CNN detection on a single image
 // Returns: { boxes: [{x1,y1,x2,y2,confidence}], annotated_image }
 
 // app/api/recognize/route.ts
-POST /api/recognize
+POST / api / recognize;
 // Run TrOCR on a cropped math expression image
 // Returns: { latex: string, confidence: number }
 
+// app/api/llm-route/route.ts
+POST / api / llm - route;
+// Route a full page to gemini-2.5-flash-lite for mixed text + math
+// Returns: { markdown: string, latexBlocks: string[], latencyMs: number }
+
 // app/api/health/route.ts
-GET /api/health
+GET / api / health;
 // Check connectivity: Arduino serial, Pi SSH, model loaded
 // Returns: { arduino: bool, pi: bool, model: bool, uptime: number }
+
+// app/api/usage/route.ts
+GET / api / usage;
+// Returns API usage stats and remaining budget
+// Returns: { provider: string, model: string, calls: number, avgLatencyMs: number, remainingBudgetUsd: number }
 ```
 
 ---
@@ -320,30 +342,30 @@ GET /api/health
 
 ### Core Layout Components
 
-| Component | Source | Purpose |
-|---|---|---|
-| `AppSidebar` | Custom + shadcn `sidebar` | Navigation sidebar with icons |
-| `Header` | Custom | Page title + breadcrumbs + theme toggle |
-| `ThemeProvider` | `next-themes` | Dark/Light mode support |
+| Component       | Source                    | Purpose                                 |
+| --------------- | ------------------------- | --------------------------------------- |
+| `AppSidebar`    | Custom + shadcn `sidebar` | Navigation sidebar with icons           |
+| `Header`        | Custom                    | Page title + breadcrumbs + theme toggle |
+| `ThemeProvider` | `next-themes`             | Dark/Light mode support                 |
 
 ### Data Display Components
 
-| Component | Source | Purpose |
-|---|---|---|
-| `StatCard` | shadcn `card` + `framer-motion` | Animated metric counters |
-| `ImageTriple` | Custom | Three-panel image comparison |
-| `FormulaCard` | shadcn `card` + KaTeX | Math image + LaTeX code + rendered output |
-| `ActivityFeed` | Custom | Real-time log list |
-| `ProgressTracker` | shadcn `progress` | Per-file processing progress |
+| Component         | Source                          | Purpose                                   |
+| ----------------- | ------------------------------- | ----------------------------------------- |
+| `StatCard`        | shadcn `card` + `framer-motion` | Animated metric counters                  |
+| `ImageTriple`     | Custom                          | Three-panel image comparison              |
+| `FormulaCard`     | shadcn `card` + KaTeX           | Math image + LaTeX code + rendered output |
+| `ActivityFeed`    | Custom                          | Real-time log list                        |
+| `ProgressTracker` | shadcn `progress`               | Per-file processing progress              |
 
 ### Interactive Components
 
-| Component | Source | Purpose |
-|---|---|---|
-| `FileDropzone` | `react-dropzone` | Drag-and-drop file upload |
-| `LatexEditor` | Custom `textarea` + KaTeX | Edit LaTeX with live preview |
-| `ImageZoom` | shadcn `dialog` | Full-screen image viewer |
-| `FilterBar` | shadcn `input` + `dropdown-menu` | Filter/sort controls |
+| Component      | Source                           | Purpose                      |
+| -------------- | -------------------------------- | ---------------------------- |
+| `FileDropzone` | `react-dropzone`                 | Drag-and-drop file upload    |
+| `LatexEditor`  | Custom `textarea` + KaTeX        | Edit LaTeX with live preview |
+| `ImageZoom`    | shadcn `dialog`                  | Full-screen image viewer     |
+| `FilterBar`    | shadcn `input` + `dropdown-menu` | Filter/sort controls         |
 
 ---
 
@@ -355,10 +377,10 @@ Use **SWR** for server data fetching with auto-revalidation:
 
 ```typescript
 // hooks/useProcessingStatus.ts
-import useSWR from 'swr';
+import useSWR from "swr";
 
 export function useProcessingStatus() {
-  const { data, error, isLoading } = useSWR('/api/status', fetcher, {
+  const { data, error, isLoading } = useSWR("/api/status", fetcher, {
     refreshInterval: 2000, // Poll every 2 seconds
   });
   return { status: data, error, isLoading };
@@ -371,13 +393,13 @@ Use Server Actions for form submissions:
 
 ```typescript
 // actions/process.ts
-'use server'
+"use server";
 
 export async function processImages(formData: FormData) {
-  const files = formData.getAll('files') as File[];
+  const files = formData.getAll("files") as File[];
   // Call Python Flask API
-  const response = await fetch('http://localhost:5000/process', {
-    method: 'POST',
+  const response = await fetch("http://localhost:5000/process", {
+    method: "POST",
     body: formData,
   });
   return response.json();
@@ -393,15 +415,15 @@ export async function processImages(formData: FormData) {
 ```css
 /* globals.css additions */
 :root {
-  --smartscan-primary: 220 90% 56%;     /* Electric Blue */
-  --smartscan-accent: 280 85% 65%;      /* Purple Accent */
-  --smartscan-success: 142 76% 36%;     /* Green */
-  --smartscan-warning: 38 92% 50%;      /* Amber */
-  --smartscan-destructive: 0 84% 60%;   /* Red */
+  --smartscan-primary: 220 90% 56%; /* Electric Blue */
+  --smartscan-accent: 280 85% 65%; /* Purple Accent */
+  --smartscan-success: 142 76% 36%; /* Green */
+  --smartscan-warning: 38 92% 50%; /* Amber */
+  --smartscan-destructive: 0 84% 60%; /* Red */
 }
 
 .dark {
-  --background: 224 71% 4%;             /* Deep Navy */
+  --background: 224 71% 4%; /* Deep Navy */
   --foreground: 213 31% 91%;
   --card: 224 71% 8%;
   --card-foreground: 213 31% 91%;
@@ -545,16 +567,16 @@ smartscan-web/
 
 ## 🔗 Key Technology Links
 
-| Technology | Version | Documentation |
-|---|---|---|
-| Next.js | 14+ | [nextjs.org/docs](https://nextjs.org/docs) |
-| shadcn/ui | Latest | [ui.shadcn.com](https://ui.shadcn.com) |
-| TailwindCSS | 3.4+ | [tailwindcss.com](https://tailwindcss.com) |
-| KaTeX | 0.16+ | [katex.org](https://katex.org) |
-| Framer Motion | 11+ | [framer.com/motion](https://www.framer.com/motion) |
-| react-dropzone | 14+ | [react-dropzone.js.org](https://react-dropzone.js.org) |
-| SWR | 2+ | [swr.vercel.app](https://swr.vercel.app) |
-| next-themes | 0.3+ | [github.com/pacocoursey/next-themes](https://github.com/pacocoursey/next-themes) |
+| Technology     | Version | Documentation                                                                    |
+| -------------- | ------- | -------------------------------------------------------------------------------- |
+| Next.js        | 14+     | [nextjs.org/docs](https://nextjs.org/docs)                                       |
+| shadcn/ui      | Latest  | [ui.shadcn.com](https://ui.shadcn.com)                                           |
+| TailwindCSS    | 3.4+    | [tailwindcss.com](https://tailwindcss.com)                                       |
+| KaTeX          | 0.16+   | [katex.org](https://katex.org)                                                   |
+| Framer Motion  | 11+     | [framer.com/motion](https://www.framer.com/motion)                               |
+| react-dropzone | 14+     | [react-dropzone.js.org](https://react-dropzone.js.org)                           |
+| SWR            | 2+      | [swr.vercel.app](https://swr.vercel.app)                                         |
+| next-themes    | 0.3+    | [github.com/pacocoursey/next-themes](https://github.com/pacocoursey/next-themes) |
 
 ---
 
