@@ -445,42 +445,6 @@ We will demonstrate the following during the lab presentation:
 
 ---
 
-## ❓ Potential Faculty Questions & Prepared Answers
-
-### Q1: "Why not just use ChatGPT/Google Lens for math OCR?"
-
-**A:** General-purpose models like Google Lens or ChatGPT Vision work on isolated, clean images. Our system handles the _entire pipeline_ — from physical page turning to batch processing hundreds of pages with embedded math in mixed-content layouts. YOLOv8 first _locates_ where math is on a dense page, then TrOCR converts only those regions. This separation of detection and recognition is what makes it scalable and accurate for full textbooks.
-
-### Q2: "Why Arduino Mega instead of ESP32?"
-
-**A:** The Arduino Mega operates at 5V logic, directly matching our MG996R servo signal requirements without level shifters. ESP32 uses 3.3V logic and would require additional circuitry. The Mega also provides more PWM-capable pins (15 vs 16, but with better timer resolution) and much simpler servo library support, critical for first-time servo-intensive projects.
-
-### Q3: "What happens if the YOLOv8 misses a formula?"
-
-**A:** The paper reports ~90% recall, meaning a small fraction of formulas can be missed. In our system, undetected formulas fall through to Tesseract OCR, which captures them as plain text (losing structural formatting). The web dashboard's detection gallery allows manual review and re-processing. Future improvement: multi-scale YOLOv8 or ensemble detection.
-
-### Q4: "How does this differ from the original paper's work?"
-
-**A:** We make three key adaptations: (1) We train on 10% of the original datasets to demonstrate feasibility within our compute budget, (2) We use Raspberry Pi 5 instead of Pi 4 for better processing speed, (3) We add a modern Next.js web dashboard (the paper only had a basic Flask interface) for real-time monitoring, LaTeX rendering, and batch processing.
-
-### Q5: "Can this handle handwritten math?"
-
-**A:** Not in the current scope. The IBEM dataset and Im2LaTeX-100K both focus on _printed_ mathematical expressions. Handwritten math recognition is listed as future work in the original paper and would require retraining on datasets like MathWriting (Google) or CROHME.
-
-### Q6: "What if the page-turn mechanism jams?"
-
-**A:** The Arduino supports pause/reset at any point via the control panel buttons. The dual blower fan + relay system prevents multi-page grabs. The V-cradle's 50-degree angle uses gravity to assist page separation. If pages are too thick, the wait times in the firmware (GRIPPER_POS2_WAIT, FLIPPER_POS2_WAIT) can be tuned.
-
-### Q7: "Why do you need TWO phones?"
-
-**A:** Each phone captures one half of the open book (left page and right page) at a 45-degree angle. This avoids the need to flatten the book or use expensive overhead cameras with wide-angle lenses. Using existing student smartphones brings the camera cost to $0.
-
-### Q8: "How does the 10% data strategy affect real-world performance?"
-
-**A:** With 10% data, we expect a ~5-8% drop in precision/recall compared to the paper's numbers. However, this is sufficient to _demonstrate the pipeline works_. For a production deployment, we would train on the full dataset. The architecture and pipeline design are identical — only the training data volume differs.
-
----
-
 ---
 
 ## 📎 References
