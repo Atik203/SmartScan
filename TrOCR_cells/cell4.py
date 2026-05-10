@@ -5,8 +5,6 @@ from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments
 from transformers.trainer_utils import get_last_checkpoint
 import torch
 
-# Enable cuDNN auto-tuner for faster convolutions on A100
-torch.backends.cudnn.benchmark = True
 
 training_args = Seq2SeqTrainingArguments(
     output_dir                  = CHECKPOINT_DIR,    # saves to Drive
@@ -43,7 +41,6 @@ training_args = Seq2SeqTrainingArguments(
 
     # ── Speed ─────────────────────────────────────────────────────────────────
     eval_strategy               = 'steps',
-    group_by_length             = True,   # batch similar-length sequences together
 )
 
 trainer = Seq2SeqTrainer(
