@@ -3,65 +3,79 @@
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  BookOpen,
-  Sigma,
-  Cpu,
-  Zap,
-  ArrowUpRight,
-  Activity,
-  Clock,
-  CheckCircle2,
+  BookOpen, Sigma, Cpu, Zap, ArrowUpRight, Activity,
+  Clock, CheckCircle2, AlertCircle, Wifi, WifiOff,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useStatus, useHealth } from "@/hooks/use-smartscan";
 
-const stats = [
-  {
-    title: "Pages Scanned",
-    value: "0",
-    change: "Ready",
-    icon: BookOpen,
-    gradient: "from-blue-500 to-cyan-400",
-    shadow: "shadow-blue-500/20",
-  },
-  {
-    title: "Formulas Detected",
-    value: "0",
-    change: "Ready",
-    icon: Sigma,
-    gradient: "from-purple-500 to-pink-400",
-    shadow: "shadow-purple-500/20",
-  },
-  {
-    title: "Avg. Latency",
-    value: "—",
-    change: "No data",
-    icon: Zap,
-    gradient: "from-amber-500 to-orange-400",
-    shadow: "shadow-amber-500/20",
-  },
-  {
-    title: "Scanner Status",
-    value: "Offline",
-    change: "Connect Pi",
-    icon: Cpu,
-    gradient: "from-emerald-500 to-green-400",
-    shadow: "shadow-emerald-500/20",
-  },
-];
+const fadeUp = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } };
 
-const pipelineLayers = [
-  { name: "Arduino Mega", status: "offline", role: "Muscle" },
-  { name: "Raspberry Pi 5", status: "offline", role: "Bridge" },
-  { name: "Processing Engine", status: "online", role: "Brain" },
-];
-
-const fadeUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-};
+function formatUptime(s: number) {
+  if (s < 60) return `${s}s`;
+  if (s < 3600) return `${Math.floor(s / 60)}m ${s % 60}s`;
+  return `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m`;
+}
 
 export default function DashboardPage() {
+  const { status, statusLoading } = useStatus();
+  const { health, healthLoading } = useHealth();
+
+  const stats = [
+    {
+      title: "Pages Scanned",
+      value: statusLoading ? "—" : String(status?.pages_scanned ?? 0),
+      change: status ? `${status.queue_length} in queue` : "Ready",
+      icon: BookOpen,
+      gradient: "from-blue-500 to-cyan-400",
+      shadow: "shadow-blue-500/20",
+    },
+    {
+      title: "Formulas Detected",
+      value: statusLoading ? "—" : String(status?.formulas_detected ?? 0),
+      change: "Via YOLO model",
+      icon: Sigma,
+      gradient: "from-purple-500 to-pink-400",
+      shadow: "shadow-purple-500/20",
+    },
+    {
+      title: "Engine Uptime",
+      value: statusLoading ? "—" : formatUptime(status?.uptime_seconds ?? 0),
+      change: "Flask backend",
+      icon: Zap,
+      gradient: "from-amber-500 to-orange-400",
+      shadow: "shadow-amber-500/20",
+    },
+    {
+      title: "Scanner Status",
+      value: healthLoading ? "—" : health?.model_loaded ? "Ready" : "Offline",
+      change: health?.pi ? `Pi ${health.pi_ip}` : "Pi disconnected",
+      icon: Cpu,
+      gradient: "from-emerald-500 to-green-400",
+      shadow: "shadow-emerald-500/20",
+    },
+  ];
+
+  const pipelineLayers = [
+    {
+      name: "Arduino Mega",
+      status: health?.arduino ? "online" : "offline",
+      role: "Muscle — servo + fan control",
+    },
+    {
+      name: "Raspberry Pi 5",
+      status: health?.pi ? "online" : "offline",
+      role: `Bridge — ADB capture (${health?.pi_ip ?? "—"})`,
+    },
+    {
+      name: "Processing Engine",
+      status: health?.model_loaded ? "online" : "offline",
+      role: `Brain — YOLO + TrOCR${health?.gemini_configured ? " + Gemini" : ""}`,
+    },
+  ];
+
   return (
     <AppLayout title="Dashboard">
       {/* Stats Grid */}
@@ -78,12 +92,12 @@ export default function DashboardPage() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-xs text-muted-foreground font-medium">
-                      {stat.title}
-                    </p>
-                    <p className="text-3xl font-bold mt-1 tracking-tight">
-                      {stat.value}
-                    </p>
+                    <p className="text-xs text-muted-foreground font-medium">{stat.title}</p>
+                    {statusLoading ? (
+                      <Skeleton className="h-8 w-16 mt-1" />
+                    ) : (
+                      <p className="text-3xl font-bold mt-1 tracking-tight">{stat.value}</p>
+                    )}
                     <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                       <ArrowUpRight className="h-3 w-3" />
                       {stat.change}
@@ -107,11 +121,8 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Pipeline Health */}
         <motion.div
-          variants={fadeUp}
-          initial="initial"
-          animate="animate"
-          transition={{ delay: 0.4, duration: 0.4 }}
-          className="lg:col-span-1"
+          variants={fadeUp} initial="initial" animate="animate"
+          transition={{ delay: 0.4, duration: 0.4 }} className="lg:col-span-1"
         >
           <Card className="border-border/50 h-full">
             <CardHeader className="pb-3">
@@ -137,9 +148,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium">{layer.name}</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {layer.role}
-                    </p>
+                    <p className="text-[10px] text-muted-foreground">{layer.role}</p>
                   </div>
                   <Badge
                     variant={layer.status === "online" ? "default" : "secondary"}
@@ -153,17 +162,34 @@ export default function DashboardPage() {
                   </Badge>
                 </div>
               ))}
+
+              {/* Extra health flags */}
+              {health && (
+                <div className="pt-2 border-t border-border/30 space-y-1.5">
+                  {[
+                    { label: "YOLO Model", ok: health.model_loaded },
+                    { label: "Tesseract OCR", ok: health.tesseract },
+                    { label: "Pandoc PDF", ok: health.pandoc },
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">{item.label}</span>
+                      {item.ok ? (
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                      ) : (
+                        <AlertCircle className="h-3.5 w-3.5 text-zinc-600" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
 
         {/* Recent Activity */}
         <motion.div
-          variants={fadeUp}
-          initial="initial"
-          animate="animate"
-          transition={{ delay: 0.5, duration: 0.4 }}
-          className="lg:col-span-2"
+          variants={fadeUp} initial="initial" animate="animate"
+          transition={{ delay: 0.5, duration: 0.4 }} className="lg:col-span-2"
         >
           <Card className="border-border/50 h-full">
             <CardHeader className="pb-3">
@@ -173,13 +199,52 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <CheckCircle2 className="h-12 w-12 mb-3 text-muted-foreground/30" />
-                <p className="text-sm font-medium">No activity yet</p>
-                <p className="text-xs mt-1">
-                  Upload images in the Batch Processor to get started
-                </p>
-              </div>
+              {statusLoading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-10 w-full" />
+                  ))}
+                </div>
+              ) : !status?.recent_activity?.length ? (
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                  <CheckCircle2 className="h-12 w-12 mb-3 text-muted-foreground/30" />
+                  <p className="text-sm font-medium">No activity yet</p>
+                  <p className="text-xs mt-1">
+                    Upload images in the Batch Processor to get started
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {status.recent_activity.map((item, i) => (
+                    <motion.div
+                      key={`${item.filename}-${i}`}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30 border border-border/30"
+                    >
+                      <div
+                        className={`h-2 w-2 rounded-full shrink-0 ${
+                          item.status === "processed"
+                            ? "bg-emerald-500"
+                            : item.status === "processing"
+                            ? "bg-amber-500 animate-pulse"
+                            : "bg-red-500"
+                        }`}
+                      />
+                      <p className="text-xs font-mono flex-1 truncate">{item.filename}</p>
+                      {item.detections !== undefined && (
+                        <span className="text-[10px] text-purple-400 shrink-0">
+                          {item.detections} formula{item.detections !== 1 ? "s" : ""}
+                        </span>
+                      )}
+                      <Badge variant="secondary" className="text-[10px] shrink-0 capitalize">
+                        {item.status}
+                      </Badge>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -187,17 +252,12 @@ export default function DashboardPage() {
 
       {/* Architecture Overview */}
       <motion.div
-        variants={fadeUp}
-        initial="initial"
-        animate="animate"
-        transition={{ delay: 0.6, duration: 0.4 }}
-        className="mt-6"
+        variants={fadeUp} initial="initial" animate="animate"
+        transition={{ delay: 0.6, duration: 0.4 }} className="mt-6"
       >
         <Card className="border-border/50 overflow-hidden">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold">
-              System Architecture
-            </CardTitle>
+            <CardTitle className="text-sm font-semibold">System Architecture</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -205,7 +265,7 @@ export default function DashboardPage() {
                 {
                   layer: "① Muscle",
                   name: "Arduino Mega 2560",
-                  desc: "PWM servos, relay control, serial communication",
+                  desc: "PWM servos, relay control, serial CAPTURE signal",
                   color: "from-blue-500/10 to-blue-500/5 border-blue-500/20",
                   accent: "text-blue-400",
                 },
@@ -219,7 +279,7 @@ export default function DashboardPage() {
                 {
                   layer: "③ Brain",
                   name: "Processing Engine",
-                  desc: "Faster R-CNN detection, TrOCR → LaTeX, Flask API",
+                  desc: "YOLO detect → TrOCR recognize → LaTeX → PDF",
                   color: "from-emerald-500/10 to-emerald-500/5 border-emerald-500/20",
                   accent: "text-emerald-400",
                 },
@@ -232,9 +292,7 @@ export default function DashboardPage() {
                     {item.layer}
                   </p>
                   <p className="text-sm font-semibold mt-1">{item.name}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {item.desc}
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
                 </div>
               ))}
             </div>

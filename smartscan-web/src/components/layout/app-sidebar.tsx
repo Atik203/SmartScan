@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   BookOpen,
+  BookOpenText,
   Image as ImageIcon,
   LayoutDashboard,
   Moon,
@@ -34,6 +35,7 @@ const navItems = [
   { title: "Batch Processor", href: "/batch", icon: Upload },
   { title: "Detection Gallery", href: "/gallery", icon: ImageIcon },
   { title: "LaTeX Preview", href: "/latex", icon: Sigma },
+  { title: "Book Reader", href: "/reader", icon: BookOpenText },
   { title: "System", href: "/system", icon: Settings },
 ];
 

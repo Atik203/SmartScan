@@ -2,6 +2,9 @@
 SmartScan — Centralized Configuration
 All paths are relative to the project root: E:\\PROJECT\\SmartScan
 Update the values below to match your setup.
+
+To add your Gemini API key, create dl-processing-engine/.env with:
+    GEMINI_API_KEY=your_key_here
 """
 
 import os
@@ -16,7 +19,11 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # MODEL PATHS
 # ============================================================
 MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
-YOLO_MODEL_PATH = os.path.join(MODELS_DIR, "best.pt")
+# YOLOv8 best.pt is downloaded from Colab after training.
+# Falls back to the Faster R-CNN model if best.pt is not yet available.
+_yolo_candidate = os.path.join(MODELS_DIR, "best.pt")
+FASTERRCNN_MODEL_PATH = os.path.join(MODELS_DIR, "fasterrcnn_math_detector.pt")
+YOLO_MODEL_PATH = _yolo_candidate if os.path.exists(_yolo_candidate) else FASTERRCNN_MODEL_PATH
 TROCR_MODEL_DIR = os.path.join(MODELS_DIR, "trocr-latex")
 
 # ============================================================
@@ -43,6 +50,30 @@ PERM_CROP_FOLDER = os.path.join(OFFLINE_DIR, "cropped")
 PERM_DEWARP_FOLDER = os.path.join(OFFLINE_DIR, "dewarped")
 PERM_PREDICT_FOLDER = os.path.join(OFFLINE_DIR, "predicted")
 PERM_EXTRACT_FOLDER = os.path.join(OFFLINE_DIR, "extracted")
+
+# ============================================================
+# OUTPUT DIRECTORIES (Markdown pages + compiled PDF)
+# ============================================================
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
+MARKDOWN_OUTPUT_DIR = os.path.join(OUTPUT_DIR, "pages")
+PDF_OUTPUT_DIR = os.path.join(OUTPUT_DIR, "pdf")
+PDF_OUTPUT_PATH = os.path.join(PDF_OUTPUT_DIR, "Final_Book.pdf")
+
+# ============================================================
+# GEMINI API CONFIG
+# Set GEMINI_API_KEY in your environment or in .env file
+# ============================================================
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite-preview-06-17")
+
+# ============================================================
+# TESSERACT OCR CONFIG
+# ============================================================
+# Set to full path of tesseract.exe on Windows, or empty string on Linux
+TESSERACT_CMD = os.getenv(
+    "TESSERACT_CMD",
+    r"C:\Program Files\Tesseract-OCR\tesseract.exe" if os.name == "nt" else "",
+)
 
 # ============================================================
 # RASPBERRY PI CONFIG (update for your Pi)
@@ -104,6 +135,9 @@ def ensure_dirs():
         PERM_PREDICT_FOLDER,
         PERM_EXTRACT_FOLDER,
         DATASETS_DIR,
+        OUTPUT_DIR,
+        MARKDOWN_OUTPUT_DIR,
+        PDF_OUTPUT_DIR,
     ]
     for d in dirs:
         os.makedirs(d, exist_ok=True)
@@ -114,4 +148,8 @@ if __name__ == "__main__":
     print(f"[OK] Project root: {PROJECT_ROOT}")
     print(f"[OK] All directories created successfully.")
     print(f"[OK] YOLO model expected at: {YOLO_MODEL_PATH}")
+    print(f"[OK] TrOCR model dir: {TROCR_MODEL_DIR}")
+    print(f"[OK] Markdown output: {MARKDOWN_OUTPUT_DIR}")
+    print(f"[OK] PDF output: {PDF_OUTPUT_PATH}")
+    print(f"[OK] Gemini key set: {'YES' if GEMINI_API_KEY else 'NO — add to .env'}")
     print(f"[OK] Data directory: {DATA_DIR}")

@@ -1,47 +1,42 @@
-# ============================================================
 # SmartScan — Python Dependencies
-# Python: 3.12.13 (conda base)
-# GPU:    RTX 3060 6GB | CUDA Driver: 13.2
-# ============================================================
+# Install: pip install -r requirements.txt
+# For GPU: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
-# --- PyTorch CUDA 12.4 (install SEPARATELY first — not via pip install -r) ---
-# Run this command first:
-#   cd dl-processing-engine
-#   .venv\Scripts\pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-#
-# Installed: torch==2.6.0+cu124, torchvision==0.21.0+cu124, torchaudio==2.6.0+cu124
+# ── Deep Learning ─────────────────────────────────────────────────────────────
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.30.0
+datasets>=2.14.0
+accelerate>=0.20.0
+ultralytics>=8.0.0
 
-# --- HuggingFace Ecosystem ---
-transformers>=4.40.0         # TrOCR + Vision Encoder-Decoder
-datasets>=2.19.0             # load_dataset("yuntian-deng/im2latex-100k-raw")
-accelerate>=0.30.0           # HuggingFace training acceleration
-evaluate>=0.4.0              # BLEU, CER metrics
-
-# --- Object Detection ---
-ultralytics>=8.2.0           # YOLOv8 (existing pipeline)
-
-# --- Image Processing ---
+# ── Image Processing ──────────────────────────────────────────────────────────
 opencv-python>=4.8.0
+numpy>=1.24.0
 Pillow>=10.0.0
-page-dewarp>=0.2.0           # Book page dewarping
 
-# --- OCR ---
-# pytesseract requires Tesseract binary: https://github.com/tesseract-ocr/tesseract
-# Install Tesseract exe first, then:
-# pytesseract>=0.3.10
-
-# --- Web Interface ---
+# ── Web Interface ─────────────────────────────────────────────────────────────
 flask>=3.0.0
+flask-cors>=4.0.0
 werkzeug>=3.0.0
 
-# --- Serial Communication (Raspberry Pi only) ---
-# pyserial>=3.5
+# ── Page Dewarping ────────────────────────────────────────────────────────────
+page-dewarp>=0.3.0
 
-# --- Evaluation & Metrics ---
-scikit-learn>=1.4.0
+# ── OCR ──────────────────────────────────────────────────────────────────────
+pytesseract>=0.3.10
+
+# ── Gemini API ────────────────────────────────────────────────────────────────
+google-generativeai>=0.8.0
+
+# ── Serial Communication (Raspberry Pi) ──────────────────────────────────────
+pyserial>=3.5
+
+# ── Metrics & Evaluation ─────────────────────────────────────────────────────
+scikit-learn>=1.3.0
 nltk>=3.8.0
-matplotlib>=3.8.0
-tqdm>=4.66.0
+evaluate>=0.4.0
 
-# --- Utilities ---
-numpy>=1.26.0
+# ── Utilities ─────────────────────────────────────────────────────────────────
+matplotlib>=3.7.0
+tqdm>=4.65.0
