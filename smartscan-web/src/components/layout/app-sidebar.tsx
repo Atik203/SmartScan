@@ -19,7 +19,6 @@ import {
   Image as ImageIcon,
   LayoutDashboard,
   Moon,
-  Presentation,
   Settings,
   Sigma,
   Sun,
@@ -28,10 +27,10 @@ import {
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const navItems = [
   { title: "Dashboard", href: "/", icon: LayoutDashboard },
-  { title: "Proposal Slides", href: "/slide", icon: Presentation },
   { title: "Batch Processor", href: "/batch", icon: Upload },
   { title: "Detection Gallery", href: "/gallery", icon: ImageIcon },
   { title: "LaTeX Preview", href: "/latex", icon: Sigma },
@@ -42,6 +41,10 @@ const navItems = [
 export function AppSidebar() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Only render theme-dependent UI after client mount to avoid hydration mismatch
+  useEffect(() => { setMounted(true); }, []);
 
   return (
     <Sidebar className="border-r border-border/50">
@@ -98,16 +101,21 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-        >
-          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="ml-4">Toggle Theme</span>
-        </Button>
+        {mounted && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+            <span>Toggle Theme</span>
+          </Button>
+        )}
         <p className="text-[10px] text-muted-foreground/50 text-center mt-2">
           UIU CSE 4326 · April 2026
         </p>

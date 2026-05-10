@@ -362,77 +362,116 @@ src/app/api/
 
 ### 🔧 Infrastructure Tasks — WHERE TO INSTALL
 
-> **Rule of thumb:** The Flask backend (`app.py`) runs on your **Laptop (Windows)**.
-> The Pi 5 only runs `auto3.py` + `auto_capture_pi5.py` — it captures images, nothing else.
-> Therefore **Tesseract and Pandoc go on the Laptop**, not the Pi.
+> ✅ **Recommended: Run Flask backend on Pi 5 — no laptop needed during demo.**
+> This matches the original goal ("Running on Pi 5 backend") and is more impressive:
+> a fully self-contained embedded system. Arduino → Pi 5 → Dashboard.
 
-#### I1 — Install Pandoc + MiKTeX ➜ **Laptop (Windows)**
+---
 
-Pandoc is called by `page_assembler.py → compile_pdf()` which runs inside Flask on your laptop.
+#### 🖥️ Option A: Pi 5 as Full Backend ✅ RECOMMENDED
+
+| Requirement | Pi 5 Capability | Notes |
+|-------------|----------------|-------|
+| Flask + routing | ✅ Fast | Pure Python, trivial load |
+| YOLO/FasterRCNN detection | ✅ OK | ~2–5s/page on CPU |
+| TrOCR inference | ⚠️ Slow | 15–40s/formula — fine for demo |
+| Tesseract OCR | ✅ Fast | Native ARM binary, excellent |
+| Pandoc + LaTeX | ✅ OK | 30–90s for full book compile |
+| Gemini API | ✅ Fast | Just HTTP — handles bulk silently |
+| RAM (8GB Pi 5) | ✅ Enough | Flask + TrOCR ~3–4GB peak |
+| RAM (4GB Pi 5) | ⚠️ Tight | Use Gemini-only, skip TrOCR load |
+
+**I1 — Install Pandoc + TeX Live on Pi 5 (Linux):**
+
+```bash
+sudo apt update
+sudo apt install -y pandoc texlive-xetex texlive-fonts-recommended
+pandoc --version && xelatex --version
+```
+
+**I2 — Install Tesseract on Pi 5 (Linux):**
+
+```bash
+sudo apt install -y tesseract-ocr tesseract-ocr-eng
+tesseract --version
+```
+
+> **Update `config.py` for Linux** — Tesseract is already in PATH on Linux so set:
+> `TESSERACT_CMD = os.getenv("TESSERACT_CMD", "")` — empty string = auto-detect ✅
+
+**I3 — Deploy project to Pi 5:**
+
+```bash
+# On Windows laptop — rsync project to Pi
+rsync -avz E:/PROJECT/SmartScan/ pi@192.168.1.100:~/SmartScan/ --exclude node_modules --exclude .venv
+
+# On Pi 5 — install Python deps
+cd ~/SmartScan/dl-processing-engine
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
+# Set Gemini key
+cp .env.example .env && nano .env
+# Add: GEMINI_API_KEY=your_key_here
+```
+
+**I4 — Start everything on Pi 5:**
+
+```bash
+# Terminal 1: Serial listener (already existed)
+cd ~/SmartScan/raspberrypi\ code && python3 auto3.py
+
+# Terminal 2: Flask backend (NEW — was on laptop before)
+cd ~/SmartScan/dl-processing-engine
+source .venv/bin/activate && python3 app.py
+# → Flask API now on http://PI_IP:5000
+```
+
+**I5 — Connect laptop frontend to Pi backend:**
+
+```bash
+# Create smartscan-web/.env.local on your Windows laptop
+NEXT_PUBLIC_FLASK_URL=http://192.168.1.100:5000
+# Then run: npm run dev
+# Laptop shows the UI, Pi 5 does all OCR/PDF/ML processing
+```
+
+> **Best demo setup:** Laptop runs Next.js (`npm run dev`) on WiFi, Pi 5 runs Flask.
+> Open `http://localhost:3000` on laptop — it calls Flask on Pi. No laptop GPU needed.
+
+---
+
+#### 💻 Option B: Laptop as Backend (development only)
+
+Keep Flask on Windows laptop, Pi only does ADB capture.
 
 ```powershell
-# Option A — winget (recommended)
+# I1 — Pandoc + MiKTeX on Windows
 winget install JohnMacFarlane.Pandoc
 winget install MiKTeX.MiKTeX
 
-# Option B — manual
-# Pandoc: https://github.com/jgm/pandoc/releases  (pandoc-X.X-windows-x86_64.msi)
-# MiKTeX: https://miktex.org/download  (basic installer, auto-installs xelatex packages)
-
-# Verify after install (restart terminal first)
-pandoc --version
-xelatex --version
-```
-
-> **MiKTeX tip:** on first `pandoc --pdf-engine=xelatex` run, MiKTeX will prompt to install
-> missing LaTeX packages — click **Install** and let it finish. Subsequent runs are instant.
-
-#### I2 — Install Tesseract OCR ➜ **Laptop (Windows)**
-
-Tesseract is called by `tesseract_ocr.py` (text-only pages, Path A) inside Flask on your laptop.
-
-```powershell
-# Option A — winget
+# I2 — Tesseract on Windows
 winget install UB-Mannheim.TesseractOCR
-
-# Option B — manual installer
-# https://github.com/UB-Mannheim/tesseract/wiki
-# Download: tesseract-ocr-w64-setup-5.x.x.exe
-# Install to: C:\Program Files\Tesseract-OCR\
-# ✅ The config.py default path already points there
-
-# Verify
-& 'C:\Program Files\Tesseract-OCR\tesseract.exe' --version
-
-# Add to PATH (optional — config.py uses full path by default)
-[Environment]::SetEnvironmentVariable('PATH', $env:PATH + ';C:\Program Files\Tesseract-OCR', 'User')
+# Installs to C:\Program Files\Tesseract-OCR\ — already the default in config.py ✅
 ```
 
-#### Does the Pi 5 need anything?
+---
 
-| Tool | Laptop | Pi 5 |
-|------|--------|------|
-| Tesseract OCR | ✅ **Install** | ❌ Not needed |
-| Pandoc + MiKTeX | ✅ **Install** | ❌ Not needed |
-| Python venv + Flask | ✅ Already done | ❌ Not needed |
-| ADB + Android tools | ❌ | ✅ Already installed |
-| pyserial (auto3.py) | ❌ | ✅ Already installed |
+#### Which option to choose?
 
-The Pi's only job is: receive `CAPTURE` from Arduino → trigger ADB → pull photos → done.
-All AI/OCR/PDF work happens on your laptop.
-
-#### I3 — Set up `.env` ➜ **Laptop only**
-
-```powershell
-# In dl-processing-engine/
-copy .env.example .env
-# Then edit .env and set:
-# GEMINI_API_KEY=your_key_here
-```
+| Scenario | Recommendation |
+|----------|---------------|
+| **University demo** (self-contained, impressive) | **Option A — Pi 5 full backend** |
+| **Fast development / TrOCR training** | Option B — Laptop |
+| **4GB Pi 5** | Option A, Gemini handles math (TrOCR skipped) |
+| **8GB Pi 5** | Option A fully — TrOCR + Flask + Pandoc |
 
 - [x] **I3:** `.env.example` created — copy to `.env` and fill in `GEMINI_API_KEY`
-- [ ] **I4:** Test SSH/SCP connectivity from Laptop → Pi (`ssh pi@192.168.1.100`)
-- [ ] **I5:** Prepare backup pre-recorded demo video
+- [ ] **I1:** Install Pandoc + TeX Live on Pi 5 (`sudo apt install pandoc texlive-xetex`)
+- [ ] **I2:** Install Tesseract on Pi 5 (`sudo apt install tesseract-ocr`)
+- [ ] **I4:** rsync project to Pi 5, install Python deps, start Flask on Pi
+- [ ] **I5:** Set `NEXT_PUBLIC_FLASK_URL=http://PI_IP:5000` in `smartscan-web/.env.local`
+- [ ] **I6:** Prepare backup pre-recorded demo video
 
 ---
 
