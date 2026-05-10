@@ -144,13 +144,6 @@ with open(data_yaml_path, 'w') as f:
 print(f"\n✅ data.yaml → {data_yaml_path}")
 print(f"   nc=2, classes: embedded (inline), isolated (display)")
 
-# ── Step 7: Save to Drive ─────────────────────────────────────────────────────
-if os.path.exists(DRIVE_YOLO):
-    shutil.rmtree(DRIVE_YOLO)
-print("📤 Saving IBEM_yolo_v2 to Drive...")
-shutil.copytree(LOCAL_YOLO, DRIVE_YOLO)
-print("✅ Saved!")
-
 DATA_YAML = data_yaml_path
 print(f"\n📍 DATA_YAML = {DATA_YAML}")
 print("▶️  Run Cell 3 to retrain with CORRECT annotations!")
