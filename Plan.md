@@ -12,10 +12,10 @@
 | ------------------------ | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | **Arduino Firmware**     | `Complete_automation_code_arduino.ino` (869 lines)                                  | ✅ Done — gripper/flipper/fan/automation cycle with `Serial.println("CAPTURE")`                        |
 | **Pi Bridge**            | `auto3.py`, `auto_capture_pi5.py`                                                   | ✅ Done — serial listener + ADB dual-phone capture + rotation                                          |
-| **DL Processing Engine** | `app.py`, `processing.py`, `offline_processing.py`, `run_on_laptop.py`, `config.py` | ⚠️ Partial — crop/dewarp/YOLO detect works, but no TrOCR inference, no Gemini routing, no PDF assembly |
+| **DL Processing Engine** | `app.py`, `processing.py`, `config.py` + 5 new modules | ✅ Done — full pipeline: crop/dewarp/YOLO/TrOCR/Gemini/Tesseract/PDF |
 | **ML Training (Local)**  | `train_detector.py` (Faster R-CNN), `train_recognizer.py` (TrOCR)                   | ✅ Done — scripts ready, model files exist in `models/`                                                |
 | **ML Training (Colab)**  | `Math_Detection_YOLOv8.ipynb`, `Math_Recognition_TrOCR.ipynb`                       | ✅ Done — Colab Pro notebooks with auto-resume                                                         |
-| **Next.js Dashboard**    | `smartscan-web/` — Dashboard, Batch, Gallery, LaTeX, System pages                   | ⚠️ Partial — UI shell exists, no API wiring, no PDF viewer                                             |
+| **Next.js Dashboard**    | All 6 pages wired + `/reader` built                                                  | ✅ Done — Live API, KaTeX formulas, PDF viewer, real activity log                                      |
 | **SmartScan_Captures**   | 10 page pairs (left/right)                                                          | ✅ Done — real captures from prototype                                                                 |
 | **Trained Models**       | `fasterrcnn_math_detector.pt`, `trocr-latex/` dir                                   | ✅ Done — weights exist                                                                                |
 
@@ -325,33 +325,34 @@ src/app/api/
 - [x] Real captured images (10 page pairs)
 - [x] Trained model weights on disk
 
-### 🔧 Backend Tasks (Priority Order)
+### ✅ Backend Tasks — ALL COMPLETE
 
-- [ ] **B1:** Implement `gemini_router.py` — Gemini API integration with `google-generativeai`
-- [ ] **B2:** Implement `trocr_inference.py` — load TrOCR model, expose `POST /recognize`
-- [ ] **B3:** Implement `tesseract_ocr.py` — Tesseract wrapper for plain text
-- [ ] **B4:** Implement `traffic_controller.py` — YOLO count → route decision
-- [ ] **B5:** Update `app.py` — add all new endpoints, CORS, integrate routing
-- [ ] **B6:** Implement `page_assembler.py` — markdown merge + Pandoc PDF compilation
-- [ ] **B7:** Update `config.py` — add Gemini key, Tesseract path, output dirs
-- [ ] **B8:** Add real `GET /status`, `GET /health` endpoints with Pi/Arduino connectivity check
-- [ ] **B9:** Add `GET /pages` and `GET /pages/:id/markdown` endpoints
-- [ ] **B10:** Add `GET /book/pdf` endpoint (compile + serve)
+- [x] **B1:** `gemini_router.py` — Gemini API, usage tracking, hidden from UI
+- [x] **B2:** `trocr_inference.py` — singleton loader, recognize + recognize_batch
+- [x] **B3:** `tesseract_ocr.py` — wrapper with Windows/Linux auto-detect
+- [x] **B4:** `traffic_controller.py` — YOLO count → Path A/B/Fallback + saves page_NNN.md
+- [x] **B5:** `app.py` — 10 new endpoints, CORS, full pipeline integrated
+- [x] **B6:** `page_assembler.py` — list/get pages, merge book, Pandoc PDF compile
+- [x] **B7:** `config.py` — GEMINI_*, TESSERACT_CMD, MARKDOWN_OUTPUT_DIR, PDF_OUTPUT_PATH
+- [x] **B8:** `GET /status` + `GET /health` — real Pi ping, model/tesseract/pandoc checks
+- [x] **B9:** `GET /pages` + `GET /pages/<n>` — list and read page markdowns
+- [x] **B10:** `GET /book/pdf` — compile via Pandoc and stream PDF
 
-### 🔧 Frontend Tasks (Priority Order)
+### ✅ Frontend Tasks — ALL COMPLETE
 
-- [ ] **F1:** Create Next.js API proxy routes (`src/app/api/*`)
-- [ ] **F2:** Wire Dashboard page to real API data via SWR polling
-- [ ] **F3:** Wire Batch Processor to upload + process flow
-- [ ] **F4:** Wire Gallery page to serve real image triples
-- [ ] **F5:** Wire LaTeX page to show real detected formulas with KaTeX
-- [ ] **F6:** **Build Book Reader page (`/reader`)** — page-by-page viewer with KaTeX + PDF embed
-- [ ] **F7:** Build `PageNavigator` component (prev/next/page number/thumbnails)
-- [ ] **F8:** Build `PdfViewer` component (embedded PDF with page controls)
-- [ ] **F9:** Add download PDF button
-- [ ] **F10:** Polish animations, loading states, error handling
+- [x] **F1:** `src/lib/flask-api.ts` — typed Flask client (direct, no proxy needed)
+- [x] **F2:** Dashboard — live SWR polling, real stats, activity feed, skeletons
+- [x] **F3:** Batch Processor — real upload, sequential processing, progress, result summary
+- [x] **F4:** Gallery — real page list, formula count, preview, zoom modal
+- [x] **F5:** LaTeX Preview — page selector, real KaTeX formula cards, copy/export .tex
+- [x] **F6:** Book Reader (`/reader`) — Markdown+KaTeX renderer, Reader + PDF View modes
+- [x] **F7:** Page navigator — prev/next + page thumbnails
+- [x] **F8:** PDF iframe embed mode toggle in reader
+- [x] **F9:** Download PDF + Recompile buttons
+- [x] **F10:** Animations, loading skeletons, error states across all pages
+- [x] **Build passes** — `npm run build` ✓ 8 routes, 0 TypeScript errors
 
-### 🔧 ML & Training Tasks
+### 🔧 ML & Training Tasks — PENDING
 
 - [ ] **M1:** Run YOLOv8 notebook on Colab Pro → download `best.pt`
 - [ ] **M2:** Run TrOCR notebook on Colab Pro → download `trocr_final/`
@@ -359,26 +360,92 @@ src/app/api/
 - [ ] **M4:** Generate detection visualization images for demo
 - [ ] **M5:** Calculate metrics (precision, recall, BLEU score) for presentation
 
-### 🔧 Infrastructure Tasks
+### 🔧 Infrastructure Tasks — WHERE TO INSTALL
 
-- [ ] **I1:** Install Pandoc + MiKTeX/TeX Live on dev machine
-- [ ] **I2:** Install Tesseract OCR binary + add to PATH
-- [ ] **I3:** Set up `.env` with `GEMINI_API_KEY`
-- [ ] **I4:** Test SSH connectivity from laptop → Pi
+> **Rule of thumb:** The Flask backend (`app.py`) runs on your **Laptop (Windows)**.
+> The Pi 5 only runs `auto3.py` + `auto_capture_pi5.py` — it captures images, nothing else.
+> Therefore **Tesseract and Pandoc go on the Laptop**, not the Pi.
+
+#### I1 — Install Pandoc + MiKTeX ➜ **Laptop (Windows)**
+
+Pandoc is called by `page_assembler.py → compile_pdf()` which runs inside Flask on your laptop.
+
+```powershell
+# Option A — winget (recommended)
+winget install JohnMacFarlane.Pandoc
+winget install MiKTeX.MiKTeX
+
+# Option B — manual
+# Pandoc: https://github.com/jgm/pandoc/releases  (pandoc-X.X-windows-x86_64.msi)
+# MiKTeX: https://miktex.org/download  (basic installer, auto-installs xelatex packages)
+
+# Verify after install (restart terminal first)
+pandoc --version
+xelatex --version
+```
+
+> **MiKTeX tip:** on first `pandoc --pdf-engine=xelatex` run, MiKTeX will prompt to install
+> missing LaTeX packages — click **Install** and let it finish. Subsequent runs are instant.
+
+#### I2 — Install Tesseract OCR ➜ **Laptop (Windows)**
+
+Tesseract is called by `tesseract_ocr.py` (text-only pages, Path A) inside Flask on your laptop.
+
+```powershell
+# Option A — winget
+winget install UB-Mannheim.TesseractOCR
+
+# Option B — manual installer
+# https://github.com/UB-Mannheim/tesseract/wiki
+# Download: tesseract-ocr-w64-setup-5.x.x.exe
+# Install to: C:\Program Files\Tesseract-OCR\
+# ✅ The config.py default path already points there
+
+# Verify
+& 'C:\Program Files\Tesseract-OCR\tesseract.exe' --version
+
+# Add to PATH (optional — config.py uses full path by default)
+[Environment]::SetEnvironmentVariable('PATH', $env:PATH + ';C:\Program Files\Tesseract-OCR', 'User')
+```
+
+#### Does the Pi 5 need anything?
+
+| Tool | Laptop | Pi 5 |
+|------|--------|------|
+| Tesseract OCR | ✅ **Install** | ❌ Not needed |
+| Pandoc + MiKTeX | ✅ **Install** | ❌ Not needed |
+| Python venv + Flask | ✅ Already done | ❌ Not needed |
+| ADB + Android tools | ❌ | ✅ Already installed |
+| pyserial (auto3.py) | ❌ | ✅ Already installed |
+
+The Pi's only job is: receive `CAPTURE` from Arduino → trigger ADB → pull photos → done.
+All AI/OCR/PDF work happens on your laptop.
+
+#### I3 — Set up `.env` ➜ **Laptop only**
+
+```powershell
+# In dl-processing-engine/
+copy .env.example .env
+# Then edit .env and set:
+# GEMINI_API_KEY=your_key_here
+```
+
+- [x] **I3:** `.env.example` created — copy to `.env` and fill in `GEMINI_API_KEY`
+- [ ] **I4:** Test SSH/SCP connectivity from Laptop → Pi (`ssh pi@192.168.1.100`)
 - [ ] **I5:** Prepare backup pre-recorded demo video
 
 ---
 
 ## 📅 Updated Timeline
 
-| Week       | Focus                         | Key Deliverables                                                               |
-| ---------- | ----------------------------- | ------------------------------------------------------------------------------ |
-| **Week 1** | ML Training                   | Run both Colab notebooks, download weights, verify locally                     |
-| **Week 2** | Backend Pipeline              | Build B1-B6 (Gemini router, TrOCR inference, traffic controller, PDF assembly) |
-| **Week 3** | Backend API + Frontend Wiring | Build B7-B10, F1-F5 (all endpoints + dashboard/batch/gallery/latex wiring)     |
-| **Week 4** | Book Reader + Polish          | Build F6-F10 (reader page, PDF viewer, download, polish)                       |
-| **Week 5** | Integration Testing           | End-to-end test with real hardware, fix bugs                                   |
-| **Week 6** | Demo Prep                     | Rehearsal, backup video, presentation slides, metrics report                   |
+| Week                  | Focus                          | Key Deliverables                                                    |
+| --------------------- | ------------------------------ | ------------------------------------------------------------------- |
+| ~~**Week 1**~~        | ~~ML Training~~                | Colab notebooks ready ✅                                            |
+| ~~**Week 2**~~        | ~~Backend Pipeline~~           | B1–B10 all done ✅                                                  |
+| ~~**Week 3**~~        | ~~Frontend Wiring~~            | F1–F10 all done, build passes ✅                                    |
+| **Week 4** ← *Now*   | **Infrastructure + ML**        | Install Tesseract (Laptop), Pandoc (Laptop), run Colab, test pipeline |
+| **Week 5**            | **Integration Testing**        | End-to-end test with real hardware, verify PDF output               |
+| **Week 6**            | **Demo Prep**                  | Rehearsal, backup video, slides, metrics (M4 + M5)                  |
 
 ---
 
@@ -430,38 +497,35 @@ SmartScan/
 │   ├── auto_capture_pi5.py                      ✅
 │   └── auto_capture_3_updated.py                ✅
 ├── dl-processing-engine/
-│   ├── app.py                                   🔧 UPDATE
-│   ├── config.py                                🔧 UPDATE
+│   ├── app.py                                   ✅ UPDATED — 10 endpoints, CORS
+│   ├── config.py                                ✅ UPDATED — Gemini/Tesseract/output dirs
 │   ├── processing.py                            ✅
 │   ├── offline_processing.py                    ✅
 │   ├── run_on_laptop.py                         ✅
 │   ├── train_detector.py                        ✅
 │   ├── train_recognizer.py                      ✅
-│   ├── gemini_router.py                         🆕 NEW
-│   ├── trocr_inference.py                       🆕 NEW
-│   ├── tesseract_ocr.py                         🆕 NEW
-│   ├── traffic_controller.py                    🆕 NEW
-│   ├── page_assembler.py                        🆕 NEW
+│   ├── gemini_router.py                         ✅ NEW — Gemini API, hidden from UI
+│   ├── trocr_inference.py                       ✅ NEW — TrOCR singleton loader
+│   ├── tesseract_ocr.py                         ✅ NEW — Tesseract wrapper
+│   ├── traffic_controller.py                    ✅ NEW — routing + page_NNN.md save
+│   ├── page_assembler.py                        ✅ NEW — list/get pages + Pandoc PDF
+│   ├── .env.example                             ✅ NEW — key template
 │   └── templates/
 ├── smartscan-web/
 │   └── src/
 │       ├── app/
-│       │   ├── page.tsx                         🔧 Wire to API
-│       │   ├── batch/page.tsx                   🔧 Wire to API
-│       │   ├── gallery/page.tsx                 🔧 Wire to API
-│       │   ├── latex/page.tsx                   🔧 Wire to API
-│       │   ├── reader/page.tsx                  🆕 NEW — Book Reader
-│       │   ├── system/page.tsx                  🔧 Wire to API
-│       │   └── api/                             🆕 NEW — Proxy routes
-│       └── components/
-│           ├── reader/                          🆕 NEW
-│           │   ├── book-reader.tsx
-│           │   ├── page-renderer.tsx
-│           │   ├── pdf-viewer.tsx
-│           │   └── page-navigator.tsx
-│           └── ...existing components
+│       │   ├── page.tsx                         ✅ WIRED — live status/health
+│       │   ├── batch/page.tsx                   ✅ WIRED — real upload + processing
+│       │   ├── gallery/page.tsx                 ✅ WIRED — real pages + zoom
+│       │   ├── latex/page.tsx                   ✅ WIRED — KaTeX formula cards
+│       │   ├── reader/page.tsx                  ✅ NEW — Book Reader + PDF viewer
+│       │   └── system/page.tsx                  ✅ WIRED — health badges + live log
+│       ├── lib/
+│       │   └── flask-api.ts                     ✅ NEW — typed Flask client
+│       └── hooks/
+│           └── use-smartscan.ts                 ✅ NEW — SWR polling hooks
 ├── models/
-│   ├── best.pt                                  ✅ (or download from Colab)
+│   ├── best.pt                                  ⬇️ Download from Colab after training
 │   ├── fasterrcnn_math_detector.pt              ✅
 │   └── trocr-latex/                             ✅
 ├── datasets/
@@ -469,8 +533,8 @@ SmartScan/
 ├── SmartScan_Captures/                          ✅ (20 images)
 ├── Math_Detection_YOLOv8.ipynb                  ✅
 ├── Math_Recognition_TrOCR.ipynb                 ✅
-├── output/                                      🆕 NEW
-│   ├── pages/                                   Markdown per page
-│   └── Final_Book.pdf                           Compiled PDF
-└── requirements.txt                             🔧 UPDATE
+├── output/                                      ✅ AUTO-CREATED by config.py
+│   ├── pages/                                   page_001.md … page_NNN.md
+│   └── pdf/Final_Book.pdf                       compiled via Pandoc
+└── requirements.txt                             ✅ UPDATED
 ```
