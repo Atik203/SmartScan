@@ -48,19 +48,22 @@ else:
         print(f'[ERROR] {e}')
         raise
 
-    print('[INFO] Preprocessing (num_proc=4 parallel)...')
+    # num_proc=1 required on Colab: PIL images cause forked workers to hang at 0%
+    print('[INFO] Preprocessing... (this takes ~10-15 min for 55k samples, one-time only)')
     train_dataset = train_data.map(
         preprocess_data,
         remove_columns=['image', 'formula'],
         batched=True,
-        num_proc=4,
+        batch_size=64,
+        num_proc=1,
         desc='Train'
     )
     eval_dataset = eval_data.map(
         preprocess_data,
         remove_columns=['image', 'formula'],
         batched=True,
-        num_proc=4,
+        batch_size=64,
+        num_proc=1,
         desc='Eval'
     )
 
