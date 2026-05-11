@@ -10,6 +10,7 @@ We trained a YOLOv8-small model to detect embedded and isolated mathematical exp
 
 | Metric | Paper V1 / V2 (Early ResNet50) | Paper V3 (Best Faster R-CNN) | Our Model (YOLOv8) |
 | :--- | :--- | :--- | :--- |
+| **Dataset** | IBEM | IBEM | **IBEM** |
 | **Parameters** | Not Disclosed | Not Disclosed | **11.1 Million** |
 | **Training Time** | Not Disclosed | Not Disclosed | **1.5 Hours** (A100 GPU) |
 | **Precision** | Performed Poorly | 95.71% | **93.89%** |
@@ -27,6 +28,7 @@ We fine-tuned the `microsoft/trocr-small-printed` model to recognize the cropped
 
 | Metric | Research Paper (Pix2Tex) | Our Model (TrOCR) |
 | :--- | :--- | :--- |
+| **Dataset** | Im2LaTeX-100k | **Im2LaTeX-100k** |
 | **Parameters** | Not Disclosed | **61.6 Million** |
 | **Training Time** | Not Disclosed | **8 Hours** (L4/A100 GPU) |
 | **CER (Character Error Rate)** | 10.84% | **9.67%** 🏆 *(Lower is better)* |
