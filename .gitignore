@@ -9,6 +9,8 @@ build/
 *.egg
 SmartScan_Captures/
 
+models/
+
 # ===== Virtual Environments =====
 .venv/
 venv/
