@@ -58,7 +58,14 @@ try:
     if last_checkpoint:
         print(f'[RESUME] Resuming from {last_checkpoint}')
         print(f'         New batch size: 128 (was 32) — will train ~4x faster')
-        trainer.train(resume_from_checkpoint=last_checkpoint)
+        try:
+            trainer.train(resume_from_checkpoint=last_checkpoint)
+        except ValueError as e:
+            if "Can't find a valid checkpoint" in str(e):
+                print(f"[WARNING] Invalid checkpoint at {last_checkpoint}. Falling back to fresh training...")
+                trainer.train()
+            else:
+                raise
     else:
         print('[START] Starting fresh training with A100-optimized settings...')
         trainer.train()
