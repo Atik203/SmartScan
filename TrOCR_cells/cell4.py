@@ -13,10 +13,10 @@ training_args = Seq2SeqTrainingArguments(
     predict_with_generate       = True,
     generation_max_length       = 64,
 
-    # ── Batch size: was 32 (13GB VRAM) → 128 fills A100's 40GB ───────────────
-    per_device_train_batch_size = 128,
-    per_device_eval_batch_size  = 128,
-    gradient_accumulation_steps = 1,      # effective batch = 128 per step
+    # ── Batch size: reduced to 64 to fit L4's 24GB VRAM ───────────────
+    per_device_train_batch_size = 64,
+    per_device_eval_batch_size  = 64,
+    gradient_accumulation_steps = 2,      # effective batch = 128 per step
 
     # ── Precision: bf16 is FASTER than fp16 on A100 (native support) ─────────
     bf16                        = True,   # A100 native bfloat16
@@ -57,7 +57,7 @@ last_checkpoint = get_last_checkpoint(CHECKPOINT_DIR)
 try:
     if last_checkpoint:
         print(f'[RESUME] Resuming from {last_checkpoint}')
-        print(f'         New batch size: 128 (was 32) — will train ~4x faster')
+        print(f'         Batch size: 64, Grad Acc: 2 (optimized for L4 24GB VRAM)')
         try:
             trainer.train(resume_from_checkpoint=last_checkpoint)
         except ValueError as e:
