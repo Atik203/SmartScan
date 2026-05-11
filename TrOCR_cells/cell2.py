@@ -4,6 +4,7 @@
 from datasets import load_dataset, load_from_disk
 from transformers import TrOCRProcessor
 import os
+import shutil
 
 TRAIN_CACHE = os.path.join(PROJECT_DIR, 'cache_train_dataset')
 EVAL_CACHE  = os.path.join(PROJECT_DIR, 'cache_eval_dataset')
@@ -29,16 +30,23 @@ def preprocess_data(examples):
 # -------------------------------------------------------------------
 # FAST PATH: load from Drive cache (all re-runs after first)
 # -------------------------------------------------------------------
+cache_loaded = False
 if os.path.exists(TRAIN_CACHE) and os.path.exists(EVAL_CACHE):
     print('[CACHE HIT] Loading processed datasets from Drive...')
-    train_dataset = load_from_disk(TRAIN_CACHE)
-    eval_dataset  = load_from_disk(EVAL_CACHE)
-    print(f'[OK] Train: {len(train_dataset)}, Eval: {len(eval_dataset)} -- ready!')
+    try:
+        train_dataset = load_from_disk(TRAIN_CACHE)
+        eval_dataset  = load_from_disk(EVAL_CACHE)
+        print(f'[OK] Train: {len(train_dataset)}, Eval: {len(eval_dataset)} -- ready!')
+        cache_loaded = True
+    except Exception as e:
+        print(f'[WARNING] Cache corrupted ({e}). Deleting and rebuilding...')
+        shutil.rmtree(TRAIN_CACHE, ignore_errors=True)
+        shutil.rmtree(EVAL_CACHE, ignore_errors=True)
 
 # -------------------------------------------------------------------
 # FIRST RUN: download + process + save to Drive cache
 # -------------------------------------------------------------------
-else:
+if not cache_loaded:
     print('[FIRST RUN] Downloading Im2LaTeX dataset...')
     try:
         train_data = load_dataset('yuntian-deng/im2latex-100k', split='train[:100000]')
