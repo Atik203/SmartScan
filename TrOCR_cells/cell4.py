@@ -13,17 +13,17 @@ training_args = Seq2SeqTrainingArguments(
     predict_with_generate       = True,
     generation_max_length       = 64,
 
-    # ── Batch size: reduced to 64 to fit L4's 24GB VRAM ───────────────
-    per_device_train_batch_size = 64,
-    per_device_eval_batch_size  = 64,
-    gradient_accumulation_steps = 2,      # effective batch = 128 per step
+    # ── Batch size: pushed to 96 to maximize L4's 24GB VRAM ───────────────
+    per_device_train_batch_size = 96,
+    per_device_eval_batch_size  = 96,
+    gradient_accumulation_steps = 1,      # effective batch = 96 per step
 
     # ── Precision: bf16 is FASTER than fp16 on A100 (native support) ─────────
     bf16                        = True,   # A100 native bfloat16
     fp16                        = False,  # disable fp16 when using bf16
 
-    # ── Data loading ──────────────────────────────────────────────────────────
-    dataloader_num_workers      = 4,
+    # ── Data loading (optimized to use more of the 54GB System RAM) ───────────
+    dataloader_num_workers      = 8,
     dataloader_pin_memory       = True,   # faster CPU->GPU transfer
 
     # ── Optimizer: fused AdamW is ~20% faster on A100 ─────────────────────────
@@ -57,7 +57,7 @@ last_checkpoint = get_last_checkpoint(CHECKPOINT_DIR)
 try:
     if last_checkpoint:
         print(f'[RESUME] Resuming from {last_checkpoint}')
-        print(f'         Batch size: 64, Grad Acc: 2 (optimized for L4 24GB VRAM)')
+        print(f'         Batch size: 96, Grad Acc: 1 (maximizing L4 24GB VRAM)')
         try:
             trainer.train(resume_from_checkpoint=last_checkpoint)
         except ValueError as e:
