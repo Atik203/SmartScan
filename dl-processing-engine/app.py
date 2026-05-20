@@ -51,6 +51,11 @@ from config import (
     YOLO_MODEL_PATH,
     PI_IP,
     PI_USER,
+    ARDUINO_MODEL,
+    ARDUINO_PORT,
+    ARDUINO_BAUD,
+    PDF_ENGINE,
+    TROCR_MODEL_DIR,
     GEMINI_API_KEY,
     ensure_dirs,
 )
@@ -431,6 +436,29 @@ def health():
     except Exception:
         pass
 
+    # Check Arduino connectivity
+    arduino_online = False
+    detected_port = None
+    try:
+        from serial.tools import list_ports
+
+        ports = list_ports.comports()
+        if ARDUINO_PORT:
+            for p in ports:
+                if p.device == ARDUINO_PORT:
+                    arduino_online = True
+                    detected_port = p.device
+                    break
+        if not arduino_online:
+            for p in ports:
+                desc = f"{p.description} {p.manufacturer}".lower()
+                if "arduino" in desc or "ch340" in desc:
+                    arduino_online = True
+                    detected_port = p.device
+                    break
+    except Exception:
+        pass
+
     # Check YOLO model
     model_loaded = _yolo_model is not None
 
@@ -450,13 +478,18 @@ def health():
 
     return jsonify(
         {
-            "arduino": False,  # Arduino health requires serial — shown as N/A
+            "arduino": arduino_online,
+            "arduino_model": ARDUINO_MODEL,
+            "arduino_port": detected_port or ARDUINO_PORT,
+            "arduino_baud": ARDUINO_BAUD,
             "pi": pi_online,
             "pi_ip": PI_IP,
             "model_loaded": model_loaded,
             "model_error": _model_load_error,
             "tesseract": tesseract_ok,
             "pandoc": pandoc_ok,
+            "pdf_engine": PDF_ENGINE,
+            "trocr_model_dir": TROCR_MODEL_DIR,
             "gemini_configured": bool(GEMINI_API_KEY),
             "uptime_seconds": int(time.time() - _server_start),
         }

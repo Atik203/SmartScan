@@ -101,6 +101,7 @@ OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
 MARKDOWN_OUTPUT_DIR = os.path.join(OUTPUT_DIR, "pages")
 PDF_OUTPUT_DIR = os.path.join(OUTPUT_DIR, "pdf")
 PDF_OUTPUT_PATH = os.path.join(PDF_OUTPUT_DIR, "Final_Book.pdf")
+PDF_ENGINE = os.getenv("PDF_ENGINE", "xelatex")
 
 # ============================================================
 # GEMINI API CONFIG
@@ -126,6 +127,16 @@ PI_USER = "pi"  # ← Update to your Pi's username
 PI_FOLDER = "/home/pi/smartscan/captured_images/"
 PI_SERIAL_PORT = "/dev/ttyUSB0"  # ← Verify with: ls /dev/tty*
 PI_BAUD_RATE = 9600
+
+# ============================================================
+# ARDUINO CONFIG (UNO by default)
+# ============================================================
+ARDUINO_MODEL = os.getenv("ARDUINO_MODEL", "uno")
+ARDUINO_PORT = os.getenv(
+    "ARDUINO_PORT",
+    "COM3" if os.name == "nt" else "/dev/ttyUSB0",
+)
+ARDUINO_BAUD = int(os.getenv("ARDUINO_BAUD", "9600"))
 
 # ============================================================
 # ADB PHONE CONFIG (update serial numbers from: adb devices)

@@ -20,7 +20,13 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from config import MARKDOWN_OUTPUT_DIR, PDF_OUTPUT_PATH, PDF_OUTPUT_DIR, ensure_dirs
+from config import (
+    MARKDOWN_OUTPUT_DIR,
+    PDF_OUTPUT_PATH,
+    PDF_OUTPUT_DIR,
+    PDF_ENGINE,
+    ensure_dirs,
+)
 
 ensure_dirs()
 
@@ -204,6 +210,14 @@ def compile_pdf(force: bool = False) -> dict:
         print(f"[Assembler] ERROR: {result['error']}")
         return result
 
+    if not _pdf_engine_available(PDF_ENGINE):
+        result["error"] = (
+            f"PDF engine '{PDF_ENGINE}' not found in PATH. "
+            "Install a TeX distribution (e.g., MiKTeX/TeX Live) or set PDF_ENGINE."
+        )
+        print(f"[Assembler] ERROR: {result['error']}")
+        return result
+
     try:
         t0 = time.monotonic()
         merged_path = assemble_book()
@@ -213,7 +227,7 @@ def compile_pdf(force: bool = False) -> dict:
         cmd = [
             "pandoc",
             merged_path,
-            "--pdf-engine=xelatex",
+            f"--pdf-engine={PDF_ENGINE}",
             "--output",
             PDF_OUTPUT_PATH,
             "--standalone",
@@ -281,6 +295,14 @@ def _pandoc_available() -> bool:
             capture_output=True,
             timeout=10,
         )
+        return r.returncode == 0
+    except Exception:
+        return False
+
+
+def _pdf_engine_available(engine: str) -> bool:
+    try:
+        r = subprocess.run([engine, "--version"], capture_output=True, timeout=10)
         return r.returncode == 0
     except Exception:
         return False

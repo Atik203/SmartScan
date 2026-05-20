@@ -24,12 +24,17 @@ export interface ActivityItem {
 
 export interface HealthResponse {
   arduino: boolean;
+  arduino_model?: string;
+  arduino_port?: string;
+  arduino_baud?: number;
   pi: boolean;
   pi_ip: string;
   model_loaded: boolean;
   model_error: string | null;
   tesseract: boolean;
   pandoc: boolean;
+  pdf_engine?: string;
+  trocr_model_dir?: string;
   gemini_configured: boolean;
   uptime_seconds: number;
 }
