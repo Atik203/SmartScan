@@ -51,7 +51,7 @@ def _get_client():
         )
 
     genai.configure(api_key=api_key)
-    model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite-preview-06-17")
+    model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
     _client = genai.GenerativeModel(model_name)
     usage_stats["model"] = model_name
     return _client
@@ -180,9 +180,7 @@ def _extract_latex_blocks(markdown: str) -> list:
 def get_usage_summary() -> dict:
     """Return a JSON-serialisable usage summary for the /usage endpoint."""
     calls = usage_stats["calls"]
-    avg_latency = (
-        int(usage_stats["total_latency_ms"] / calls) if calls > 0 else 0
-    )
+    avg_latency = int(usage_stats["total_latency_ms"] / calls) if calls > 0 else 0
     return {
         "provider": usage_stats["provider"],
         "model": usage_stats["model"],
