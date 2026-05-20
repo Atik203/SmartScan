@@ -1,17 +1,27 @@
 "use client";
 
 import { AppLayout } from "@/components/layout/app-layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  BookOpen, Sigma, Cpu, Zap, ArrowUpRight, Activity,
-  Clock, CheckCircle2, AlertCircle, Wifi, WifiOff,
-} from "lucide-react";
+import { useHealth, useStatus } from "@/hooks/use-smartscan";
 import { motion } from "framer-motion";
-import { useStatus, useHealth } from "@/hooks/use-smartscan";
+import {
+  Activity,
+  AlertCircle,
+  ArrowUpRight,
+  BookOpen,
+  CheckCircle2,
+  Clock,
+  Cpu,
+  Sigma,
+  Zap,
+} from "lucide-react";
 
-const fadeUp = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } };
+const fadeUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+};
 
 function formatUptime(s: number) {
   if (s < 60) return `${s}s`;
@@ -60,7 +70,7 @@ export default function DashboardPage() {
 
   const pipelineLayers = [
     {
-      name: "Arduino Mega",
+      name: "Arduino Uno",
       status: health?.arduino ? "online" : "offline",
       role: "Muscle — servo + fan control",
     },
@@ -92,11 +102,15 @@ export default function DashboardPage() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-xs text-muted-foreground font-medium">{stat.title}</p>
+                    <p className="text-xs text-muted-foreground font-medium">
+                      {stat.title}
+                    </p>
                     {statusLoading ? (
                       <Skeleton className="h-8 w-16 mt-1" />
                     ) : (
-                      <p className="text-3xl font-bold mt-1 tracking-tight">{stat.value}</p>
+                      <p className="text-3xl font-bold mt-1 tracking-tight">
+                        {stat.value}
+                      </p>
                     )}
                     <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                       <ArrowUpRight className="h-3 w-3" />
@@ -121,8 +135,11 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Pipeline Health */}
         <motion.div
-          variants={fadeUp} initial="initial" animate="animate"
-          transition={{ delay: 0.4, duration: 0.4 }} className="lg:col-span-1"
+          variants={fadeUp}
+          initial="initial"
+          animate="animate"
+          transition={{ delay: 0.4, duration: 0.4 }}
+          className="lg:col-span-1"
         >
           <Card className="border-border/50 h-full">
             <CardHeader className="pb-3">
@@ -148,10 +165,14 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium">{layer.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{layer.role}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {layer.role}
+                    </p>
                   </div>
                   <Badge
-                    variant={layer.status === "online" ? "default" : "secondary"}
+                    variant={
+                      layer.status === "online" ? "default" : "secondary"
+                    }
                     className={`text-[10px] ${
                       layer.status === "online"
                         ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
@@ -171,8 +192,13 @@ export default function DashboardPage() {
                     { label: "Tesseract OCR", ok: health.tesseract },
                     { label: "Pandoc PDF", ok: health.pandoc },
                   ].map((item) => (
-                    <div key={item.label} className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">{item.label}</span>
+                    <div
+                      key={item.label}
+                      className="flex items-center justify-between"
+                    >
+                      <span className="text-xs text-muted-foreground">
+                        {item.label}
+                      </span>
                       {item.ok ? (
                         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
                       ) : (
@@ -188,8 +214,11 @@ export default function DashboardPage() {
 
         {/* Recent Activity */}
         <motion.div
-          variants={fadeUp} initial="initial" animate="animate"
-          transition={{ delay: 0.5, duration: 0.4 }} className="lg:col-span-2"
+          variants={fadeUp}
+          initial="initial"
+          animate="animate"
+          transition={{ delay: 0.5, duration: 0.4 }}
+          className="lg:col-span-2"
         >
           <Card className="border-border/50 h-full">
             <CardHeader className="pb-3">
@@ -228,17 +257,23 @@ export default function DashboardPage() {
                           item.status === "processed"
                             ? "bg-emerald-500"
                             : item.status === "processing"
-                            ? "bg-amber-500 animate-pulse"
-                            : "bg-red-500"
+                              ? "bg-amber-500 animate-pulse"
+                              : "bg-red-500"
                         }`}
                       />
-                      <p className="text-xs font-mono flex-1 truncate">{item.filename}</p>
+                      <p className="text-xs font-mono flex-1 truncate">
+                        {item.filename}
+                      </p>
                       {item.detections !== undefined && (
                         <span className="text-[10px] text-purple-400 shrink-0">
-                          {item.detections} formula{item.detections !== 1 ? "s" : ""}
+                          {item.detections} formula
+                          {item.detections !== 1 ? "s" : ""}
                         </span>
                       )}
-                      <Badge variant="secondary" className="text-[10px] shrink-0 capitalize">
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] shrink-0 capitalize"
+                      >
                         {item.status}
                       </Badge>
                     </motion.div>
@@ -252,19 +287,24 @@ export default function DashboardPage() {
 
       {/* Architecture Overview */}
       <motion.div
-        variants={fadeUp} initial="initial" animate="animate"
-        transition={{ delay: 0.6, duration: 0.4 }} className="mt-6"
+        variants={fadeUp}
+        initial="initial"
+        animate="animate"
+        transition={{ delay: 0.6, duration: 0.4 }}
+        className="mt-6"
       >
         <Card className="border-border/50 overflow-hidden">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold">System Architecture</CardTitle>
+            <CardTitle className="text-sm font-semibold">
+              System Architecture
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 {
                   layer: "① Muscle",
-                  name: "Arduino Mega 2560",
+                  name: "Arduino Uno",
                   desc: "PWM servos, relay control, serial CAPTURE signal",
                   color: "from-blue-500/10 to-blue-500/5 border-blue-500/20",
                   accent: "text-blue-400",
@@ -273,14 +313,16 @@ export default function DashboardPage() {
                   layer: "② Bridge",
                   name: "Raspberry Pi 5",
                   desc: "ADB camera trigger, image pull, serial listener",
-                  color: "from-purple-500/10 to-purple-500/5 border-purple-500/20",
+                  color:
+                    "from-purple-500/10 to-purple-500/5 border-purple-500/20",
                   accent: "text-purple-400",
                 },
                 {
                   layer: "③ Brain",
                   name: "Processing Engine",
                   desc: "YOLO detect → TrOCR recognize → LaTeX → PDF",
-                  color: "from-emerald-500/10 to-emerald-500/5 border-emerald-500/20",
+                  color:
+                    "from-emerald-500/10 to-emerald-500/5 border-emerald-500/20",
                   accent: "text-emerald-400",
                 },
               ].map((item) => (
@@ -288,11 +330,15 @@ export default function DashboardPage() {
                   key={item.layer}
                   className={`rounded-xl border bg-gradient-to-b p-4 ${item.color}`}
                 >
-                  <p className={`text-[10px] font-bold uppercase tracking-widest ${item.accent}`}>
+                  <p
+                    className={`text-[10px] font-bold uppercase tracking-widest ${item.accent}`}
+                  >
                     {item.layer}
                   </p>
                   <p className="text-sm font-semibold mt-1">{item.name}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {item.desc}
+                  </p>
                 </div>
               ))}
             </div>

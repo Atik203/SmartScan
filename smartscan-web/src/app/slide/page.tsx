@@ -480,7 +480,7 @@ const slides: Slide[] = [
         {[
           {
             layer: "Layer 1 - Muscle",
-            name: "Arduino Mega 2560",
+            name: "Arduino Uno",
             desc: "Executes calibrated servo trajectories for gripper/flipper, controls fan relay events, and emits CAPTURE signal at the stable hold stage.",
           },
           {
@@ -488,7 +488,7 @@ const slides: Slide[] = [
             name: "Raspberry Pi 5",
             desc: "Receives serial trigger, issues synchronized ADB camera commands, manages orientation and naming, then transfers images to processing node.",
           },
-          {
+                "Arduino Uno","Raspberry Pi 5 (8GB)","MG996R Servo ×4",
             layer: "Layer 3 - Brain",
             name: "Laptop Processing + Web",
             desc: "Runs crop/dewarp preprocessing, OCR extraction, Faster R-CNN detection, TrOCR LaTeX decoding, and dashboard-level output visualization.",
