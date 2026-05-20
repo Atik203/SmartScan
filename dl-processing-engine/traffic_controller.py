@@ -40,6 +40,7 @@ def route_page(
     extract_folder: str,
     page_number: int,
     force_local: bool = False,
+    source_file: str | None = None,
 ) -> dict:
     """
     Route a processed page through the correct OCR / LLM path.
@@ -108,7 +109,9 @@ def route_page(
 
     # Save markdown to disk regardless of route
     if result.get("markdown"):
-        md_path = _save_markdown(result["markdown"], page_number)
+        md_path = _save_markdown(
+            result["markdown"], page_number, source_file=source_file
+        )
         result["markdown_path"] = md_path
 
     result["latency_ms"] = int((time.monotonic() - t0) * 1000)
@@ -123,6 +126,7 @@ def route_page(
 
 
 # ─── Private helpers ────────────────────────────────────────────────────────
+
 
 def _run_tesseract_path(image_path: str) -> dict:
     """Path A — Tesseract only."""
@@ -161,7 +165,8 @@ def _run_trocr_on_crops(extract_folder: str) -> list:
             return []
 
         crop_paths = sorted(
-            str(p) for p in folder.iterdir()
+            str(p)
+            for p in folder.iterdir()
             if p.suffix.lower() in (".jpg", ".jpeg", ".png")
         )
         return recognizer.recognize_batch(crop_paths)
@@ -199,13 +204,19 @@ def _run_fallback_path(image_path: str, trocr_results: list) -> dict:
     }
 
 
-def _save_markdown(content: str, page_number: int) -> str:
+def _save_markdown(
+    content: str, page_number: int, source_file: str | None = None
+) -> str:
     """Write page content to MARKDOWN_OUTPUT_DIR/page_NNN.md."""
     os.makedirs(MARKDOWN_OUTPUT_DIR, exist_ok=True)
     filename = f"page_{page_number:03d}.md"
     path = os.path.join(MARKDOWN_OUTPUT_DIR, filename)
     with open(path, "w", encoding="utf-8") as f:
-        f.write(f"<!-- Page {page_number} -->\n\n")
+        header = f"<!-- Page {page_number}"
+        if source_file:
+            header += f" | Source: {source_file}"
+        header += " -->\n\n"
+        f.write(header)
         f.write(content)
         f.write("\n")
     return path

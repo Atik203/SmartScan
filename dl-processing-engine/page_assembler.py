@@ -27,6 +27,7 @@ ensure_dirs()
 
 # ─── Page listing ────────────────────────────────────────────────────────────
 
+
 def list_pages() -> list:
     """
     Return metadata for every page_NNN.md in MARKDOWN_OUTPUT_DIR.
@@ -60,6 +61,8 @@ def list_pages() -> list:
         page_num = int(match.group(1))
         content = md_file.read_text(encoding="utf-8", errors="replace")
 
+        source_file = _extract_source_file(content)
+
         # Strip HTML comment header for preview
         preview_text = re.sub(r"<!--.*?-->\s*", "", content, flags=re.DOTALL).strip()
         preview = preview_text[:200] + ("…" if len(preview_text) > 200 else "")
@@ -75,6 +78,7 @@ def list_pages() -> list:
                 "preview": preview,
                 "latex_count": latex_count,
                 "char_count": len(content),
+                "source_file": source_file,
             }
         )
 
@@ -98,20 +102,28 @@ def get_page_content(page_number: int) -> dict:
     path = Path(MARKDOWN_OUTPUT_DIR) / filename
 
     if not path.exists():
-        return {"number": page_number, "markdown": "", "latex_blocks": [], "found": False}
+        return {
+            "number": page_number,
+            "markdown": "",
+            "latex_blocks": [],
+            "found": False,
+        }
 
     content = path.read_text(encoding="utf-8", errors="replace")
     latex_blocks = _extract_display_math(content)
+    source_file = _extract_source_file(content)
 
     return {
         "number": page_number,
         "markdown": content,
         "latex_blocks": latex_blocks,
+        "source_file": source_file,
         "found": True,
     }
 
 
 # ─── Book assembly ───────────────────────────────────────────────────────────
+
 
 def assemble_book() -> str:
     """
@@ -152,6 +164,7 @@ def assemble_book() -> str:
 
 
 # ─── PDF compilation ─────────────────────────────────────────────────────────
+
 
 def compile_pdf(force: bool = False) -> dict:
     """
@@ -201,11 +214,14 @@ def compile_pdf(force: bool = False) -> dict:
             "pandoc",
             merged_path,
             "--pdf-engine=xelatex",
-            "--output", PDF_OUTPUT_PATH,
+            "--output",
+            PDF_OUTPUT_PATH,
             "--standalone",
             "--highlight-style=tango",
-            "-V", "colorlinks=true",
-            "-V", "linkcolor=blue",
+            "-V",
+            "colorlinks=true",
+            "-V",
+            "linkcolor=blue",
         ]
 
         print(f"[Assembler] Running: {' '.join(cmd)}")
@@ -241,9 +257,21 @@ def compile_pdf(force: bool = False) -> dict:
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
 
+
 def _extract_display_math(markdown: str) -> list:
     parts = markdown.split("$$")
     return [p.strip() for i, p in enumerate(parts) if i % 2 == 1 and p.strip()]
+
+
+def _extract_source_file(markdown: str) -> str | None:
+    match = re.search(
+        r"<!--\s*Page\s+\d+(?:\s*\|\s*Source:\s*(.+?))?\s*-->",
+        markdown,
+    )
+    if not match:
+        return None
+    source = match.group(1)
+    return source.strip() if source else None
 
 
 def _pandoc_available() -> bool:

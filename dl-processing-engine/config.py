@@ -15,6 +15,39 @@ import os
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Resolves to: E:\PROJECT\SmartScan
 
+
+# ============================================================
+# ENV LOADING (local .env file)
+# ============================================================
+def _load_env_file() -> None:
+    env_path = os.path.join(PROJECT_ROOT, "dl-processing-engine", ".env")
+    if not os.path.exists(env_path):
+        return
+    try:
+        from dotenv import load_dotenv  # type: ignore
+
+        load_dotenv(env_path, override=False)
+        return
+    except Exception:
+        pass
+
+    # Fallback minimal parser (KEY=VALUE)
+    try:
+        with open(env_path, "r", encoding="utf-8") as fh:
+            for raw in fh:
+                line = raw.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, value = line.split("=", 1)
+                key = key.strip()
+                value = value.strip().strip('"').strip("'")
+                os.environ.setdefault(key, value)
+    except Exception:
+        return
+
+
+_load_env_file()
+
 # ============================================================
 # MODEL PATHS
 # ============================================================
@@ -23,13 +56,23 @@ MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
 # Falls back to the Faster R-CNN model if best.pt is not yet available.
 _yolo_candidate = os.path.join(MODELS_DIR, "best.pt")
 FASTERRCNN_MODEL_PATH = os.path.join(MODELS_DIR, "fasterrcnn_math_detector.pt")
-YOLO_MODEL_PATH = _yolo_candidate if os.path.exists(_yolo_candidate) else FASTERRCNN_MODEL_PATH
-TROCR_MODEL_DIR = os.path.join(MODELS_DIR, "trocr-latex")
+YOLO_MODEL_PATH = (
+    _yolo_candidate if os.path.exists(_yolo_candidate) else FASTERRCNN_MODEL_PATH
+)
+_trocr_candidates = [
+    os.path.join(MODELS_DIR, "trocr"),
+    os.path.join(MODELS_DIR, "trocr-latex"),
+]
+TROCR_MODEL_DIR = next(
+    (p for p in _trocr_candidates if os.path.isdir(p) and any(os.scandir(p))),
+    _trocr_candidates[0],
+)
 
 # ============================================================
 # DATA PATHS (Processing Engine)
 # ============================================================
 DATA_DIR = os.path.join(PROJECT_ROOT, "dl-processing-engine", "data")
+CAPTURES_DIR = os.path.join(PROJECT_ROOT, "SmartScan_Captures")
 
 # Online pipeline paths (images coming from Pi)
 LOCAL_FOLDER = os.path.join(DATA_DIR, "from_pi")
@@ -64,7 +107,7 @@ PDF_OUTPUT_PATH = os.path.join(PDF_OUTPUT_DIR, "Final_Book.pdf")
 # Set GEMINI_API_KEY in your environment or in .env file
 # ============================================================
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite-preview-06-17")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
 
 # ============================================================
 # TESSERACT OCR CONFIG
@@ -123,6 +166,7 @@ def ensure_dirs():
     dirs = [
         MODELS_DIR,
         DATA_DIR,
+        CAPTURES_DIR,
         LOCAL_FOLDER,
         CROPPED_FOLDER,
         DEWARPED_FOLDER,

@@ -50,6 +50,7 @@ export interface PageMeta {
   preview: string;
   latex_count: number;
   char_count: number;
+  source_file?: string | null;
 }
 
 export interface PageContent {
@@ -57,6 +58,7 @@ export interface PageContent {
   markdown: string;
   latex_blocks: string[];
   found: boolean;
+  source_file?: string | null;
 }
 
 export interface ProcessResult {
@@ -68,7 +70,13 @@ export interface ProcessResult {
   dewarped: string | null;
   detected: string | null;
   detections: number;
-  boxes: { x1: number; y1: number; x2: number; y2: number; confidence: number }[];
+  boxes: {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    confidence: number;
+  }[];
   route: "local" | "ai" | "fallback";
   markdown: string;
   latex_blocks: string[];
@@ -117,5 +125,32 @@ export const flaskApi = {
     });
     if (!res.ok) throw new Error(`process-page → ${res.status}`);
     return res.json() as Promise<ProcessResult>;
+  },
+
+  async processCaptures(
+    limit = 0,
+    startPage?: number,
+  ): Promise<{
+    success: boolean;
+    total: number;
+    processed: ProcessResult[];
+    errors: { file: string; error: string }[];
+  }> {
+    const payload: { limit?: number; start_page?: number } = {};
+    if (limit > 0) payload.limit = limit;
+    if (startPage !== undefined) payload.start_page = startPage;
+
+    const res = await fetch(`${FLASK_BASE}/process-captures`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`process-captures → ${res.status}`);
+    return res.json() as Promise<{
+      success: boolean;
+      total: number;
+      processed: ProcessResult[];
+      errors: { file: string; error: string }[];
+    }>;
   },
 };

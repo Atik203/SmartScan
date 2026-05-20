@@ -1,16 +1,15 @@
 "use client";
 
 import { AppLayout } from "@/components/layout/app-layout";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ImageIcon, Search, ZoomIn, Layers } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { motion, AnimatePresence } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 import { usePages } from "@/hooks/use-smartscan";
-import { flaskApi } from "@/lib/flask-api";
-import { useState } from "react";
-import Image from "next/image";
+import { flaskApi, GalleryItem } from "@/lib/flask-api";
+import { AnimatePresence, motion } from "framer-motion";
+import { ImageIcon, Layers, Search, ZoomIn } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface PanelProps {
   label: string;
@@ -23,7 +22,9 @@ function ImagePanel({ label, src, accent }: PanelProps) {
   if (!src) {
     return (
       <div className="flex-1 flex flex-col gap-1.5">
-        <span className={`text-[10px] font-bold uppercase tracking-widest ${accent}`}>
+        <span
+          className={`text-[10px] font-bold uppercase tracking-widest ${accent}`}
+        >
           {label}
         </span>
         <div className="flex-1 min-h-[140px] rounded-lg bg-muted/30 border border-border/20 flex items-center justify-center">
@@ -34,8 +35,13 @@ function ImagePanel({ label, src, accent }: PanelProps) {
   }
   return (
     <>
-      <div className="flex-1 flex flex-col gap-1.5 group cursor-zoom-in" onClick={() => setZoom(true)}>
-        <span className={`text-[10px] font-bold uppercase tracking-widest ${accent}`}>
+      <div
+        className="flex-1 flex flex-col gap-1.5 group cursor-zoom-in"
+        onClick={() => setZoom(true)}
+      >
+        <span
+          className={`text-[10px] font-bold uppercase tracking-widest ${accent}`}
+        >
           {label}
         </span>
         <div className="relative flex-1 min-h-[140px] rounded-lg overflow-hidden border border-border/20 bg-muted/10">
@@ -80,17 +86,53 @@ function ImagePanel({ label, src, accent }: PanelProps) {
 export default function GalleryPage() {
   const { pages, pagesLoading } = usePages();
   const [query, setQuery] = useState("");
+  const [galleryBySource, setGalleryBySource] = useState<
+    Record<string, GalleryItem>
+  >({});
 
-  const filtered = pages.filter((p) =>
-    p.filename.toLowerCase().includes(query.toLowerCase())
-  );
+  useEffect(() => {
+    let active = true;
+    const toLoad = pages
+      .map((p) => p.source_file)
+      .filter((s): s is string => Boolean(s) && !galleryBySource[s]);
+
+    if (toLoad.length === 0) return;
+
+    (async () => {
+      try {
+        const results = await Promise.all(
+          toLoad.map((name) => flaskApi.gallery(name)),
+        );
+        if (!active) return;
+        setGalleryBySource((prev) => {
+          const next = { ...prev };
+          results.forEach((item, i) => {
+            next[toLoad[i]] = item;
+          });
+          return next;
+        });
+      } catch {
+        // Ignore per-item failures; placeholders will show instead.
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [pages, galleryBySource]);
+
+  const filtered = pages.filter((p) => {
+    const haystack = `${p.filename} ${p.source_file ?? ""}`.toLowerCase();
+    return haystack.includes(query.toLowerCase());
+  });
 
   return (
     <AppLayout title="Detection Gallery">
       <div className="space-y-6">
         {/* Search & Filter */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-3"
         >
           <div className="relative flex-1 max-w-sm">
@@ -103,7 +145,9 @@ export default function GalleryPage() {
             />
           </div>
           <Badge variant="secondary" className="text-xs">
-            {pagesLoading ? "…" : `${filtered.length} page${filtered.length !== 1 ? "s" : ""}`}
+            {pagesLoading
+              ? "…"
+              : `${filtered.length} page${filtered.length !== 1 ? "s" : ""}`}
           </Badge>
         </motion.div>
 
@@ -118,13 +162,18 @@ export default function GalleryPage() {
 
         {/* Empty state */}
         {!pagesLoading && filtered.length === 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
             <Card className="border-border/50">
               <CardContent className="flex flex-col items-center justify-center py-20">
                 <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-muted/50 mb-4">
                   <ImageIcon className="h-10 w-10 text-muted-foreground/40" />
                 </div>
-                <p className="text-sm font-medium text-muted-foreground">No processed images yet</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  No processed images yet
+                </p>
                 <p className="text-xs text-muted-foreground/60 mt-1 max-w-sm text-center">
                   Upload & process images in the Batch Processor to see the
                   Original → Dewarped → Detected comparison here.
@@ -158,7 +207,8 @@ export default function GalleryPage() {
                           {page.latex_count > 0 && (
                             <Badge className="text-[10px] bg-purple-500/10 text-purple-400 border-purple-500/30">
                               <Layers className="h-2.5 w-2.5 mr-1" />
-                              {page.latex_count} formula{page.latex_count !== 1 ? "s" : ""}
+                              {page.latex_count} formula
+                              {page.latex_count !== 1 ? "s" : ""}
                             </Badge>
                           )}
                           <Badge variant="secondary" className="text-[10px]">
@@ -169,9 +219,31 @@ export default function GalleryPage() {
 
                       {/* Three panel comparison */}
                       <div className="flex gap-3">
-                        <ImagePanel label="Original" src={null} accent="text-blue-400" />
-                        <ImagePanel label="Dewarped" src={null} accent="text-purple-400" />
-                        <ImagePanel label="Detected" src={null} accent="text-emerald-400" />
+                        {(() => {
+                          const key = page.source_file ?? "";
+                          const gallery = key
+                            ? galleryBySource[key]
+                            : undefined;
+                          return (
+                            <>
+                              <ImagePanel
+                                label="Original"
+                                src={gallery?.original ?? null}
+                                accent="text-blue-400"
+                              />
+                              <ImagePanel
+                                label="Dewarped"
+                                src={gallery?.dewarped ?? null}
+                                accent="text-purple-400"
+                              />
+                              <ImagePanel
+                                label="Detected"
+                                src={gallery?.detected ?? null}
+                                accent="text-emerald-400"
+                              />
+                            </>
+                          );
+                        })()}
                       </div>
 
                       {/* Preview text */}
