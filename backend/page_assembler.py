@@ -65,6 +65,11 @@ def list_pages() -> list:
             continue
 
         page_num = int(match.group(1))
+
+        # Skip page 0 (title/cover page) — it appears automatically first in the PDF
+        if page_num == 0:
+            continue
+
         content = md_file.read_text(encoding="utf-8", errors="replace")
 
         source_file = _extract_source_file(content)
@@ -162,6 +167,15 @@ def assemble_book() -> str:
         out.write("linestretch: 1.2\n")
         out.write("---\n\n")
 
+        # ── Cover page (page_000.md) ──────────────────────────────────────────
+        cover_path = Path(MARKDOWN_OUTPUT_DIR) / "page_000.md"
+        if cover_path.exists():
+            cover_content = cover_path.read_text(encoding="utf-8", errors="replace")
+            cover_content = re.sub(r"<!--.*?-->\s*", "", cover_content, flags=re.DOTALL)
+            out.write(cover_content.strip())
+            out.write("\n\n\\newpage\n\n")
+            print(f"[Assembler] Cover page included from {cover_path}")
+
         for i, page in enumerate(pages):
             content = Path(page["path"]).read_text(encoding="utf-8", errors="replace")
             # Remove the HTML comment headers we write in traffic_controller
@@ -170,7 +184,7 @@ def assemble_book() -> str:
             if i < len(pages) - 1:
                 out.write("\n\n\\newpage\n\n")
 
-    print(f"[Assembler] Merged {len(pages)} pages → {merged_path}")
+    print(f"[Assembler] Merged {len(pages)} pages + cover → {merged_path}")
     return merged_path
 
 
