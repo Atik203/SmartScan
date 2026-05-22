@@ -94,7 +94,7 @@ export default function GalleryPage() {
     let active = true;
     const toLoad = pages
       .map((p) => p.source_file)
-      .filter((s): s is string => Boolean(s) && !galleryBySource[s]);
+      .filter((s): s is string => typeof s === "string" && s !== "" && !galleryBySource[s]);
 
     if (toLoad.length === 0) return;
 
