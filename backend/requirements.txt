@@ -27,7 +27,7 @@ page-dewarp>=0.3.0
 pytesseract>=0.3.10
 
 # ── Gemini API ────────────────────────────────────────────────────────────────
-google-generativeai>=0.8.0
+google-genai>=0.1.1
 
 # ── Serial Communication (Raspberry Pi) ──────────────────────────────────────
 pyserial>=3.5

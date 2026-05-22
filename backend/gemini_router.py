@@ -36,11 +36,11 @@ def _get_client():
         return _client
 
     try:
-        import google.generativeai as genai  # type: ignore
+        from google import genai  # type: ignore
     except ImportError:
         raise RuntimeError(
-            "google-generativeai is not installed. "
-            "Run: pip install google-generativeai"
+            "google-genai is not installed. "
+            "Run: pip install google-genai"
         )
 
     api_key = os.getenv("GEMINI_API_KEY", "")
@@ -50,9 +50,8 @@ def _get_client():
             "Add it to backend/.env"
         )
 
-    genai.configure(api_key=api_key)
+    _client = genai.Client(api_key=api_key)
     model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
-    _client = genai.GenerativeModel(model_name)
     usage_stats["model"] = model_name
     return _client
 
@@ -121,22 +120,28 @@ def gemini_process_page(image_path: str, page_number: int = 0) -> dict:
 
         # Read and encode image
         image_data = Path(image_path).read_bytes()
-        b64_image = base64.b64encode(image_data).decode("utf-8")
 
         # Determine MIME type
         suffix = Path(image_path).suffix.lower()
         mime_map = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png"}
         mime_type = mime_map.get(suffix, "image/jpeg")
 
+        from google.genai import types
+
         # Build request
         contents = [
-            _SYSTEM_PROMPT,
-            {"mime_type": mime_type, "data": b64_image},
+            types.Part.from_bytes(data=image_data, mime_type=mime_type),
         ]
 
         # Call API and time it
         t0 = time.monotonic()
-        response = client.generate_content(contents)
+        response = client.models.generate_content(
+            model=usage_stats["model"],
+            contents=contents,
+            config=types.GenerateContentConfig(
+                system_instruction=_SYSTEM_PROMPT
+            ),
+        )
         latency_ms = int((time.monotonic() - t0) * 1000)
 
         markdown_text = response.text.strip()
