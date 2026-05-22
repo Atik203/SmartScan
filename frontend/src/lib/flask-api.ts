@@ -64,6 +64,19 @@ export interface PageContent {
   latex_blocks: string[];
   found: boolean;
   source_file?: string | null;
+  boxes?: {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    confidence: number;
+  }[];
+  trocr_results?: {
+    latex: string;
+    latency_ms: number;
+    success: boolean;
+    filename?: string;
+  }[];
 }
 
 export interface ProcessResult {
@@ -85,7 +98,12 @@ export interface ProcessResult {
   route: "local" | "ai" | "fallback";
   markdown: string;
   latex_blocks: string[];
-  trocr_results: { latex: string; latency_ms: number; success: boolean }[];
+  trocr_results: {
+    latex: string;
+    latency_ms: number;
+    success: boolean;
+    filename?: string;
+  }[];
   latency_ms: number;
 }
 

@@ -118,12 +118,15 @@ def get_page_content(page_number: int) -> dict:
     content = path.read_text(encoding="utf-8", errors="replace")
     latex_blocks = _extract_display_math(content)
     source_file = _extract_source_file(content)
+    metadata = _extract_metadata(content)
 
     return {
         "number": page_number,
         "markdown": content,
         "latex_blocks": latex_blocks,
         "source_file": source_file,
+        "boxes": metadata.get("boxes", []),
+        "trocr_results": metadata.get("trocr_results", []),
         "found": True,
     }
 
@@ -155,12 +158,14 @@ def assemble_book() -> str:
         out.write("geometry: 'margin=2.5cm'\n")
         out.write("fontsize: '11pt'\n")
         out.write("mainfont: 'DejaVu Serif'\n")
+        out.write("parskip: true\n")
+        out.write("linestretch: 1.2\n")
         out.write("---\n\n")
 
         for i, page in enumerate(pages):
             content = Path(page["path"]).read_text(encoding="utf-8", errors="replace")
-            # Remove the HTML comment header we write in traffic_controller
-            content = re.sub(r"<!--.*?-->\n\n", "", content, flags=re.DOTALL)
+            # Remove the HTML comment headers we write in traffic_controller
+            content = re.sub(r"<!--.*?-->\s*", "", content, flags=re.DOTALL)
             out.write(content)
             if i < len(pages) - 1:
                 out.write("\n\n\\newpage\n\n")
@@ -286,6 +291,21 @@ def _extract_source_file(markdown: str) -> str | None:
         return None
     source = match.group(1)
     return source.strip() if source else None
+
+
+def _extract_metadata(markdown: str) -> dict:
+    match = re.search(
+        r"<!--\s*SMART_SCAN_METADATA\s*(.*?)\s*-->",
+        markdown,
+        re.DOTALL
+    )
+    if not match:
+        return {}
+    try:
+        import json
+        return json.loads(match.group(1))
+    except Exception:
+        return {}
 
 
 def _pandoc_available() -> bool:

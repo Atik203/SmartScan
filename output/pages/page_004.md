@@ -1,19 +1,71 @@
-<!-- Page 4 | Source: 20260521_020223_page_002_right.jpg -->
+<!-- Page 4 | Source: 20260522_231808_page_004_left.jpg -->
+<!-- SMART_SCAN_METADATA
+{
+  "page_number": 4,
+  "source_file": "20260522_231808_page_004_left.jpg",
+  "boxes": [],
+  "trocr_results": []
+}
+-->
 
-1 The Role of Algorithms in Computing
+|
 
-What are algorithms? Why is the study of algorithms worthwhile? What is the role of algorithms relative to other technologies used in computers? This chapter will answer these questions.
+; Chapter 1 The Role of Algorithms in Computing
 
-1.1 Algorithms
+| + Given a mechanical design in terms of a library of parts, where each part may
+include instances of other parts, list the paris in order so that each part appears
 
-Informally, an algorithm is any well-defined computational procedure that takes some value, or set of values, as input and produces some value, or set of values, as output in a finite amount of time. An algorithm is thus a sequence of computational steps that transform the input into the output.
+before any part that uses it, If the design comprises 7 parts, then there are i!
 
-You can also view an algorithm as a tool for solving a well-specified computational problem. The statement of the problem specifies in general terms the desired input/output relationship for problem instances, typically of arbitrary large size. The algorithm describes a specific computational procedure for achieving that input/output relationship for all problem instances.
+possible orders, where ! denotes the factorial function, Because the factorial
 
-As an example, suppose that you need to sort a sequence of numbers into monotonically increasing order. This problem arises frequently in practice and provides fertile ground for introducing many standard design techniques and analysis tools. Here is how we formally define the sorting problem:
+function grows faster than even an exponential function, you cannot feasibly
 
-Input: A sequence of $n$ numbers $\langle a_1, a_2, \dots, a_n \rangle$.
+generate each possible order and then verify that, within that order, each part
 
-Output: A permutation (reordering) $\langle a'_1, a'_2, \dots, a'_n \rangle$ of the input sequence such that $a'_1 \le a'_2 \le \dots \le a'_n$.
+appears before the parts using it (unicss you have only a few parts). This prob-
+lem is an instance of topological sorting, and Chapter 20 shows how to solve
 
-Thus, given the input sequence $\{31, 41, 59, 26, 41, 58\}$, a correct sorting algorithm returns as output the sequence $\{26, 31, 41, 41, 58, 59\}$. Such an input sequence is
+this problem efficiently.
+
+* A doctor needs to determine whether an image represents a cancerous tumor or
+a benign one. The doctor has available images of many other tumors, some of
+which are known to be cancerous and some of which are known to be benign.
+A cancerous tumor is likely to be more similar to other cancerous tumors than
+to benign tumors, and a benign tumor is more likely to be similar to other be-
+nign tumors. By using a clustering algorithm, as in Chapter 33, the doctor can ;
+
+identify which outcome is more likely.
+
+* You need to compress a large file containing text so that it occupies less space.
+Many ways to do so are known, including “LZW compression,” which looks for
+tepeating character sequences. Chapter 15 studies a different approach, “Huff-
+man coding,” which encodes characters by bit sequences of various lengths,
+with characters occurring more frequently encoded by shorter bit sequences.
+
+These lists are far from exhaustive (as you again have probably surmised from
+this book’s heft), but they exhibit two characteristics common to many interesting
+algorithmic problems:
+
+1. They have many candidate solutions, the overwhelming majority of which do
+not solve the problem at hand. Finding one that does, or one that is “best,” with-
+out explicitly examining each possible solution, can present quite a challenge.
+
+2. They have practical applications. Of the problems in the above list, finding the
+shortest path provides the easiest examples. A transportation firm, such as a
+trucking or railroad company, has a financial interest in finding shortest paths
+through a road or rail network because taking shorter paths results in lower
+
+labor and fuel costs. Or a routing node on the internet might need to find the
+
+shoriest path through the network in order to route a message quickly. Ora
+
+person wishing to drive from New York to Boston might want to find driving .
+
+directions using a navigation app.
+
+Not every problem solved by algorithms has an easily identified set of candi-
+date solutions. For example, given a set of numerical values representing samples
+of a signal taken at regular time intervals, the discrete Fourier transform converts
+
+ee . .

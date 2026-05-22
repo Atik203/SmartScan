@@ -61,22 +61,30 @@ _SYSTEM_PROMPT = """You are an expert academic document digitizer.
 The image provided is a scanned page from an academic textbook.
 
 Your task:
-1. Extract ALL text from the page, preserving paragraph structure.
-2. Identify every mathematical expression (inline and block).
-3. Convert every mathematical expression to valid LaTeX syntax.
+1. Extract ALL text from the page, preserving the exact textbook formatting, structure, and spacing.
+2. Maintain headings and subheadings exactly as written in the textbook, using appropriate Markdown header levels (e.g., `# Chapter 1`, `## 1.1 Algorithms`, `### Input:`).
+3. Preserve textbook bolding (e.g., `**insertion sort**`), italics, lists, and enumerations.
+4. Keep the exact logical paragraph breaks and insert a blank line (`\n\n`) between paragraphs/sections/lists to ensure proper spacing.
+5. Identify every mathematical expression (inline and block).
+6. Convert every mathematical expression to valid LaTeX syntax.
    - Inline math → wrap with $...$
    - Block / display math → wrap with $$...$$
-4. Return the result as clean Markdown.
-5. Preserve logical reading order (text, then formulas in context).
-6. Do NOT include page headers, footers, or page numbers.
-7. Do NOT add any explanation — only output the Markdown content.
+7. Preserve logical reading order (text, then formulas in context).
+8. Do NOT include running page headers, footers, or page numbers (unless they are part of the main text).
+9. Do NOT add any conversational explanation or wrappers — only output the Markdown content.
 
 Example output format:
-The solution to the quadratic equation is given by the quadratic formula:
+## 1.1 The Selection Problem
 
-$$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
+We are given a set of $n$ numbers and want to find the $k$-th smallest element. A simple algorithm is:
 
-where $a$, $b$, and $c$ are the coefficients of $ax^2 + bx + c = 0$.
+1. Read the $n$ numbers into an array.
+2. Sort the array in decreasing order using **Insertion Sort**.
+3. Return the element at position $k$.
+
+$$T(n) = O(n^2)$$
+
+where $n$ represents the input size.
 """
 
 

@@ -143,17 +143,77 @@ def _crop_image(src: str, dst: str):
     cv2.imwrite(dst, cropped)
 
 
+def _clean_and_crop_dewarped_image(image_path: str):
+    """
+    Cleans up curved black borders and corners from page-dewarp output.
+    Finds the largest white contour (the page paper), masks out everything else
+    to white (255), and crops the image to the bounding box of the page.
+    """
+    img = cv2.imread(image_path)
+    if img is None:
+        return
+
+    # Convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img
+
+    # Threshold to binary (ensure paper is 255, ink/borders are 0)
+    _, thresh = cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY)
+
+    # Find external contours
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contours:
+        return
+
+    # Find the largest contour by area
+    largest_contour = max(contours, key=cv2.contourArea)
+
+    # Bounding box of the largest contour
+    x, y, w, h = cv2.boundingRect(largest_contour)
+    img_h, img_w = img.shape[:2]
+
+    # Validate size (must be at least 30% of the image)
+    if w < img_w * 0.3 or h < img_h * 0.3:
+        return
+
+    # Create mask of the page contour
+    mask = np.zeros_like(gray)
+    cv2.drawContours(mask, [largest_contour], -1, 255, -1)
+
+    # Set all pixels outside the page contour to white (255)
+    cleaned_img = img.copy()
+    cleaned_img[mask == 0] = 255
+
+    # Crop to the bounding rect of the page with a tiny padding
+    pad = 10
+    x1 = max(0, x + pad)
+    y1 = max(0, y + pad)
+    x2 = min(img_w, x + w - pad)
+    y2 = min(img_h, y + h - pad)
+
+    if x2 > x1 and y2 > y1:
+        cropped = cleaned_img[y1:y2, x1:x2]
+        cv2.imwrite(image_path, cropped)
+    else:
+        cv2.imwrite(image_path, cleaned_img)
+
+
 def _dewarp_image(src: str, dst: str) -> bool:
     base = os.path.splitext(os.path.basename(src))[0]
     tmp = os.path.join(os.getcwd(), base + "_thresh.png")
-    subprocess.run(
-        ["page-dewarp", src],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+    
+    res = subprocess.run(
+        [sys.executable, "-m", "page_dewarp", src],
+        capture_output=True,
+        text=True,
     )
+    if res.returncode != 0:
+        print(f"[Dewarp] page-dewarp returned non-zero code {res.returncode}")
+        print(f"[Dewarp] stdout: {res.stdout}")
+        print(f"[Dewarp] stderr: {res.stderr}")
     for _ in range(30):
         if os.path.exists(tmp):
             shutil.move(tmp, dst)
+            _clean_and_crop_dewarped_image(dst)
             return True
         time.sleep(1)
     return False
@@ -632,9 +692,122 @@ def index_post():
     return render_template("index.html", results=results, completed=_recent_activity)
 
 
+# ── Background Watcher ────────────────────────────────────────────────────────
+def _is_file_stable(file_path: Path) -> bool:
+    try:
+        if not file_path.exists():
+            return False
+        sz1 = file_path.stat().st_size
+        time.sleep(1.0)
+        if not file_path.exists():
+            return False
+        sz2 = file_path.stat().st_size
+        return sz1 == sz2 and sz1 > 0
+    except Exception:
+        return False
+
+
+def _captures_watcher_thread():
+    print("[Watcher] Background folder watcher thread initializing...")
+    processed_txt_path = os.path.abspath(os.path.join(UPLOAD_FOLDER, "../processed_captures.txt"))
+    
+    # Load already processed filenames
+    processed_files = set()
+    if os.path.exists(processed_txt_path):
+        try:
+            with open(processed_txt_path, "r", encoding="utf-8") as f:
+                processed_files = {line.strip() for line in f if line.strip()}
+            print(f"[Watcher] Loaded {len(processed_files)} previously processed files.")
+        except Exception as e:
+            print(f"[Watcher] Error reading processed_captures.txt: {e}")
+
+    while True:
+        try:
+            if not os.path.isdir(CAPTURES_DIR):
+                time.sleep(2)
+                continue
+
+            # Find all image files
+            images = []
+            for ext in (".jpg", ".jpeg", ".png"):
+                images.extend(Path(CAPTURES_DIR).glob(f"*{ext}"))
+                images.extend(Path(CAPTURES_DIR).glob(f"*{ext.upper()}"))
+
+            # Sort them so they process in alphabetical/sequential order
+            images = sorted(images, key=lambda p: p.name)
+
+            for img_path in images:
+                filename = img_path.name
+                if filename in processed_files:
+                    continue
+
+                # Wait for file to write completely
+                if not _is_file_stable(img_path):
+                    continue
+
+                print(f"[Watcher] New capture detected: {filename}")
+                try:
+                    # Determine page number
+                    from page_assembler import list_pages
+                    page_number = len(list_pages()) + 1
+
+                    # Copy to upload folder with timestamp prefix
+                    safe_name = secure_filename(filename)
+                    ts = time.strftime("%Y%m%d_%H%M%S")
+                    new_name = f"{ts}_{safe_name}"
+                    upload_p = os.path.join(UPLOAD_FOLDER, new_name)
+                    shutil.copy2(str(img_path), upload_p)
+
+                    # Process image through pipeline
+                    print(f"[Watcher] Processing {filename} as page {page_number}...")
+                    result = _process_upload_path(upload_p, new_name, page_number)
+                    print(f"[Watcher] Successfully processed {filename} (Route: {result.get('route')})")
+
+                    # Automatically compile the PDF
+                    from page_assembler import compile_pdf
+                    compile_pdf(force=True)
+                    print(f"[Watcher] Automatically recompiled book PDF.")
+
+                    # Mark as processed
+                    processed_files.add(filename)
+                    with open(processed_txt_path, "a", encoding="utf-8") as f:
+                        f.write(filename + "\n")
+
+                except Exception as e:
+                    import traceback
+                    print(f"[Watcher] Error processing {filename}: {e}")
+                    traceback.print_exc()
+
+        except Exception as e:
+            print(f"[Watcher] Error in watcher loop: {e}")
+
+        time.sleep(2)
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     print("=" * 55)
     print("  SmartScan Flask API — http://localhost:5000")
     print("=" * 55)
-    app.run(host="0.0.0.0", port=5000, debug=True)
+
+    # Start the watcher thread inside the main Werkzeug process (if reloading) or normal execution
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true" or not app.debug:
+        import threading
+        watcher = threading.Thread(target=_captures_watcher_thread, daemon=True)
+        watcher.start()
+        print("[App] Captures folder watcher thread started.")
+
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=True,
+        exclude_patterns=[
+            "*/output/*",
+            "*/static/*",
+            "*/SmartScan_Captures/*",
+            "*.md",
+            "*.pdf",
+            "*.txt",
+            "processed_captures.txt",
+        ],
+    )

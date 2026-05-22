@@ -183,6 +183,107 @@ export default function LatexPage() {
           </Card>
         </motion.div>
 
+        {/* Local ML Proof of Work Card */}
+        {pageContent && pageContent.trocr_results && pageContent.trocr_results.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+            <Card className="border-border/50 bg-gradient-to-br from-muted/20 to-muted/50 border-purple-500/25">
+              <CardHeader className="pb-3 border-b border-border/20">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <span className="flex h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
+                  Local ML Proof of Work (Offline YOLOv8 + TrOCR)
+                </CardTitle>
+                <p className="text-[11px] text-muted-foreground">
+                  Verification of fine-tuned local models running offline, before final API assembly.
+                </p>
+              </CardHeader>
+              <CardContent className="p-4 space-y-4">
+                <div className="grid gap-4">
+                  {pageContent.trocr_results.map((res, i) => {
+                    const box = pageContent.boxes?.[i];
+                    const base = pageContent.source_file
+                      ? pageContent.source_file.substring(0, pageContent.source_file.lastIndexOf('.'))
+                      : "";
+                    const cropUrl = base && res.filename
+                      ? flaskApi.imageUrl(`/images/extracted/${base}/${res.filename}`)
+                      : null;
+
+                    return (
+                      <div
+                        key={i}
+                        className="flex flex-col md:flex-row gap-4 p-4 rounded-xl border border-border/40 bg-card/60 hover:bg-card transition-all"
+                      >
+                        {/* Crop Image Column */}
+                        <div className="flex flex-col items-center justify-center bg-white p-2 rounded-lg border border-border/20 w-full md:w-48 h-20 overflow-hidden relative group shrink-0">
+                          {cropUrl ? (
+                            <img
+                              src={cropUrl}
+                              alt={`Crop ${i + 1}`}
+                              className="max-h-full max-w-full object-contain filter contrast-125 select-none"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground font-mono">No Image Crop</span>
+                          )}
+                          <span className="absolute bottom-1 right-1 bg-black/60 text-[8px] font-mono px-1 rounded text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                            {res.filename}
+                          </span>
+                        </div>
+
+                        {/* Metadata & LaTeX Output */}
+                        <div className="flex-1 flex flex-col justify-between gap-2 min-w-0">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge variant="outline" className="text-[9px] font-mono px-1.5 py-0">
+                                Box {i + 1}
+                              </Badge>
+                              {box && (
+                                <span className="text-[10px] text-muted-foreground font-mono">
+                                  coords: [{box.x1}, {box.y1}, {box.x2}, {box.y2}] | conf: {Math.round(box.confidence * 100)}%
+                                </span>
+                              )}
+                              <Badge className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border-none text-[9px] font-mono py-0">
+                                Latency: {res.latency_ms}ms
+                              </Badge>
+                            </div>
+                            <div className="mt-1.5">
+                              <code className="text-xs text-purple-300 font-mono select-all break-all bg-purple-950/20 dark:bg-purple-950/30 p-1.5 rounded block border border-purple-500/10">
+                                {res.latex}
+                              </code>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between gap-4 mt-2">
+                            <div className="text-xs font-medium text-muted-foreground">KaTeX Preview:</div>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="h-6 text-[10px] gap-1 hover:bg-purple-500 hover:text-white transition-all shrink-0"
+                              onClick={() => {
+                                setEditorLatex(res.latex);
+                                handleCopy(res.latex);
+                              }}
+                            >
+                              <Copy className="h-2.5 w-2.5" />
+                              Copy & Import
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* KaTeX Live Render Column */}
+                        <div className="flex-1 flex items-center justify-center p-4 rounded-lg bg-zinc-950/5 border border-border/20 min-h-[5rem] overflow-x-auto text-lg">
+                          <KatexBlock latex={res.latex} display={true} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Extracted Formulas from selected page */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <Card className="border-border/50">

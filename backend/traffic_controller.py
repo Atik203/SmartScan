@@ -110,7 +110,11 @@ def route_page(
     # Save markdown to disk regardless of route
     if result.get("markdown"):
         md_path = _save_markdown(
-            result["markdown"], page_number, source_file=source_file
+            result["markdown"],
+            page_number,
+            source_file=source_file,
+            detected_boxes=detected_boxes,
+            trocr_results=result.get("trocr_results", []),
         )
         result["markdown_path"] = md_path
 
@@ -169,7 +173,12 @@ def _run_trocr_on_crops(extract_folder: str) -> list:
             for p in folder.iterdir()
             if p.suffix.lower() in (".jpg", ".jpeg", ".png")
         )
-        return recognizer.recognize_batch(crop_paths)
+        results = []
+        for p in crop_paths:
+            res = recognizer.recognize(p)
+            res["filename"] = os.path.basename(p)
+            results.append(res)
+        return results
     except Exception as exc:
         print(f"[Router] TrOCR batch error: {exc}")
         return []
@@ -205,18 +214,35 @@ def _run_fallback_path(image_path: str, trocr_results: list) -> dict:
 
 
 def _save_markdown(
-    content: str, page_number: int, source_file: str | None = None
+    content: str,
+    page_number: int,
+    source_file: str | None = None,
+    detected_boxes: list | None = None,
+    trocr_results: list | None = None,
 ) -> str:
-    """Write page content to MARKDOWN_OUTPUT_DIR/page_NNN.md."""
+    """Write page content to MARKDOWN_OUTPUT_DIR/page_NNN.md with embedded metadata."""
+    import json
     os.makedirs(MARKDOWN_OUTPUT_DIR, exist_ok=True)
     filename = f"page_{page_number:03d}.md"
     path = os.path.join(MARKDOWN_OUTPUT_DIR, filename)
     with open(path, "w", encoding="utf-8") as f:
+        # Standard human-readable comment header
         header = f"<!-- Page {page_number}"
         if source_file:
             header += f" | Source: {source_file}"
-        header += " -->\n\n"
+        header += " -->\n"
         f.write(header)
+
+        # Embedded JSON metadata for API retrieval
+        meta_dict = {
+            "page_number": page_number,
+            "source_file": source_file,
+            "boxes": detected_boxes or [],
+            "trocr_results": trocr_results or [],
+        }
+        meta_json = json.dumps(meta_dict, indent=2)
+        f.write(f"<!-- SMART_SCAN_METADATA\n{meta_json}\n-->\n\n")
+
         f.write(content)
         f.write("\n")
     return path
