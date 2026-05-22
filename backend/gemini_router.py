@@ -15,12 +15,20 @@ Usage:
 import base64
 import os
 import time
+import requests
 from pathlib import Path
+from config import (
+    API_PROVIDER,
+    GEMINI_API_KEY,
+    GEMINI_MODEL,
+    OPENAI_API_KEY,
+    OPENAI_MODEL,
+)
 
 # usage_stats is mutated in-place so app.py can read it at any time
 usage_stats = {
-    "provider": "gemini",
-    "model": "",
+    "provider": API_PROVIDER,
+    "model": OPENAI_MODEL if API_PROVIDER == "openai" else GEMINI_MODEL,
     "calls": 0,
     "total_latency_ms": 0,
     "last_error": None,
@@ -43,16 +51,14 @@ def _get_client():
             "Run: pip install google-genai"
         )
 
-    api_key = os.getenv("GEMINI_API_KEY", "")
-    if not api_key:
+    if not GEMINI_API_KEY:
         raise RuntimeError(
             "GEMINI_API_KEY environment variable is not set. "
             "Add it to backend/.env"
         )
 
-    _client = genai.Client(api_key=api_key)
-    model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
-    usage_stats["model"] = model_name
+    _client = genai.Client(api_key=GEMINI_API_KEY)
+    usage_stats["model"] = GEMINI_MODEL
     return _client
 
 
@@ -89,7 +95,8 @@ where $n$ represents the input size.
 
 def gemini_process_page(image_path: str, page_number: int = 0) -> dict:
     """
-    Send a page image to Gemini and receive structured Markdown.
+    Process a page image using the active LLM provider (OpenAI or Gemini)
+    and receive structured Markdown.
 
     Args:
         image_path: Absolute path to the dewarped page image.
@@ -105,38 +112,150 @@ def gemini_process_page(image_path: str, page_number: int = 0) -> dict:
             "error": str | None,
         }
     """
+    if API_PROVIDER == "openai":
+        return _run_openai_path(image_path, page_number)
+    else:
+        return _run_gemini_path(image_path, page_number)
+
+
+def _run_openai_path(image_path: str, page_number: int) -> dict:
+    """Path B primary — call OpenAI Chat Completions API with image input."""
     result = {
         "success": False,
         "markdown": "",
         "latex_blocks": [],
         "latency_ms": 0,
-        "model": usage_stats["model"],
+        "model": OPENAI_MODEL,
+        "error": None,
+    }
+
+    try:
+        if not OPENAI_API_KEY:
+            raise RuntimeError(
+                "OPENAI_API_KEY environment variable is not set. "
+                "Add it to backend/.env"
+            )
+
+        # Read and encode image to base64
+        image_data = Path(image_path).read_bytes()
+        suffix = Path(image_path).suffix.lower()
+        mime_map = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png"}
+        mime_type = mime_map.get(suffix, "image/jpeg")
+        base64_image = base64.b64encode(image_data).decode("utf-8")
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {OPENAI_API_KEY}",
+        }
+
+        payload = {
+            "model": OPENAI_MODEL,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": _SYSTEM_PROMPT,
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{mime_type};base64,{base64_image}"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "temperature": 0.1,
+        }
+
+        t0 = time.monotonic()
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers=headers,
+            json=payload,
+            timeout=60,
+        )
+        latency_ms = int((time.monotonic() - t0) * 1000)
+
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"OpenAI API returned status code {response.status_code}: {response.text}"
+            )
+
+        res_json = response.json()
+        markdown_text = res_json["choices"][0]["message"]["content"].strip()
+
+        # Clean markdown code block wrapper if returned by LLM
+        if markdown_text.startswith("```"):
+            lines = markdown_text.splitlines()
+            if lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].startswith("```"):
+                lines = lines[:-1]
+            markdown_text = "\n".join(lines).strip()
+
+        latex_blocks = _extract_latex_blocks(markdown_text)
+
+        # Update stats
+        usage_stats["calls"] += 1
+        usage_stats["total_latency_ms"] += latency_ms
+        usage_stats["provider"] = "openai"
+        usage_stats["model"] = OPENAI_MODEL
+
+        result.update(
+            {
+                "success": True,
+                "markdown": markdown_text,
+                "latex_blocks": latex_blocks,
+                "latency_ms": latency_ms,
+                "error": None,
+            }
+        )
+        print(
+            f"[OpenAI] Page {page_number}: {len(latex_blocks)} LaTeX blocks extracted "
+            f"in {latency_ms}ms using {OPENAI_MODEL}"
+        )
+
+    except Exception as exc:
+        error_msg = str(exc)
+        usage_stats["last_error"] = error_msg
+        result["error"] = error_msg
+        print(f"[OpenAI] ERROR on page {page_number}: {error_msg}")
+
+    return result
+
+
+def _run_gemini_path(image_path: str, page_number: int) -> dict:
+    """Path B fallback/secondary — call Gemini API."""
+    result = {
+        "success": False,
+        "markdown": "",
+        "latex_blocks": [],
+        "latency_ms": 0,
+        "model": GEMINI_MODEL,
         "error": None,
     }
 
     try:
         client = _get_client()
-        result["model"] = usage_stats["model"]
 
         # Read and encode image
         image_data = Path(image_path).read_bytes()
-
-        # Determine MIME type
         suffix = Path(image_path).suffix.lower()
         mime_map = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png"}
         mime_type = mime_map.get(suffix, "image/jpeg")
 
         from google.genai import types
 
-        # Build request
         contents = [
             types.Part.from_bytes(data=image_data, mime_type=mime_type),
         ]
 
-        # Call API and time it
         t0 = time.monotonic()
         response = client.models.generate_content(
-            model=usage_stats["model"],
+            model=GEMINI_MODEL,
             contents=contents,
             config=types.GenerateContentConfig(
                 system_instruction=_SYSTEM_PROMPT
@@ -145,13 +264,13 @@ def gemini_process_page(image_path: str, page_number: int = 0) -> dict:
         latency_ms = int((time.monotonic() - t0) * 1000)
 
         markdown_text = response.text.strip()
-
-        # Extract LaTeX display blocks for the frontend LaTeX preview
         latex_blocks = _extract_latex_blocks(markdown_text)
 
-        # Update usage stats
+        # Update stats
         usage_stats["calls"] += 1
         usage_stats["total_latency_ms"] += latency_ms
+        usage_stats["provider"] = "gemini"
+        usage_stats["model"] = GEMINI_MODEL
 
         result.update(
             {

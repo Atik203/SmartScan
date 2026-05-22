@@ -57,6 +57,8 @@ from config import (
     PDF_ENGINE,
     TROCR_MODEL_DIR,
     GEMINI_API_KEY,
+    OPENAI_API_KEY,
+    API_PROVIDER,
     ensure_dirs,
 )
 
@@ -527,7 +529,9 @@ def health():
             "pandoc": pandoc_ok,
             "pdf_engine": PDF_ENGINE,
             "trocr_model_dir": TROCR_MODEL_DIR,
-            "gemini_configured": bool(GEMINI_API_KEY),
+            "gemini_configured": bool(GEMINI_API_KEY or OPENAI_API_KEY),
+            "openai_configured": bool(OPENAI_API_KEY),
+            "api_provider": API_PROVIDER,
             "uptime_seconds": int(time.time() - _server_start),
         }
     )

@@ -104,11 +104,26 @@ PDF_OUTPUT_PATH = os.path.join(PDF_OUTPUT_DIR, "Final_Book.pdf")
 PDF_ENGINE = os.getenv("PDF_ENGINE", "xelatex")
 
 # ============================================================
-# GEMINI API CONFIG
-# Set GEMINI_API_KEY in your environment or in .env file
+# LLM PROVIDER & API CONFIG
+# Set API_PROVIDER, GEMINI_API_KEY, and/or OPENAI_API_KEY in backend/.env
 # ============================================================
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+
+# Auto-detect or select provider
+API_PROVIDER = os.getenv("API_PROVIDER", "").lower()
+if not API_PROVIDER:
+    if OPENAI_API_KEY and not GEMINI_API_KEY:
+        API_PROVIDER = "openai"
+    elif GEMINI_API_KEY:
+        API_PROVIDER = "gemini"
+    elif OPENAI_API_KEY:
+        API_PROVIDER = "openai"
+    else:
+        API_PROVIDER = "gemini"
 
 # ============================================================
 # TESSERACT OCR CONFIG
@@ -201,5 +216,7 @@ if __name__ == "__main__":
     print(f"[OK] TrOCR model dir: {TROCR_MODEL_DIR}")
     print(f"[OK] Markdown output: {MARKDOWN_OUTPUT_DIR}")
     print(f"[OK] PDF output: {PDF_OUTPUT_PATH}")
-    print(f"[OK] Gemini key set: {'YES' if GEMINI_API_KEY else 'NO — add to .env'}")
+    print(f"[OK] LLM Provider: {API_PROVIDER.upper()}")
+    print(f"[OK] Gemini key set: {'YES' if GEMINI_API_KEY else 'NO'}")
+    print(f"[OK] OpenAI key set: {'YES' if OPENAI_API_KEY else 'NO'}")
     print(f"[OK] Static directory: {BASE_STATIC}")
