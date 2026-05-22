@@ -9,6 +9,7 @@ build/
 *.egg
 SmartScan_Captures/
 
+
 models/
 
 # ===== Virtual Environments =====
@@ -36,23 +37,23 @@ models/*.onnx
 *.h5
 
 # ===== Processing Outputs (auto-generated, not tracked) =====
-dl-processing-engine/data/
-dl-processing-engine/.env
-dl-processing-engine/cropped/
-dl-processing-engine/dewarped/
-dl-processing-engine/predicted/
-dl-processing-engine/extracted/
-dl-processing-engine/uploads/
-dl-processing-engine/offline/
-dl-processing-engine/static/
-dl-processing-engine/meta/
-dl-processing-engine/image_queue.txt
-dl-processing-engine/processed_images.txt
+backend/data/
+backend/.env
+backend/cropped/
+backend/dewarped/
+backend/predicted/
+backend/extracted/
+backend/uploads/
+backend/offline/
+backend/static/
+backend/meta/
+backend/image_queue.txt
+backend/processed_images.txt
 
 # ===== Node.js (Web App) =====
-smartscan-web/node_modules/
-smartscan-web/.next/
-smartscan-web/out/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
 
 # ===== Logs =====
 *.log
