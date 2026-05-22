@@ -158,13 +158,22 @@ def assemble_book() -> str:
     merged_path = os.path.join(PDF_OUTPUT_DIR, "merged_book.md")
 
     with open(merged_path, "w", encoding="utf-8") as out:
+        # ── YAML front-matter ──────────────────────────────────────────────────
         out.write("---\n")
         out.write("title: 'SmartScan Digitized Book'\n")
-        out.write("geometry: 'margin=2.5cm'\n")
-        out.write("fontsize: '11pt'\n")
+        out.write("geometry: 'top=2cm, bottom=2cm, left=2cm, right=2cm'\n")
+        out.write("fontsize: '10.5pt'\n")
         out.write("mainfont: 'DejaVu Serif'\n")
-        out.write("parskip: true\n")
-        out.write("linestretch: 1.2\n")
+        out.write("linestretch: 1.0\n")
+        # Tight paragraph spacing: no extra gap between paragraphs
+        out.write("header-includes:\n")
+        out.write("  - |\n")
+        out.write("    \\setlength{\\parskip}{3pt}\n")
+        out.write("    \\setlength{\\parindent}{0pt}\n")
+        out.write("    \\setlength{\\abovedisplayskip}{4pt}\n")
+        out.write("    \\setlength{\\belowdisplayskip}{4pt}\n")
+        out.write("    \\setlength{\\abovedisplayshortskip}{2pt}\n")
+        out.write("    \\setlength{\\belowdisplayshortskip}{2pt}\n")
         out.write("---\n\n")
 
         # ── Cover page (page_000.md) ──────────────────────────────────────────
