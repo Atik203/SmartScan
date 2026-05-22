@@ -39,15 +39,15 @@ from werkzeug.utils import secure_filename
 
 # ── Config & utils ───────────────────────────────────────────────────────────
 from config import (
-    DEWARPED_FOLDER,
-    EXTRACTED_FOLDER,
+    BASE_STATIC,
+    UPLOAD_FOLDER,
+    CROP_FOLDER,
+    DEWARP_FOLDER,
+    PREDICTED_FOLDER_STATIC,
+    EXTRACT_FOLDER,
     MARKDOWN_OUTPUT_DIR,
     PDF_OUTPUT_PATH,
     CAPTURES_DIR,
-    PERM_CROP_FOLDER,
-    PERM_DEWARP_FOLDER,
-    PERM_PREDICT_FOLDER,
-    PREDICTED_FOLDER,
     YOLO_MODEL_PATH,
     PI_IP,
     PI_USER,
@@ -69,22 +69,6 @@ CORS(
     resources={r"/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]}},
 )
 
-# ── Static upload/processing folders ─────────────────────────────────────────
-BASE_STATIC = os.path.join(os.getcwd(), "static")
-UPLOAD_FOLDER = os.path.join(BASE_STATIC, "upload")
-CROP_FOLDER = os.path.join(BASE_STATIC, "cropped")
-DEWARP_FOLDER = os.path.join(BASE_STATIC, "dewarped")
-PREDICTED_FOLDER_STATIC = os.path.join(BASE_STATIC, "predicted")
-EXTRACT_FOLDER = os.path.join(BASE_STATIC, "extracted")
-
-for _d in [
-    UPLOAD_FOLDER,
-    CROP_FOLDER,
-    DEWARP_FOLDER,
-    PREDICTED_FOLDER_STATIC,
-    EXTRACT_FOLDER,
-]:
-    os.makedirs(_d, exist_ok=True)
 
 # ── Load YOLO model once ──────────────────────────────────────────────────────
 _yolo_model: YOLO | None = None
@@ -276,19 +260,12 @@ def _process_upload_path(upload_p: str, filename: str, page_number: int) -> dict
     extract_d = os.path.join(EXTRACT_FOLDER, base)
 
     _crop_image(upload_p, crop_p)
-    shutil.copy2(crop_p, os.path.join(PERM_CROP_FOLDER, filename))
 
     if not _dewarp_image(crop_p, dewarp_p):
         _log_activity(filename, "error", {"reason": "dewarp_failed"})
         raise RuntimeError("Dewarp failed")
 
-    shutil.copy2(dewarp_p, os.path.join(PERM_DEWARP_FOLDER, os.path.basename(dewarp_p)))
-
     boxes = _detect_and_save(dewarp_p, detect_p, extract_d)
-    if os.path.exists(detect_p):
-        shutil.copy2(
-            detect_p, os.path.join(PERM_PREDICT_FOLDER, os.path.basename(detect_p))
-        )
 
     from traffic_controller import route_page as _route_page
 

@@ -71,33 +71,33 @@ TROCR_MODEL_DIR = next(
 # ============================================================
 # DATA PATHS (Processing Engine)
 # ============================================================
-DATA_DIR = os.path.join(PROJECT_ROOT, "backend", "data")
+# ============================================================
+# STATIC & DATA PATHS (Processing Engine)
+# ============================================================
+BASE_STATIC = os.path.join(PROJECT_ROOT, "backend", "static")
 CAPTURES_DIR = os.path.join(PROJECT_ROOT, "SmartScan_Captures")
 
-# Online pipeline paths (images coming from Pi)
-LOCAL_FOLDER = os.path.join(DATA_DIR, "from_pi")
-CROPPED_FOLDER = os.path.join(DATA_DIR, "cropped")
-DEWARPED_FOLDER = os.path.join(DATA_DIR, "dewarped")
-PREDICTED_FOLDER = os.path.join(DATA_DIR, "predicted")
-EXTRACTED_FOLDER = os.path.join(DATA_DIR, "extracted")
-LOGS_DIR = os.path.join(DATA_DIR, "logs")
+UPLOAD_FOLDER = os.path.join(BASE_STATIC, "upload")
+CROP_FOLDER = os.path.join(BASE_STATIC, "cropped")
+CROPPED_FOLDER = CROP_FOLDER  # Older reference compatibility
+DEWARP_FOLDER = os.path.join(BASE_STATIC, "dewarped")
+DEWARPED_FOLDER = DEWARP_FOLDER  # Older reference compatibility
+PREDICTED_FOLDER = os.path.join(BASE_STATIC, "predicted")
+PREDICTED_FOLDER_STATIC = PREDICTED_FOLDER  # Older reference compatibility
+EXTRACTED_FOLDER = os.path.join(BASE_STATIC, "extracted")
+EXTRACT_FOLDER = EXTRACTED_FOLDER  # Older reference compatibility
+LOGS_DIR = os.path.join(BASE_STATIC, "logs")
 
-# Queue / state files
-QUEUE_FILE = os.path.join(DATA_DIR, "image_queue.txt")
-PROCESSED_FILE = os.path.join(DATA_DIR, "processed_images.txt")
+# State files
+QUEUE_FILE = os.path.join(BASE_STATIC, "image_queue.txt")
+PROCESSED_FILE = os.path.join(BASE_STATIC, "processed_images.txt")
 CSV_LOG_FILE = os.path.join(LOGS_DIR, "image_log.csv")
 
-# Offline / permanent storage (Flask web UI uploads)
-OFFLINE_DIR = os.path.join(DATA_DIR, "offline")
-PERM_CROP_FOLDER = os.path.join(OFFLINE_DIR, "cropped")
-PERM_DEWARP_FOLDER = os.path.join(OFFLINE_DIR, "dewarped")
-PERM_PREDICT_FOLDER = os.path.join(OFFLINE_DIR, "predicted")
-PERM_EXTRACT_FOLDER = os.path.join(OFFLINE_DIR, "extracted")
 
 # ============================================================
 # OUTPUT DIRECTORIES (Markdown pages + compiled PDF)
 # ============================================================
-OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
+OUTPUT_DIR = os.path.join(BASE_STATIC, "output")
 MARKDOWN_OUTPUT_DIR = os.path.join(OUTPUT_DIR, "pages")
 PDF_OUTPUT_DIR = os.path.join(OUTPUT_DIR, "pdf")
 PDF_OUTPUT_PATH = os.path.join(PDF_OUTPUT_DIR, "Final_Book.pdf")
@@ -176,19 +176,14 @@ def ensure_dirs():
     """Create all necessary directories."""
     dirs = [
         MODELS_DIR,
-        DATA_DIR,
+        BASE_STATIC,
         CAPTURES_DIR,
-        LOCAL_FOLDER,
-        CROPPED_FOLDER,
-        DEWARPED_FOLDER,
+        UPLOAD_FOLDER,
+        CROP_FOLDER,
+        DEWARP_FOLDER,
         PREDICTED_FOLDER,
         EXTRACTED_FOLDER,
         LOGS_DIR,
-        OFFLINE_DIR,
-        PERM_CROP_FOLDER,
-        PERM_DEWARP_FOLDER,
-        PERM_PREDICT_FOLDER,
-        PERM_EXTRACT_FOLDER,
         DATASETS_DIR,
         OUTPUT_DIR,
         MARKDOWN_OUTPUT_DIR,
@@ -207,4 +202,4 @@ if __name__ == "__main__":
     print(f"[OK] Markdown output: {MARKDOWN_OUTPUT_DIR}")
     print(f"[OK] PDF output: {PDF_OUTPUT_PATH}")
     print(f"[OK] Gemini key set: {'YES' if GEMINI_API_KEY else 'NO — add to .env'}")
-    print(f"[OK] Data directory: {DATA_DIR}")
+    print(f"[OK] Static directory: {BASE_STATIC}")
