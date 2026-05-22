@@ -1,21 +1,21 @@
-<!-- Page 6 | Source: 20260522_232004_page_003_right.jpg -->
+<!-- Page 6 | Source: 20260522_231941_page_005_left.jpg -->
 <!-- SMART_SCAN_METADATA
 {
   "page_number": 6,
-  "source_file": "20260522_232004_page_003_right.jpg",
+  "source_file": "20260522_231941_page_005_left.jpg",
   "boxes": [
     {
-      "x1": 2145,
-      "y1": 357,
-      "x2": 2334,
-      "y2": 457,
-      "confidence": 0.551
+      "x1": 2174,
+      "y1": 3246,
+      "x2": 2371,
+      "y2": 3298,
+      "confidence": 0.745
     }
   ],
   "trocr_results": [
     {
-      "latex": "\\frac { \\kappa } { \\bf \\bf \\bf \\bf \\bf \\bf = } ^ { \\cdot } \\sum _ { \\bf \\bf x } } \\\\ { \\cdots } \\\\ { \\bf { \\bf \\",
-      "latency_ms": 1327,
+      "latex": "\\begin{array} { c c } { { \\bf k ^ { - } } } \\\\ { \\end{array} { c c } { - } \\\\ { \\end{array}}}} \\\\ { \\end{array}}",
+      "latency_ms": 1500,
       "model_used": "E:\\PROJECT\\SmartScan\\models\\trocr",
       "success": true,
       "error": null,
@@ -25,50 +25,50 @@
 }
 -->
 
-## 1.1 Algorithms
+10 Chapter 1 The Role of Algorithms in Computing
 
-In Chapter 14, is an important technique for solving several of these biological
-problems, particularly ones that involve determining similarity between DNA
-sequences. The savings realized are in time, both human and machine, and in
-money, as more information can be extracted by laboratory techniques.
+NP-complete problems has the remarkable property that if an efficient algorithm
+exists for any one of them, then efficient algorithms exist for all of them. This re-
+lationship among the NP-complete problems makes the lack of efficient solutions
+all the more tantalizing. Third, several NP-complete problems are similar, but not
+identical, to problems for which we do know of efficient algorithms. Computer
+scientists are intrigued by how a small change to the problem statement can cause
+a big change to the efficiency of the best known algorithm.
 
-* The internet enables people all around the world to quickly access and retrieve
-large amounts of information. With the aid of clever algorithms, sites on the
-internet are able to manage and manipulate this large volume of data. Exam-
-ples of problems that make essential use of algorithms include finding good
-routes on which the data travels (techniques for solving such problems appear
-in Chapter 22), and using a search engine to quickly find pages on which par-
-ticular information resides (related techniques are in Chapters 11 and 32).
+You should know about NP-complete problems because some of them arise sur-
+prisingly often in real applications. If you are called upon to produce an efficient
+algorithm for an NP-complete problem, you are likely to spend a lot of time in a
+fruitless search. If, instead, you can show that the problem is NP-complete, you
+can spend your time developing an efficient approximation algorithm; that is, an
+algorithm that gives a good, but not necessarily the best possible, solution.
 
-* Electronic commerce enables goods and services to be negotiated and ex-
-changed electronically, and it depends on the privacy of personal informa-
-tion such as credit card numbers, passwords, and bank statements. The core
-technologies used in electronic commerce include public-key cryptography and
-digital signatures (covered in Chapter 31), which are based on numerical algo-
-rithms and number theory.
+As a concrete example, consider a delivery company with a central depot. Each
+day it loads up delivery trucks at the depot and sends them around to deliver goods
+to several addresses. At the end of the day, each truck must end up back at the depot
+so that it is ready to be loaded for the next day. To reduce costs, the company wants
+to select an order of delivery stops that yields the lowest overall distance traveled by
+each truck. This problem is the well-known "traveling-salesperson problem," and it
+is NP-complete. It has no known efficient algorithm. Under certain assumptions,
+however, we know of efficient algorithms that compute overall distances close to
+the smallest possible. Chapter 35 discusses such "approximation algorithms."
 
-* Manufacturing and other commercial enterprises often need to allocate scarce
-resources in the most beneficial way. An oil company might wish to know
-where to place its wells in order to maximize its expected profit. A political
-candidate might ask where to spend money buying campaign ad-
-vertising in order to maximize the chances of winning an election. An airline
-might wish to assign crews to flights in the least expensive way possible, mak-
-ing sure that each flight is covered and that government regulations regarding
-crew scheduling are met. An internet service provider might wish to determine
-where to place additional resources in order to serve its customers more effec-
-tively. All of these are examples of problems that can be solved by modeling
-them as linear programs, which Chapter 29 explores.
+## Alternative computing models
 
-Although some of the details of these examples are beyond the scope of
-book, we do give underlying techniques that apply to these problems and
-areas. We also show how to solve many specific problems, including the fol-
-lowing:
+For many years, we could count on processor clock speeds increas-
+ing at a steady
+rate. Physical limitations present a fundamental roadblock to ever-increasing clock
+speeds; however, because power density increases superlinearly with clock speed,
+chips run the risk of melting once their clock speeds become high enough. In or-
+der to perform more computations per second, therefore, chips are being designed
+to contain not just one but several processing "cores." We can liken these mul-
+ticore computers to several sequential computers on a single chip. In other words,
+they are a type of "parallel computer." In order to elicit the best performance
+from multicore computers, we need to design algorithms with parallelism in mind.
+Chapter 26 presents a model for "task-parallel" algorithms, which take advantage
+of multiple processing cores. This model has advantages from both theoretical and
 
-* You have a road map on which the distance between each pair of adj-
-tersections is marked, and you wish to determine the shortest route from one
-intersection to another. The number of possible routes can be huge, even if you
-disallow routes that cross over themselves. How can you choose which of all
-possible routes is the shortest? You can start by modeling the road map (which
-is itself a model of the actual roads) as a graph (which we will meet in Part VI
-and Appendix B). In this graph, you wish to find the shortest path from one
-vertex to another. Chapter 22 shows how to solve this problem efficiently.
+\vspace{0.5cm}
+\noindent
+$^{2}$To be precise, only decision problems—those with a "yes/no" answer—can be NP-complete. The
+decision version of the traveling salesperson problem asks whether there exists an order of steps
+whose distance totals at most a given amount.
