@@ -13,7 +13,7 @@ Dataset splits: train (165,099) | val (18,216) | test (20,430)
 Hardware: RTX 3060 6GB VRAM + 32GB RAM (Ryzen 7 5800H)
 
 Usage:
-    cd E:\\PROJECT\\SmartScan\\dl-processing-engine
+    cd E:\\PROJECT\\SmartScan\\backend
     .venv\\Scripts\\python.exe train_recognizer.py
 """
 

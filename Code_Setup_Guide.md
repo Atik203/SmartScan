@@ -15,7 +15,7 @@ SmartScan/
 ├── raspberry-pi-bridge/         # (was: raspberrypi code)
 │   ├── auto3.py                 # Serial listener (Arduino → Pi)
 │   └── auto_capture_3_updated.py # ADB camera trigger + image pull
-├── dl-processing-engine/        # (was: PythonProject)
+├── backend/        # (was: PythonProject)
 │   ├── config.py                # [NEW] Centralized configuration (ALL paths here)
 │   ├── app.py                   # Flask offline web interface
 │   ├── processing.py            # Crop / dewarp / YOLO detect (online)
@@ -163,18 +163,18 @@ model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-base-printed"
 
 ## ✅ Path Updates — DONE (Centralized in `config.py`)
 
-> All hardcoded `D:/` paths have been replaced. All Python files now import from `dl-processing-engine/config.py`.
+> All hardcoded `D:/` paths have been replaced. All Python files now import from `backend/config.py`.
 > **The only file you need to edit is `config.py`** — update your Pi IP, Pi username, and phone serial numbers there.
 
 ### What was fixed:
 
 | File | Status | Details |
 |---|---|---|
-| `dl-processing-engine/config.py` | ✅ **NEW** | All paths, PI credentials, training config centralized here |
-| `dl-processing-engine/run_on_laptop.py` | ✅ Fixed | Imports from `config.py` |
-| `dl-processing-engine/app.py` | ✅ Fixed | Imports from `config.py` |
-| `dl-processing-engine/processing.py` | ✅ Fixed | Imports from `config.py` |
-| `dl-processing-engine/offline_processing.py` | ✅ Fixed | Imports from `config.py` |
+| `backend/config.py` | ✅ **NEW** | All paths, PI credentials, training config centralized here |
+| `backend/run_on_laptop.py` | ✅ Fixed | Imports from `config.py` |
+| `backend/app.py` | ✅ Fixed | Imports from `config.py` |
+| `backend/processing.py` | ✅ Fixed | Imports from `config.py` |
+| `backend/offline_processing.py` | ✅ Fixed | Imports from `config.py` |
 | `raspberry-pi-bridge/auto3.py` | ✅ Fixed | Uses `os.path` relative to script |
 | `raspberry-pi-bridge/auto_capture_3_updated.py` | ✅ Fixed | Uses `os.path.expanduser` |
 | `arduino-controller/*.ino` | ✅ No changes needed | Pin definitions are hardware-specific |
@@ -182,7 +182,7 @@ model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-base-printed"
 ### What YOU need to update in `config.py`:
 
 ```python
-# In dl-processing-engine/config.py — update these values:
+# In backend/config.py — update these values:
 PI_IP = "192.168.1.100"          # ← Your Pi's IP address
 PI_USER = "pi"                   # ← Your Pi's SSH username
 
@@ -237,7 +237,7 @@ tqdm>=4.65.0
 
 ```bash
 # On Laptop (Processing Engine)
-cd dl-processing-engine
+cd backend
 pip install -r ../requirements.txt
 
 # On Raspberry Pi (Bridge)
@@ -259,7 +259,7 @@ pip install -r requirements.txt
 
 ### Step 2: Create directories
 ```bash
-cd E:\PROJECT\SmartScan\dl-processing-engine
+cd E:\PROJECT\SmartScan\backend
 python config.py   # Creates all required directories
 ```
 
@@ -291,7 +291,7 @@ npm run dev   # Opens at http://localhost:3000
 - [ ] Flash Arduino sketch via Arduino IDE
 - [ ] Setup Raspberry Pi with ADB + Python serial listener
 - [ ] Run web dashboard: `cd smartscan-web && npm run dev`
-- [ ] Test offline Flask UI: `cd dl-processing-engine && python app.py`
+- [ ] Test offline Flask UI: `cd backend && python app.py`
 
 ---
 

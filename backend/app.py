@@ -4,7 +4,7 @@ SmartScan — Flask Backend API
 Runs on port 5000. The Next.js dashboard (port 3000) proxies all calls here.
 
 Start:
-    cd dl-processing-engine
+    cd backend
     python app.py
 
 Endpoints:

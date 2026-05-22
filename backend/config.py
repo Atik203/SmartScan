@@ -3,7 +3,7 @@ SmartScan — Centralized Configuration
 All paths are relative to the project root: E:\\PROJECT\\SmartScan
 Update the values below to match your setup.
 
-To add your Gemini API key, create dl-processing-engine/.env with:
+To add your Gemini API key, create backend/.env with:
     GEMINI_API_KEY=your_key_here
 """
 
@@ -20,7 +20,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # ENV LOADING (local .env file)
 # ============================================================
 def _load_env_file() -> None:
-    env_path = os.path.join(PROJECT_ROOT, "dl-processing-engine", ".env")
+    env_path = os.path.join(PROJECT_ROOT, "backend", ".env")
     if not os.path.exists(env_path):
         return
     try:
@@ -71,7 +71,7 @@ TROCR_MODEL_DIR = next(
 # ============================================================
 # DATA PATHS (Processing Engine)
 # ============================================================
-DATA_DIR = os.path.join(PROJECT_ROOT, "dl-processing-engine", "data")
+DATA_DIR = os.path.join(PROJECT_ROOT, "backend", "data")
 CAPTURES_DIR = os.path.join(PROJECT_ROOT, "SmartScan_Captures")
 
 # Online pipeline paths (images coming from Pi)

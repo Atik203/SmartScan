@@ -92,7 +92,7 @@ mkdir -p ~/SmartScan/models
 ## 🐍 Step 4 — Python Virtual Environment
 
 ```bash
-cd ~/SmartScan/dl-processing-engine
+cd ~/SmartScan/backend
 
 python3 -m venv .venv
 source .venv/bin/activate
@@ -107,7 +107,7 @@ pip install -r requirements.txt
 ### Fix config.py for Linux (Tesseract is in PATH — no full path needed):
 
 ```bash
-nano ~/SmartScan/dl-processing-engine/config.py
+nano ~/SmartScan/backend/config.py
 ```
 
 Find this line and update it:
@@ -124,7 +124,7 @@ TESSERACT_CMD = os.getenv("TESSERACT_CMD", "")   # empty = auto on Linux ✅
 ## 🔑 Step 5 — Environment Variables (.env)
 
 ```bash
-cd ~/SmartScan/dl-processing-engine
+cd ~/SmartScan/backend
 cp .env.example .env
 nano .env
 ```
@@ -173,7 +173,7 @@ scp -r E:\Downloads\trocr_final\ pi@192.168.1.100:~/SmartScan/models/trocr-latex
 ### Verify models load:
 
 ```bash
-cd ~/SmartScan/dl-processing-engine
+cd ~/SmartScan/backend
 source .venv/bin/activate
 python3 -c "from trocr_inference import get_trocr_model; get_trocr_model(); print('TrOCR OK')"
 python3 -c "from config import YOLO_MODEL_PATH; import os; print('YOLO:', os.path.exists(YOLO_MODEL_PATH))"
@@ -207,7 +207,7 @@ Open **3 terminals** (or use `tmux`):
 
 ```bash
 cd ~/SmartScan/raspberrypi\ code
-source ~/SmartScan/dl-processing-engine/.venv/bin/activate
+source ~/SmartScan/backend/.venv/bin/activate
 python3 auto3.py
 # Waits for "CAPTURE" from Arduino → triggers capture script
 ```
@@ -215,7 +215,7 @@ python3 auto3.py
 ### Terminal 2 — Flask Backend:
 
 ```bash
-cd ~/SmartScan/dl-processing-engine
+cd ~/SmartScan/backend
 source .venv/bin/activate
 python3 app.py
 # → Flask API: http://0.0.0.0:5000
@@ -277,8 +277,8 @@ After=network.target
 
 [Service]
 User=pi
-WorkingDirectory=/home/pi/SmartScan/dl-processing-engine
-ExecStart=/home/pi/SmartScan/dl-processing-engine/.venv/bin/python3 app.py
+WorkingDirectory=/home/pi/SmartScan/backend
+ExecStart=/home/pi/SmartScan/backend/.venv/bin/python3 app.py
 Restart=always
 RestartSec=5
 

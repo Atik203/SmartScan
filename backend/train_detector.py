@@ -8,7 +8,7 @@ Optimized for: RTX 3060 6GB VRAM + 32GB RAM
 Expected training time: ~2-3 hours on 10% data
 
 Usage:
-    cd E:\\PROJECT\\SmartScan\\dl-processing-engine
+    cd E:\\PROJECT\\SmartScan\\backend
     python train_detector.py
 """
 

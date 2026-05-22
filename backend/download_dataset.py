@@ -4,7 +4,7 @@ SmartScan — Dataset Download & Verification Script
 Run this BEFORE training to download and verify the Im2LaTeX dataset.
 
 Usage:
-    cd E:\\PROJECT\\SmartScan\\dl-processing-engine
+    cd E:\\PROJECT\\SmartScan\\backend
     .venv\\Scripts\\python.exe download_dataset.py
 """
 

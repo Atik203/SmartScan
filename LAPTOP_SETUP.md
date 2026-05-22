@@ -60,7 +60,7 @@ npm run dev
 > Skip this if Flask runs on the Pi (recommended). Only needed for local testing.
 
 ```powershell
-cd E:\PROJECT\SmartScan\dl-processing-engine
+cd E:\PROJECT\SmartScan\backend
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt

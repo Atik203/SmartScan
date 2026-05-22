@@ -47,7 +47,7 @@ def _get_client():
     if not api_key:
         raise RuntimeError(
             "GEMINI_API_KEY environment variable is not set. "
-            "Add it to dl-processing-engine/.env"
+            "Add it to backend/.env"
         )
 
     genai.configure(api_key=api_key)

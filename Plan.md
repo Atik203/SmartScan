@@ -142,7 +142,7 @@ app.py (Flask on port 5000)
 └── GET  /gallery/:id         → [NEW] Serve original/cropped/dewarped/detected images
 ```
 
-#### 4.3 Key Code Changes in `dl-processing-engine/`
+#### 4.3 Key Code Changes in `backend/`
 
 **New files to create:**
 
@@ -406,7 +406,7 @@ tesseract --version
 rsync -avz E:/PROJECT/SmartScan/ pi@192.168.1.100:~/SmartScan/ --exclude node_modules --exclude .venv
 
 # On Pi 5 — install Python deps
-cd ~/SmartScan/dl-processing-engine
+cd ~/SmartScan/backend
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
@@ -422,7 +422,7 @@ cp .env.example .env && nano .env
 cd ~/SmartScan/raspberrypi\ code && python3 auto3.py
 
 # Terminal 2: Flask backend (NEW — was on laptop before)
-cd ~/SmartScan/dl-processing-engine
+cd ~/SmartScan/backend
 source .venv/bin/activate && python3 app.py
 # → Flask API now on http://PI_IP:5000
 ```
@@ -535,7 +535,7 @@ SmartScan/
 │   ├── auto3.py                                 ✅
 │   ├── auto_capture_pi5.py                      ✅
 │   └── auto_capture_3_updated.py                ✅
-├── dl-processing-engine/
+├── backend/
 │   ├── app.py                                   ✅ UPDATED — 10 endpoints, CORS
 │   ├── config.py                                ✅ UPDATED — Gemini/Tesseract/output dirs
 │   ├── processing.py                            ✅
