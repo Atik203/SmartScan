@@ -11,15 +11,17 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePages } from "@/hooks/use-smartscan";
 import { flaskApi, PageContent } from "@/lib/flask-api";
+import { cleanAndBalanceLatex } from "@/lib/utils";
 
 function KatexBlock({ latex, display = true }: { latex: string; display?: boolean }) {
   const [html, setHtml] = useState("");
   useEffect(() => {
+    const balanced = cleanAndBalanceLatex(latex);
     import("katex").then((k) => {
       try {
-        setHtml(k.default.renderToString(latex, { throwOnError: false, displayMode: display }));
+        setHtml(k.default.renderToString(balanced, { throwOnError: false, displayMode: display }));
       } catch {
-        setHtml(`<span style="color:red">Invalid LaTeX</span>`);
+        setHtml(`<span style="color:orange;font-size:0.75rem">${latex}</span>`);
       }
     });
   }, [latex, display]);
@@ -44,11 +46,12 @@ export default function LatexPage() {
 
   // Render live editor
   useEffect(() => {
+    const balanced = cleanAndBalanceLatex(editorLatex);
     import("katex").then((k) => {
       try {
-        setEditorHtml(k.default.renderToString(editorLatex, { throwOnError: false, displayMode: true }));
+        setEditorHtml(k.default.renderToString(balanced, { throwOnError: false, displayMode: true }));
       } catch {
-        setEditorHtml(`<span style="color:red">Invalid LaTeX</span>`);
+        setEditorHtml(`<span style="color:orange;font-size:0.8rem">Cannot render — try fixing the expression</span>`);
       }
     });
   }, [editorLatex]);
@@ -261,8 +264,9 @@ export default function LatexPage() {
                               size="sm"
                               className="h-6 text-[10px] gap-1 hover:bg-purple-500 hover:text-white transition-all shrink-0"
                               onClick={() => {
-                                setEditorLatex(res.latex);
-                                handleCopy(res.latex);
+                                const balanced = cleanAndBalanceLatex(res.latex);
+                                setEditorLatex(balanced);
+                                handleCopy(balanced);
                               }}
                             >
                               <Copy className="h-2.5 w-2.5" />

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useHealth, usePages } from "@/hooks/use-smartscan";
 import { flaskApi, PageContent } from "@/lib/flask-api";
+import { cleanAndBalanceLatex } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   BookOpen,
@@ -21,27 +22,31 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
-/** Render markdown with inline $...$ and display $$...$$ via KaTeX */
+/** Render markdown with inline $...$ and display $$...$$ via KaTeX.
+ *  HTML comments (metadata headers) are stripped before parsing. */
 function MarkdownRenderer({ markdown }: { markdown: string }) {
   const [parts, setParts] = useState<
     { type: "text" | "math" | "display"; content: string }[]
   >([]);
 
   useEffect(() => {
+    // Strip HTML comments (<!-- ... -->) that contain page metadata
+    const clean = markdown.replace(/<!--[\s\S]*?-->/g, "").trim();
+
     // Split on $$...$$ first (display math), then $...$ (inline)
     const segments: { type: "text" | "math" | "display"; content: string }[] =
       [];
-    const displayParts = markdown.split(/\$\$([\s\S]*?)\$\$/g);
+    const displayParts = clean.split(/\$\$([\s\S]*?)\$\$/g);
     displayParts.forEach((part, i) => {
       if (i % 2 === 1) {
         segments.push({ type: "display", content: part.trim() });
       } else {
         // Split inline math
-        const inlineParts = part.split(/\$(.*?)\$/g);
+        const inlineParts = part.split(/(\$[^$]+\$)/g);
         inlineParts.forEach((ip, j) => {
           if (j % 2 === 1) {
-            segments.push({ type: "math", content: ip });
-          } else if (ip) {
+            segments.push({ type: "math", content: ip.slice(1, -1) });
+          } else if (ip.trim()) {
             segments.push({ type: "text", content: ip });
           }
         });
@@ -76,16 +81,17 @@ function MarkdownRenderer({ markdown }: { markdown: string }) {
 function DisplayMath({ latex }: { latex: string }) {
   const [html, setHtml] = useState("");
   useEffect(() => {
+    const balanced = cleanAndBalanceLatex(latex);
     import("katex").then((k) => {
       try {
         setHtml(
-          k.default.renderToString(latex, {
+          k.default.renderToString(balanced, {
             throwOnError: false,
             displayMode: true,
           }),
         );
       } catch {
-        setHtml(`<span style="color:red">${latex}</span>`);
+        setHtml(`<span style="color:orange;font-size:0.75rem">${latex}</span>`);
       }
     });
   }, [latex]);
@@ -100,10 +106,11 @@ function DisplayMath({ latex }: { latex: string }) {
 function InlineMath({ latex }: { latex: string }) {
   const [html, setHtml] = useState("");
   useEffect(() => {
+    const balanced = cleanAndBalanceLatex(latex);
     import("katex").then((k) => {
       try {
         setHtml(
-          k.default.renderToString(latex, {
+          k.default.renderToString(balanced, {
             throwOnError: false,
             displayMode: false,
           }),
@@ -124,6 +131,8 @@ export default function ReaderPage() {
   const [loadingContent, setLoadingContent] = useState(false);
   const [compilingPdf, setCompilingPdf] = useState(false);
   const [viewMode, setViewMode] = useState<"reader" | "pdf">("reader");
+  // Increment to force iframe src reload after recompile
+  const [pdfVersion, setPdfVersion] = useState(0);
   const pdfReady = Boolean(health?.pandoc);
 
   // Auto-select first page
@@ -156,9 +165,11 @@ export default function ReaderPage() {
     try {
       const url = flaskApi.pdfUrl();
       const a = document.createElement("a");
-      a.href = url + "?force=false";
+      a.href = url + "?force=false&download=true";
       a.download = "SmartScan_Book.pdf";
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
     } finally {
       setTimeout(() => setCompilingPdf(false), 2000);
     }
@@ -169,12 +180,16 @@ export default function ReaderPage() {
     try {
       const res = await fetch(flaskApi.pdfUrl() + "?force=true");
       if (res.ok) {
-        const blob = await res.blob();
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "SmartScan_Book.pdf";
-        a.click();
+        // Increment version to bust the iframe cache and reload inline viewer
+        setPdfVersion((v) => v + 1);
+        setViewMode("pdf");
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(`PDF compilation failed: ${data?.error ?? res.statusText}`);
       }
+    } catch (err) {
+      console.error("[compileFreshPdf] fetch error:", err);
+      alert("Could not connect to the backend. Is the Flask server running on port 5000?");
     } finally {
       setCompilingPdf(false);
     }
@@ -332,12 +347,13 @@ export default function ReaderPage() {
             </Card>
           </motion.div>
         ) : viewMode === "pdf" ? (
-          /* PDF Viewer */
+          /* PDF Viewer — render inline using browser's native PDF viewer */
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <Card className="border-border/50 overflow-hidden">
               <CardContent className="p-0">
                 <iframe
-                  src={flaskApi.pdfUrl() + "?force=false"}
+                  key={pdfVersion}
+                  src={`${flaskApi.pdfUrl()}?force=false&v=${pdfVersion}`}
                   className="w-full h-[80vh]"
                   title="SmartScan Book PDF"
                 />

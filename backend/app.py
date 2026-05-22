@@ -66,10 +66,7 @@ ensure_dirs()
 
 # ── Flask app ─────────────────────────────────────────────────────────────────
 app = Flask(__name__)
-CORS(
-    app,
-    resources={r"/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]}},
-)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 # ── Load YOLO model once ──────────────────────────────────────────────────────
@@ -569,6 +566,7 @@ def page_content(page_number: int):
 def book_pdf():
     """Compile (if needed) and stream the final PDF."""
     force = request.args.get("force", "false").lower() == "true"
+    as_download = request.args.get("download", "false").lower() == "true"
 
     from page_assembler import compile_pdf
 
@@ -580,12 +578,24 @@ def book_pdf():
     if not os.path.exists(PDF_OUTPUT_PATH):
         return jsonify({"error": "PDF not found after compilation"}), 500
 
-    return send_file(
-        PDF_OUTPUT_PATH,
-        mimetype="application/pdf",
-        as_attachment=False,
-        download_name="SmartScan_Book.pdf",
-    )
+    if as_download:
+        return send_file(
+            PDF_OUTPUT_PATH,
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name="SmartScan_Book.pdf",
+        )
+
+    # Serve inline so the browser's built-in PDF viewer renders it inside an iframe
+    from flask import make_response
+    with open(PDF_OUTPUT_PATH, "rb") as f:
+        pdf_bytes = f.read()
+    response = make_response(pdf_bytes)
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = "inline"
+    response.headers["Content-Length"] = str(len(pdf_bytes))
+    response.headers["Cache-Control"] = "no-cache"
+    return response
 
 
 # ── GET /gallery/<name> ───────────────────────────────────────────────────────
