@@ -92,13 +92,18 @@ def get_latest_image():
 
 def rotate_and_split(image_path, capture_num):
     """
-    Rotate the raw 2-page landscape capture 90° clockwise, then split
-    at the horizontal midpoint to produce two individual page images.
+    Rotate the raw 2-page portrait capture 90° clockwise, then split
+    at the VERTICAL midpoint (mid-width) to produce two portrait page images.
 
-    After rotating CW a landscape shot (width > height):
-      - The image becomes portrait (height > width)
-      - Top half  → left book page  → saved as page_{2N-1:03d}.jpg
-      - Bottom half → right book page → saved as page_{2N:03d}.jpg
+    The Redmi captures in portrait mode — both book pages sit side-by-side
+    inside the frame (left page on the left, right page on the right).
+    After rotating 90° CW the image becomes landscape; we cut at x = w//2:
+
+        [ LEFT PAGE | RIGHT PAGE ]
+             ← left_half   right_half →
+
+      Left half   → odd page   → page_{2N-1:03d}.jpg
+      Right half  → even page  → page_{2N:03d}.jpg
 
     Returns (left_path, right_path) or (None, None) on failure.
     """
@@ -111,10 +116,10 @@ def rotate_and_split(image_path, capture_num):
     rotated = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
     h, w = rotated.shape[:2]
 
-    # Split at mid-height
-    mid = h // 2
-    top_half    = rotated[:mid, :]   # left book page (when book opens toward camera)
-    bottom_half = rotated[mid:, :]   # right book page
+    # Split VERTICALLY at mid-width  ← this is the key fix
+    mid = w // 2
+    left_half  = rotated[:, :mid]   # left book page
+    right_half = rotated[:, mid:]   # right book page
 
     left_page_num  = 2 * capture_num - 1
     right_page_num = 2 * capture_num
@@ -124,11 +129,11 @@ def rotate_and_split(image_path, capture_num):
     left_path  = os.path.join(PI_SAVE_PATH, left_name)
     right_path = os.path.join(PI_SAVE_PATH, right_name)
 
-    cv2.imwrite(left_path, top_half)
-    cv2.imwrite(right_path, bottom_half)
+    cv2.imwrite(left_path, left_half)
+    cv2.imwrite(right_path, right_half)
 
-    print(f"[✂] Split → {left_name} ({top_half.shape[1]}×{top_half.shape[0]}) "
-          f"| {right_name} ({bottom_half.shape[1]}×{bottom_half.shape[0]})")
+    print(f"[✂] Split → {left_name} ({left_half.shape[1]}×{left_half.shape[0]}) "
+          f"| {right_name} ({right_half.shape[1]}×{right_half.shape[0]})")
     return left_path, right_path
 
 
