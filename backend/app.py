@@ -190,47 +190,56 @@ def _clean_and_crop_dewarped_image(image_path: str):
 
 def _dewarp_image(src: str, dst: str) -> bool:
     """
-    Run page-dewarp on a pre-flattened document-mode image.
-    Since mobile document mode already produces nearly-flat pages, dewarp
-    output is generally very good. If page-dewarp fails (e.g., image is
-    already too flat to detect curvature), we gracefully fall back to
-    copying the source directly so the pipeline can continue.
+    Bypasses external page-dewarp (since mobile document mode already dewarps).
+    Applies a high-quality whiteness filter/brightness normalization to make the
+    background pure white and text crisp, without cropping.
     """
-    base = os.path.splitext(os.path.basename(src))[0]
-    tmp = os.path.join(os.getcwd(), base + "_thresh.png")
-
-    res = subprocess.run(
-        [sys.executable, "-m", "page_dewarp", src],
-        capture_output=True,
-        text=True,
-    )
-    if res.returncode != 0:
-        print(f"[Dewarp] page-dewarp returned non-zero code {res.returncode}")
-        print(f"[Dewarp] stdout: {res.stdout}")
-        print(f"[Dewarp] stderr: {res.stderr}")
-
-    # Wait up to 30 s for page-dewarp to write its output file
-    for _ in range(30):
-        if os.path.exists(tmp):
-            shutil.move(tmp, dst)
-            _clean_and_crop_dewarped_image(dst)
-            print(f"[Dewarp] Success: {os.path.basename(dst)}")
-            return True
-        time.sleep(1)
-
-    # Graceful fallback: image from document mode is already flat enough.
-    # Convert JPG → PNG and copy so the rest of the pipeline proceeds.
-    print(f"[Dewarp] page-dewarp produced no output — image is likely already flat. "
-          f"Using source image as fallback.")
     try:
         img = cv2.imread(src)
-        if img is not None:
-            cv2.imwrite(dst, img)
-            print(f"[Dewarp] Fallback copy written: {os.path.basename(dst)}")
-            return True
+        if img is None:
+            return False
+
+        h, w = img.shape[:2]
+        
+        # Downscale for performance during background estimation
+        scale = 0.25
+        sh = int(h * scale)
+        sw = int(w * scale)
+        if sh > 0 and sw > 0:
+            small = cv2.resize(img, (sw, sh), interpolation=cv2.INTER_AREA)
+            
+            # Median blur on each channel of the small image to estimate background illumination
+            bg_channels = []
+            for ch in cv2.split(small):
+                bg_ch = cv2.medianBlur(ch, 41)  # Large kernel to smooth out text
+                bg_channels.append(bg_ch)
+            bg_small = cv2.merge(bg_channels)
+            
+            # Upscale background back to original size
+            bg = cv2.resize(bg_small, (w, h), interpolation=cv2.INTER_LINEAR)
+        else:
+            bg = img.copy()
+
+        # Division to normalize illumination: (img / bg) * 255
+        # Prevent division by zero
+        bg = np.clip(bg, 1, 255)
+        normalized = np.uint8(np.clip((img.astype(np.float32) / bg.astype(np.float32)) * 255.0, 0, 255))
+
+        # Further enhance contrast and brightness slightly
+        # alpha = contrast, beta = brightness
+        enhanced = cv2.convertScaleAbs(normalized, alpha=1.05, beta=5)
+        
+        cv2.imwrite(dst, enhanced)
+        print(f"[Whiteness Filter] Successfully processed and enhanced: {os.path.basename(dst)}")
+        return True
     except Exception as e:
-        print(f"[Dewarp] Fallback copy failed: {e}")
-    return False
+        print(f"[Whiteness Filter] Error enhancing image: {e}")
+        # Fallback: copy original
+        try:
+            shutil.copy2(src, dst)
+            return True
+        except Exception:
+            return False
 
 
 def _detect_and_save(image_path: str, save_path: str, extract_dir: str) -> list:
@@ -364,9 +373,14 @@ def process_page():
     # Determine page number from form or auto-assign
     page_number = int(request.form.get("page_number", 0))
     if page_number <= 0:
-        from page_assembler import list_pages
-
-        page_number = len(list_pages()) + 1
+        # Try parsing from filename (e.g. page_001_002.jpg -> 1)
+        import re
+        match = re.search(r"page_(\d+)", file.filename)
+        if match:
+            page_number = int(match.group(1))
+        else:
+            from page_assembler import list_pages
+            page_number = len(list_pages()) + 1
 
     # Save upload
     fname = secure_filename(file.filename)
@@ -419,14 +433,23 @@ def process_captures():
 
     for img_path in images:
         try:
+            import re
+            match = re.search(r"page_(\d+)", img_path.name)
+            current_page_number = int(match.group(1)) if match else page_number
+
             safe_name = secure_filename(img_path.name)
             ts = time.strftime("%Y%m%d_%H%M%S")
             new_name = f"{ts}_{safe_name}"
             upload_p = os.path.join(UPLOAD_FOLDER, new_name)
             shutil.copy2(str(img_path), upload_p)
 
-            processed.append(_process_upload_path(upload_p, new_name, page_number))
-            page_number += 1
+            processed.append(_process_upload_path(upload_p, new_name, current_page_number))
+            
+            if match:
+                # If matched page range, increment by 2 for the next spread fallback
+                page_number = current_page_number + 2
+            else:
+                page_number += 1
         except Exception as exc:
             errors.append({"file": img_path.name, "error": str(exc)})
 
@@ -773,9 +796,14 @@ def _captures_watcher_thread():
 
                 print(f"[Watcher] New capture detected: {filename}")
                 try:
-                    # Determine page number
-                    from page_assembler import list_pages
-                    page_number = len(list_pages()) + 1
+                    # Determine page number from filename if possible, e.g. page_001_002.jpg -> 1
+                    import re
+                    match = re.search(r"page_(\d+)", filename)
+                    if match:
+                        page_number = int(match.group(1))
+                    else:
+                        from page_assembler import list_pages
+                        page_number = len(list_pages()) + 1
 
                     # Copy to upload folder with timestamp prefix
                     safe_name = secure_filename(filename)
