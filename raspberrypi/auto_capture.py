@@ -8,8 +8,15 @@ ADB_PATH = r"C:\Program Files (x86)\Minimal ADB and Fastboot\adb.exe"
 PI_SAVE_PATH = r"E:\PROJECT\SmartScan\SmartScan_Captures"
 COUNTER_FILE = os.path.join(PI_SAVE_PATH, "page_counter.txt")
 
-# === DEVICE CONFIG (Single phone: Redmi Note 13 Pro) ===
-DEVICE_SERIAL = "868130a1"
+# === DEVICE CONFIG ===
+# Only ONE phone is used at a time. Comment/uncomment to switch devices.
+
+# --- Option A: Redmi Note 13 Pro (currently active) ---
+# DEVICE_SERIAL      = "868130a1"
+# DEVICE_CAMERA_PATH = "/storage/emulated/0/DCIM/Camera"
+
+# --- Option B: Vivo X300 Pro (comment out Option A and uncomment below to switch) ---
+DEVICE_SERIAL      = "10AFBB2BKT00367"
 DEVICE_CAMERA_PATH = "/storage/emulated/0/DCIM/Camera"
 
 # Auto-capture settings
