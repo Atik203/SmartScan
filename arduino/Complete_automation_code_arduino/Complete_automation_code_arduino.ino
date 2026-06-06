@@ -44,7 +44,7 @@ const unsigned long CYCLE_DELAY = 3000;
 // SPEED
 // =====================================================
 
-const unsigned long LIFT_SPEED_DELAY = 15;
+const unsigned long LIFT_SPEED_DELAY = 25;
 const unsigned long FLIP_SPEED_DELAY = 5;
 
 // =====================================================
