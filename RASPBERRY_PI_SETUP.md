@@ -51,15 +51,19 @@ xelatex --version
 
 ---
 
-## 🔌 Step 2 — ADB Setup for Phones
+## 🔌 Step 2 — ADB Setup for Phone
 
 ```bash
-# Enable USB debugging on both phones (Settings → Developer Options)
-# Connect phones via USB, then:
+# Enable USB debugging on the Redmi Note 13 Pro:
+#   Settings → About Phone → tap MIUI version 7× → Developer Options → USB Debugging ON
+# Connect via USB, then:
 adb devices
 # Expected output:
 #   868130a1       device    ← Redmi Note 13 Pro
-#   10AFBB2BKT00367 device  ← Vivo X300 Pro
+#
+# Capture mode: ONE phone captures BOTH open book pages in a single landscape shot.
+# The capture script rotates the image 90° clockwise and splits at the midpoint,
+# producing page_001.jpg + page_002.jpg per capture.
 
 # If you see "unauthorized" — check the phone screen and tap "Allow"
 
@@ -298,7 +302,7 @@ sudo systemctl status smartscan
 
 - [ ] Raspberry Pi OS 64-bit Bookworm installed
 - [ ] `sudo apt install` all dependencies (adb, tesseract, pandoc, texlive-xetex)
-- [ ] ADB recognizes both phones (`adb devices`)
+- [ ] ADB recognizes Redmi Note 13 Pro (`adb devices` shows `868130a1`)
 - [ ] Project cloned to `~/SmartScan/`
 - [ ] Python venv created + `pip install -r requirements.txt` done
 - [ ] `.env` created with `GEMINI_API_KEY`

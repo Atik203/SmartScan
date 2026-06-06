@@ -154,15 +154,17 @@ ARDUINO_PORT = os.getenv(
 ARDUINO_BAUD = int(os.getenv("ARDUINO_BAUD", "9600"))
 
 # ============================================================
-# ADB PHONE CONFIG (update serial numbers from: adb devices)
+# ADB PHONE CONFIG — Single device: Redmi Note 13 Pro
+# Run 'adb devices' to confirm the serial number.
 # ============================================================
+ADB_DEVICE_SERIAL = "868130a1"  # Redmi Note 13 Pro
 ADB_DEVICE_PATHS = {
-    "YOUR_LEFT_PHONE_SERIAL": "/storage/emulated/0/DCIM/Camera",
-    "YOUR_RIGHT_PHONE_SERIAL": "/storage/emulated/0/DCIM/Camera",
+    "868130a1": "/storage/emulated/0/DCIM/Camera",  # Redmi Note 13 Pro
 }
+# No left/right labels — single phone captures both pages in one shot.
+# Pages are split in the capture script: page_{2N-1}.jpg + page_{2N}.jpg.
 ADB_DEVICE_LABELS = {
-    "YOUR_LEFT_PHONE_SERIAL": "left",
-    "YOUR_RIGHT_PHONE_SERIAL": "right",
+    "868130a1": "single",  # Redmi Note 13 Pro (2-page capture)
 }
 
 # ============================================================

@@ -118,19 +118,26 @@ import numpy as np
 
 
 def _crop_image(src: str, dst: str):
+    """
+    Minimal-margin crop.
+    Mobile document mode already clips borders, so we only trim a tiny
+    edge (10 px) to remove any thin JPEG compression artefact lines.
+    """
     img = cv2.imread(src)
     if img is None:
         return
     h, w = img.shape[:2]
-    cropped = img[50 : h - 50, 50:]
+    pad = 10
+    cropped = img[pad : h - pad, pad : w - pad]
     cv2.imwrite(dst, cropped)
 
 
 def _clean_and_crop_dewarped_image(image_path: str):
     """
-    Cleans up curved black borders and corners from page-dewarp output.
-    Finds the largest white contour (the page paper), masks out everything else
-    to white (255), and crops the image to the bounding box of the page.
+    Cleans up any residual black borders from page-dewarp output.
+    Since mobile document mode produces nearly-flat images, this step is
+    lighter: we use a lower threshold (160) so clean white pages are not
+    over-cropped, and we still remove any dark edge artefacts.
     """
     img = cv2.imread(image_path)
     if img is None:
@@ -139,8 +146,8 @@ def _clean_and_crop_dewarped_image(image_path: str):
     # Convert to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img
 
-    # Threshold to binary (ensure paper is 255, ink/borders are 0)
-    _, thresh = cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY)
+    # Lower threshold is safer for document-mode images (already bright/white)
+    _, thresh = cv2.threshold(gray, 160, 255, cv2.THRESH_BINARY)
 
     # Find external contours
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -154,8 +161,9 @@ def _clean_and_crop_dewarped_image(image_path: str):
     x, y, w, h = cv2.boundingRect(largest_contour)
     img_h, img_w = img.shape[:2]
 
-    # Validate size (must be at least 30% of the image)
-    if w < img_w * 0.3 or h < img_h * 0.3:
+    # Validate size (must be at least 50% of the image — document pages fill the frame)
+    if w < img_w * 0.5 or h < img_h * 0.5:
+        print("[Cleanup] Largest contour too small — skipping crop to avoid data loss.")
         return
 
     # Create mask of the page contour
@@ -166,8 +174,8 @@ def _clean_and_crop_dewarped_image(image_path: str):
     cleaned_img = img.copy()
     cleaned_img[mask == 0] = 255
 
-    # Crop to the bounding rect of the page with a tiny padding
-    pad = 10
+    # Crop to the bounding rect of the page with a small padding
+    pad = 8
     x1 = max(0, x + pad)
     y1 = max(0, y + pad)
     x2 = min(img_w, x + w - pad)
@@ -181,9 +189,16 @@ def _clean_and_crop_dewarped_image(image_path: str):
 
 
 def _dewarp_image(src: str, dst: str) -> bool:
+    """
+    Run page-dewarp on a pre-flattened document-mode image.
+    Since mobile document mode already produces nearly-flat pages, dewarp
+    output is generally very good. If page-dewarp fails (e.g., image is
+    already too flat to detect curvature), we gracefully fall back to
+    copying the source directly so the pipeline can continue.
+    """
     base = os.path.splitext(os.path.basename(src))[0]
     tmp = os.path.join(os.getcwd(), base + "_thresh.png")
-    
+
     res = subprocess.run(
         [sys.executable, "-m", "page_dewarp", src],
         capture_output=True,
@@ -193,12 +208,28 @@ def _dewarp_image(src: str, dst: str) -> bool:
         print(f"[Dewarp] page-dewarp returned non-zero code {res.returncode}")
         print(f"[Dewarp] stdout: {res.stdout}")
         print(f"[Dewarp] stderr: {res.stderr}")
+
+    # Wait up to 30 s for page-dewarp to write its output file
     for _ in range(30):
         if os.path.exists(tmp):
             shutil.move(tmp, dst)
             _clean_and_crop_dewarped_image(dst)
+            print(f"[Dewarp] Success: {os.path.basename(dst)}")
             return True
         time.sleep(1)
+
+    # Graceful fallback: image from document mode is already flat enough.
+    # Convert JPG → PNG and copy so the rest of the pipeline proceeds.
+    print(f"[Dewarp] page-dewarp produced no output — image is likely already flat. "
+          f"Using source image as fallback.")
+    try:
+        img = cv2.imread(src)
+        if img is not None:
+            cv2.imwrite(dst, img)
+            print(f"[Dewarp] Fallback copy written: {os.path.basename(dst)}")
+            return True
+    except Exception as e:
+        print(f"[Dewarp] Fallback copy failed: {e}")
     return False
 
 
