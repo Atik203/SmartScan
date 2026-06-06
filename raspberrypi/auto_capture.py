@@ -7,7 +7,7 @@ import cv2
 # Path to Minimal ADB
 ADB_PATH = r"C:\Program Files (x86)\Minimal ADB and Fastboot\adb.exe"
 # Local save directory
-PI_SAVE_PATH = r"D:\SmartScan_Captures"
+PI_SAVE_PATH = r"E:\PROJECT\SmartScan\SmartScan_Captures"
 COUNTER_FILE = os.path.join(PI_SAVE_PATH, "page_counter.txt")
 
 # Device Serials
