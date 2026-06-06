@@ -4,9 +4,7 @@ import os
 import cv2
 
 # === CONFIGURATION ===
-# Path to Minimal ADB
 ADB_PATH = r"C:\Program Files (x86)\Minimal ADB and Fastboot\adb.exe"
-# Local save directory
 PI_SAVE_PATH = r"E:\PROJECT\SmartScan\SmartScan_Captures"
 COUNTER_FILE = os.path.join(PI_SAVE_PATH, "page_counter.txt")
 
@@ -17,9 +15,9 @@ DEVICE_CAMERA_PATH = "/storage/emulated/0/DCIM/Camera"
 # Auto-capture settings
 PREPROCESS_DELAY_SEC = 1
 PAGE_FLIP_INTERVAL_SEC = 2
-TOTAL_CAPTURES = 10  # Each capture yields 2 book pages
+TOTAL_CAPTURES = 10  # Each capture = 1 spread (2 book pages in one image)
 
-# Track the last pulled filename for duplicate prevention
+# Track last pulled filename for duplicate prevention
 last_filename = ""
 
 os.makedirs(PI_SAVE_PATH, exist_ok=True)
@@ -58,12 +56,10 @@ def save_page_counter(counter):
 
 def take_photo():
     print(f"[*] Triggering shutter on Redmi Note 13 Pro ({DEVICE_SERIAL})")
-    # Force Camera App to front
     run_adb_command(
         ["shell", "monkey", "-p", "com.android.camera", "1"], DEVICE_SERIAL
     )
     time.sleep(0.5)
-    # Use Keycode 66 (ENTER) to trigger shutter
     run_adb_command(["shell", "input", "keyevent", "66"], DEVICE_SERIAL)
 
 
@@ -72,75 +68,56 @@ def get_latest_image():
     output = run_adb_command(
         ["shell", f"ls -t {DEVICE_CAMERA_PATH}"], DEVICE_SERIAL
     )
-
-    # Filter for JPG files (case-insensitive)
     image_files = [f for f in output.splitlines() if f.lower().endswith(".jpg")]
-
     if not image_files:
         return None, None
-
     newest_file = image_files[0]
-
-    # Duplicate check
     if newest_file == last_filename:
-        print(f"[⚠️ WARNING] Same file returned again: {newest_file} — photo may not have been taken.")
+        print(f"[⚠️] Same file returned again: {newest_file} — photo may not have been taken.")
         return "DUPLICATE", DEVICE_CAMERA_PATH
-
     last_filename = newest_file
     return newest_file, DEVICE_CAMERA_PATH
 
 
-def rotate_and_split(image_path, capture_num):
+def rotate_spread(image_path, capture_num):
     """
-    Rotate the raw 2-page portrait capture 90° clockwise, then split
-    at the VERTICAL midpoint (mid-width) to produce two portrait page images.
+    Rotate the raw capture 90° CCW (left) so the 2-page book spread
+    is upright, then save as a single full-spread image.
 
-    The Redmi captures in portrait mode — both book pages sit side-by-side
-    inside the frame (left page on the left, right page on the right).
-    After rotating 90° CW the image becomes landscape; we cut at x = w//2:
+    Naming: page_NNN_MMM.jpg  where NNN = left page, MMM = right page
+      Capture 1 → page_001_002.jpg
+      Capture 2 → page_003_004.jpg
+      ...
 
-        [ LEFT PAGE | RIGHT PAGE ]
-             ← left_half   right_half →
+    The full spread goes to the backend pipeline as one image:
+    → dewarp → YOLO detect → Gemini/Tesseract OCR both pages at once.
 
-      Left half   → odd page   → page_{2N-1:03d}.jpg
-      Right half  → even page  → page_{2N:03d}.jpg
-
-    Returns (left_path, right_path) or (None, None) on failure.
+    Returns the saved spread path, or None on failure.
     """
     img = cv2.imread(image_path)
     if img is None:
         print(f"[ERROR] Cannot read image: {image_path}")
-        return None, None
+        return None
 
-    # Rotate 90° clockwise
-    rotated = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+    # Rotate 90° counter-clockwise (left)
+    rotated = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
     h, w = rotated.shape[:2]
-
-    # Split VERTICALLY at mid-width  ← this is the key fix
-    mid = w // 2
-    left_half  = rotated[:, :mid]   # left book page
-    right_half = rotated[:, mid:]   # right book page
 
     left_page_num  = 2 * capture_num - 1
     right_page_num = 2 * capture_num
+    spread_name = f"page_{left_page_num:03d}_{right_page_num:03d}.jpg"
+    spread_path = os.path.join(PI_SAVE_PATH, spread_name)
 
-    left_name  = f"page_{left_page_num:03d}.jpg"
-    right_name = f"page_{right_page_num:03d}.jpg"
-    left_path  = os.path.join(PI_SAVE_PATH, left_name)
-    right_path = os.path.join(PI_SAVE_PATH, right_name)
-
-    cv2.imwrite(left_path, left_half)
-    cv2.imwrite(right_path, right_half)
-
-    print(f"[✂] Split → {left_name} ({left_half.shape[1]}×{left_half.shape[0]}) "
-          f"| {right_name} ({right_half.shape[1]}×{right_half.shape[0]})")
-    return left_path, right_path
+    cv2.imwrite(spread_path, rotated)
+    print(f"[📄] Spread saved: {spread_name} ({w}×{h})")
+    return spread_path
 
 
 def pull_image(filename, remote_path, capture_num):
-    """Pull the raw capture from the phone, rotate and split. Raw file is KEPT for inspection."""
-    global last_filename
-
+    """
+    Pull the raw capture from the phone, rotate 90° CCW, save as a
+    full-spread image. The raw file is also kept for inspection.
+    """
     remote_full = f"{remote_path}/{filename}"
     raw_name    = f"capture_{capture_num:03d}_raw.jpg"
     raw_path    = os.path.join(PI_SAVE_PATH, raw_name)
@@ -152,17 +129,14 @@ def pull_image(filename, remote_path, capture_num):
         print(f"[ERROR] Pull failed — file not found locally: {raw_path}")
         return
 
-    rotate_and_split(raw_path, capture_num)
-    # Raw file is intentionally kept so you can compare the phone’s document-mode
-    # crop against the final split pages and diagnose any height clipping.
+    rotate_spread(raw_path, capture_num)
     print(f"[💾] Raw file kept: {raw_name}")
 
 
 # === MAIN ===
 def capture_page(capture_num):
-    """Trigger shutter, wait for ISP, pull and split the image."""
+    """Trigger shutter, wait for ISP, pull and rotate the spread."""
     take_photo()
-
     print("⏳ Waiting for image processing...")
     time.sleep(5)
 
@@ -178,18 +152,18 @@ def capture_page(capture_num):
         print(f"[ERROR] {e}")
 
     save_page_counter(capture_num + 1)
-    print(f"✅ Capture {capture_num} complete "
-          f"(book pages {2*capture_num-1} & {2*capture_num}).\n")
+    left_p  = 2 * capture_num - 1
+    right_p = 2 * capture_num
+    print(f"✅ Capture {capture_num} complete → page_{left_p:03d}_{right_p:03d}.jpg\n")
 
 
 def main():
-    print("🚀 SmartScan — Single-Phone Capture Mode")
+    print("🚀 SmartScan — Full-Spread Capture Mode")
     print(f"   Device : Redmi Note 13 Pro ({DEVICE_SERIAL})")
-    print(f"   Mode   : 2 pages per capture (rotate 90°CW + split)")
-    print("=" * 50)
+    print(f"   Mode   : 2 pages per capture, saved as one spread image (rotate 90°CCW)")
+    print("=" * 55)
 
     capture_num = load_page_counter()
-
     print(f"⏳ Pre-capture delay: {PREPROCESS_DELAY_SEC}s")
     time.sleep(PREPROCESS_DELAY_SEC)
 
