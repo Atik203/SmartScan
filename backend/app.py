@@ -407,6 +407,7 @@ def process_captures():
         p
         for p in Path(CAPTURES_DIR).iterdir()
         if p.suffix.lower() in (".jpg", ".jpeg", ".png")
+        and not p.name.startswith("capture_")  # skip raw diagnostic files
     )
 
     if limit > 0:
@@ -749,11 +750,14 @@ def _captures_watcher_thread():
                 time.sleep(2)
                 continue
 
-            # Find all image files
+            # Find all image files — but skip raw capture files (kept for diagnostics)
             images = []
             for ext in (".jpg", ".jpeg", ".png"):
                 images.extend(Path(CAPTURES_DIR).glob(f"*{ext}"))
                 images.extend(Path(CAPTURES_DIR).glob(f"*{ext.upper()}"))
+
+            # Exclude capture_NNN_raw.jpg files — those are unprocessed phone dumps
+            images = [p for p in images if not p.name.startswith("capture_")]
 
             # Sort them so they process in alphabetical/sequential order
             images = sorted(images, key=lambda p: p.name)

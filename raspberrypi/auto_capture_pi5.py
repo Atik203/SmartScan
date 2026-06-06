@@ -185,7 +185,7 @@ def rotate_and_split(image_path, capture_num):
 
 
 def pull_image(filename, remote_path, capture_num):
-    """Pull the raw capture from the phone, rotate, split, then remove the raw file."""
+    """Pull the raw capture from the phone, rotate and split. Raw file is KEPT for inspection."""
     remote_full = f"{remote_path}/{filename}"
     raw_name    = f"capture_{capture_num:03d}_raw.jpg"
     raw_path    = os.path.join(PI_SAVE_PATH, raw_name)
@@ -197,14 +197,10 @@ def pull_image(filename, remote_path, capture_num):
         print(f"[ERROR] Pull failed — file not found locally: {raw_path}")
         return
 
-    left_path, right_path = rotate_and_split(raw_path, capture_num)
-
-    # Remove the raw file to keep SmartScan_Captures clean
-    if left_path and right_path:
-        os.remove(raw_path)
-        print(f"[Cleanup] Removed raw file: {raw_name}")
-    else:
-        print(f"[WARNING] Split failed — keeping raw file for inspection: {raw_name}")
+    rotate_and_split(raw_path, capture_num)
+    # Raw file is intentionally kept so you can compare the phone's document-mode
+    # crop against the final split pages and diagnose any height clipping.
+    print(f"[SAVE] Raw file kept: {raw_name}")
 
 
 # === MAIN ===
