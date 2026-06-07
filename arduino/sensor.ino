@@ -2,12 +2,19 @@
 
 // =====================================================
 // AUTOMATIC PAGE TURNER
-// SIMULTANEOUS LIFT + FLIPPER (50% START)
+// WITH END OF BOOK + PAGE SUCCESS + JAM DETECTION
 // =====================================================
 
 Servo tyre;
 Servo lift;
 Servo flipper;
+
+// =====================================================
+// SENSOR PINS
+// =====================================================
+
+const int STACK_SENSOR  = 2; // Sensor 1
+const int OUTPUT_SENSOR = 3; // Sensor 2
 
 // =====================================================
 // TYRE SERVO
@@ -49,11 +56,29 @@ const unsigned long FLIP_SPEED_DELAY = 5;
 
 // =====================================================
 
+void stopSystem()
+{
+  tyre.write(TYRE_STOP);
+  lift.write(LIFT_UP);
+  flipper.write(FLIP_RELEASE);
+
+  Serial.println("SYSTEM STOPPED");
+
+  while (true)
+  {
+  }
+}
+
 void setup()
 {
   tyre.attach(8);
   lift.attach(9);
   flipper.attach(11);
+
+  pinMode(STACK_SENSOR, INPUT);
+  pinMode(OUTPUT_SENSOR, INPUT);
+
+  Serial.begin(9600);
 
   tyre.write(TYRE_STOP);
   lift.write(LIFT_UP);
@@ -64,9 +89,20 @@ void setup()
 
 void loop()
 {
-  // ==========================================
-  // STEP 1: LOWER TYRE (LIFT DOWN POSITION READY)
-  // ==========================================
+  // =====================================================
+  // END OF BOOK CHECK
+  // =====================================================
+
+  if (digitalRead(STACK_SENSOR) == HIGH)
+  {
+    Serial.println("END OF BOOK DETECTED");
+    stopSystem();
+  }
+
+  // =====================================================
+  // STEP 1
+  // LOWER TYRE
+  // =====================================================
 
   for (int pos = LIFT_UP; pos <= LIFT_DOWN; pos++)
   {
@@ -76,16 +112,19 @@ void loop()
 
   delay(100);
 
-  // ==========================================
-  // STEP 2: START TYRE
-  // ==========================================
+  // =====================================================
+  // STEP 2
+  // START TYRE
+  // =====================================================
 
   tyre.write(TYRE_TURN);
+
   delay(TYRE_LEAD_TIME);
 
-  // ==========================================
-  // STEP 3: LIFT + FLIPPER SIMULTANEOUS
-  // ==========================================
+  // =====================================================
+  // STEP 3
+  // LIFT + FLIPPER SIMULTANEOUS
+  // =====================================================
 
   int liftPos = LIFT_DOWN;
   int flipPos = FLIP_RELEASE;
@@ -101,14 +140,17 @@ void loop()
   {
     unsigned long now = millis();
 
-    // --------------------------
-    // LIFT MOVEMENT
-    // --------------------------
-    if (!liftFinished && now - lastLiftMove >= LIFT_SPEED_DELAY)
+    // -----------------------
+    // LIFT
+    // -----------------------
+
+    if (!liftFinished &&
+        now - lastLiftMove >= LIFT_SPEED_DELAY)
     {
       lastLiftMove = now;
 
       liftPos--;
+
       lift.write(liftPos);
 
       if (liftPos <= LIFT_UP)
@@ -117,17 +159,19 @@ void loop()
       }
     }
 
-    // --------------------------
-    // FLIPPER START CONDITION (50%)
-    // --------------------------
-    if (liftPos <= 120)   // 50% point
+    // -----------------------
+    // FLIPPER START AT 50%
+    // -----------------------
+
+    if (liftPos <= 120)
     {
       flipStarted = true;
     }
 
-    // --------------------------
-    // FLIPPER MOVEMENT
-    // --------------------------
+    // -----------------------
+    // FLIPPER
+    // -----------------------
+
     if (flipStarted &&
         !flipFinished &&
         now - lastFlipMove >= FLIP_SPEED_DELAY)
@@ -135,6 +179,7 @@ void loop()
       lastFlipMove = now;
 
       flipPos++;
+
       flipper.write(flipPos);
 
       if (flipPos >= FLIP_PRESS)
@@ -144,16 +189,19 @@ void loop()
     }
   }
 
-  // ==========================================
-  // STEP 4: KEEP TYRE RUNNING
-  // ==========================================
+  // =====================================================
+  // STEP 4
+  // KEEP TYRE RUNNING
+  // =====================================================
 
   delay(TYRE_EXTRA_TIME);
+
   tyre.write(TYRE_STOP);
 
-  // ==========================================
-  // STEP 5: HOLD FLIPPER
-  // ==========================================
+  // =====================================================
+  // STEP 5
+  // HOLD FLIPPER
+  // =====================================================
 
   unsigned long holdStart = millis();
 
@@ -162,9 +210,10 @@ void loop()
     flipper.write(FLIP_PRESS);
   }
 
-  // ==========================================
-  // STEP 6: RELEASE FLIPPER
-  // ==========================================
+  // =====================================================
+  // STEP 6
+  // RELEASE FLIPPER
+  // =====================================================
 
   for (int pos = FLIP_PRESS; pos >= FLIP_RELEASE; pos--)
   {
@@ -172,9 +221,25 @@ void loop()
     delay(FLIP_SPEED_DELAY);
   }
 
-  // ==========================================
-  // STEP 7: WAIT FOR NEXT CYCLE
-  // ==========================================
+  // =====================================================
+  // PAGE TURN VERIFICATION
+  // =====================================================
+
+  delay(300);
+
+  if (digitalRead(OUTPUT_SENSOR) == HIGH)
+  {
+    Serial.println("PAGE TURN FAILED");
+    Serial.println("JAM DETECTED");
+
+    stopSystem();
+  }
+
+  Serial.println("PAGE TURN SUCCESS");
+
+  // =====================================================
+  // NEXT PAGE
+  // =====================================================
 
   delay(CYCLE_DELAY);
 }
