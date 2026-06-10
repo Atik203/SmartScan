@@ -35,7 +35,7 @@ const int FLIP_PRESS   = 180;
 // =====================================================
 
 const unsigned long TYRE_LEAD_TIME  = 150;
-const unsigned long TYRE_EXTRA_TIME = 150;
+const unsigned long TYRE_EXTRA_TIME = 250;
 
 const unsigned long PRESS_HOLD = 3000;
 const unsigned long CYCLE_DELAY = 3000;
@@ -45,7 +45,7 @@ const unsigned long CYCLE_DELAY = 3000;
 // =====================================================
 
 const unsigned long LIFT_SPEED_DELAY = 25;
-const unsigned long FLIP_SPEED_DELAY = 5;
+const unsigned long FLIP_SPEED_DELAY = 3;
 
 // =====================================================
 
@@ -121,7 +121,7 @@ void loop()
     // --------------------------
     // FLIPPER START CONDITION (50%)
     // --------------------------
-    if (liftPos <= 120)   // 50% point
+    if (liftPos <= 135)   // 50% point
     {
       flipStarted = true;
     }

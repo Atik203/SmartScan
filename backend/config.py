@@ -160,22 +160,22 @@ ARDUINO_BAUD = int(os.getenv("ARDUINO_BAUD", "9600"))
 # ============================================================
 
 # --- Option A: Redmi Note 13 Pro (currently active) ---
-# ADB_DEVICE_SERIAL = "868130a1"
-# ADB_DEVICE_PATHS = {
-#     "868130a1": "/storage/emulated/0/DCIM/Camera",  # Redmi Note 13 Pro
-# }
-# ADB_DEVICE_LABELS = {
-#     "868130a1": "single",  # full-spread capture
-# }
-
-# --- Option B: Vivo X300 Pro (comment out Option A and uncomment below) ---
-ADB_DEVICE_SERIAL = "10AFBB2BKT00367"
+ADB_DEVICE_SERIAL = "868130a1"
 ADB_DEVICE_PATHS = {
-    "10AFBB2BKT00367": "/storage/emulated/0/DCIM/Camera",  # Vivo X300 Pro
+    "868130a1": "/storage/emulated/0/DCIM/Camera",  # Redmi Note 13 Pro
 }
 ADB_DEVICE_LABELS = {
-    "10AFBB2BKT00367": "single",
+    "868130a1": "single",  # full-spread capture
 }
+
+# --- Option B: Vivo X300 Pro (comment out Option A and uncomment below) ---
+# ADB_DEVICE_SERIAL = "10AFBB2BKT00367"
+# ADB_DEVICE_PATHS = {
+#     "10AFBB2BKT00367": "/storage/emulated/0/DCIM/Camera",  # Vivo X300 Pro
+# }
+# ADB_DEVICE_LABELS = {
+#     "10AFBB2BKT00367": "single",
+# }
 
 # ============================================================
 # DATASET PATHS
