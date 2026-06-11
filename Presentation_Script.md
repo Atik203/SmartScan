@@ -111,7 +111,7 @@ for technical education. [PAUSE]
 
 Our system has several core features. [PAUSE]
 
-[SLOW] First — [SHORT PAUSE] a fully autonomous **4-stage page-flipping mechanism**.
+[SLOW] First — [SHORT PAUSE] a fully autonomous **page-flipping mechanism**.
 
 [SLOW] Second — [SHORT PAUSE] a **synchronized camera capture** system.
 
