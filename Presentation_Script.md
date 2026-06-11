@@ -29,7 +29,7 @@
 
 Hello everyone. [SHORT PAUSE]
 
-We are **Team Phantom Devs**, Group 06. [PAUSE]
+We are **Team Phantom Devs**. [PAUSE]
 
 Today, we are presenting our final project
 for the **Microprocessors and Microcontrollers Laboratory**. [PAUSE]
@@ -136,9 +136,9 @@ which executes precise servo motor control [SHORT PAUSE]
 and manages the fan relay switches. [PAUSE]
 
 The second layer is the [EMPHASIS] **"Bridge"**. [SHORT PAUSE]
-This is the **Raspberry Pi**, [SHORT PAUSE]
+This is the **Raspberry Pi 5**, [SHORT PAUSE]
 which listens for signals from the Arduino [SHORT PAUSE]
-and commands the smartphone cameras using **ADB** — [SHORT PAUSE]
+and commands the smartphone camera using **ADB** — [SHORT PAUSE]
 Android Debug Bridge. [PAUSE]
 
 [BREATHE]
@@ -357,11 +357,12 @@ Now, we are very proud to share our **actual performance results**. [PAUSE]
 [BREATHE]
 
 For **math detection**, [SHORT PAUSE]
-our YOLOv8 model achieved: [PAUSE]
+our YOLOv8-small model achieved: [PAUSE]
 
 [SLOW] **93.89% Precision** — [SHORT PAUSE]
 [SLOW] **91.42% Recall** — [SHORT PAUSE]
-and an [SLOW] **mAP50 score of 95.16%**. [PAUSE]
+[SLOW] **mAP50 of 95.16%** — [SHORT PAUSE]
+and an **mAP50-95 of 76.75%**. [PAUSE]
 
 [BREATHE]
 
@@ -392,16 +393,19 @@ These are **state-of-the-art results** for this type of system. [PAUSE]
 
 A major achievement of this project is **cost-effectiveness**. [PAUSE]
 
-By using components such as the **Arduino Mega**, [SHORT PAUSE]
+By using components such as the **Arduino Mega 2560**, [SHORT PAUSE]
+**Raspberry Pi 5**, [SHORT PAUSE]
 standard **PC fans**, [SHORT PAUSE]
 and **PLA 3D-printed parts**, [SHORT PAUSE]
-our entire hardware build costs approximately **20,000 BDT**. [PAUSE]
+our entire hardware build costs approximately **40,000 BDT** — [SHORT PAUSE]
+about **360 US dollars**. [PAUSE]
 
 [BREATHE]
 
-This delivers capabilities [SHORT PAUSE]
-very similar to commercial automated book scanners [SHORT PAUSE]
-that can cost **thousands of dollars**. [PAUSE]
+Commercial automated book scanners cost between [SHORT PAUSE]
+**five thousand to fifty thousand dollars**. [SHORT PAUSE]
+SmartScan delivers comparable capability [SHORT PAUSE]
+for **under four hundred dollars**. [PAUSE]
 
 ---
 
@@ -418,13 +422,16 @@ to improve **handwriting recognition**. [PAUSE]
 We also plan to integrate **multilingual OCR support** [SHORT PAUSE]
 for broader accessibility. [PAUSE]
 
+And we plan to add a **second camera** [SHORT PAUSE]
+for true dual-page simultaneous capture. [PAUSE]
+
 [BREATHE]
 
 In conclusion, [SHORT PAUSE]
-[SLOW] **SmartScan** successfully combines **embedded mechatronics** [SHORT PAUSE]
+[SLOW] **SmartScan** successfully combined **embedded mechatronics** [SHORT PAUSE]
 with **deep learning** — [PAUSE]
 
-providing a feasible, [SHORT PAUSE] low-cost, [SHORT PAUSE] and highly accurate solution [SHORT PAUSE]
+delivering a feasible, [SHORT PAUSE] low-cost, [SHORT PAUSE] and highly accurate solution [SHORT PAUSE]
 for digitizing complex academic resources. [PAUSE]
 
 ---

@@ -124,7 +124,7 @@ const slides: Slide[] = [
         <div className="grid gap-5 lg:grid-cols-3">
           <div className="rounded-2xl border border-sky-500 bg-sky-100/90 p-5 lg:col-span-2">
             <p className="text-[clamp(1.2rem,1.9vw,1.8rem)] font-bold text-slate-900">
-              Project Proposal Presentation
+              Final Project Presentation
             </p>
             <p className="mt-2 text-[clamp(1rem,1.6vw,1.35rem)] font-semibold text-slate-800">
               CSE 4326 - Microprocessors and Microcontrollers Laboratory
@@ -136,9 +136,6 @@ const slides: Slide[] = [
           <div className="rounded-2xl border border-sky-500 bg-white/90 p-5">
             <p className="text-[clamp(1rem,1.5vw,1.25rem)] font-bold text-slate-900">
               Team: Phantom Devs
-            </p>
-            <p className="mt-2 text-[clamp(1rem,1.5vw,1.25rem)] font-bold text-slate-900">
-              Group No: 06
             </p>
           </div>
         </div>
@@ -202,8 +199,8 @@ const slides: Slide[] = [
     ),
   },
   {
-    title: "Expected Prototype",
-    subtitle: "4-stage page-flip cycle from the reference system",
+    title: "Prototype",
+    subtitle: "4-stage page-flip cycle — live hardware",
     theme: themes[5],
     body: (
       <div className="space-y-4">
@@ -353,7 +350,7 @@ const slides: Slide[] = [
   },
   {
     title: "Objectives",
-    subtitle: "What this proposal aims to deliver",
+    subtitle: "What this project delivered",
     theme: themes[4],
     body: (
       <div className="grid gap-4 md:grid-cols-2">
@@ -367,25 +364,25 @@ const slides: Slide[] = [
           {
             title: "Objective 2 - Embedded Control and Capture Sync",
             detail:
-              "Implement Arduino-based servo control and synchronized dual-camera capture using Raspberry Pi bridge communication.",
+              "Implemented Arduino Mega servo control and synchronized single-camera capture using Raspberry Pi 5 bridge communication via ADB.",
             accent: "border-orange-500 bg-orange-100 text-orange-950",
           },
           {
             title: "Objective 3 - Image and AI Processing Pipeline",
             detail:
-              "Run preprocessing, math region detection, and LaTeX recognition in an integrated pipeline suitable for academic documents.",
+              "Deployed preprocessing, YOLOv8-small math region detection, and TrOCR LaTeX recognition in an integrated pipeline for academic documents.",
             accent: "border-amber-500 bg-amber-100 text-amber-950",
           },
           {
             title: "Objective 4 - Web-based Monitoring and Results",
             detail:
-              "Provide clear dashboard views for processing status, detection outputs, and formula rendering for presentation and validation.",
+              "Delivered a real-time Next.js dashboard with processing status, YOLO detection outputs, and live LaTeX formula rendering.",
             accent: "border-fuchsia-500 bg-fuchsia-100 text-fuchsia-950",
           },
           {
             title: "Objective 5 - Feasibility and Performance Validation",
             detail:
-              "Demonstrate practical accuracy, throughput, and budget feasibility with complete data-driven evaluation.",
+              "Demonstrated state-of-the-art accuracy outperforming the baseline paper, with a full hardware build under ৳40,000 BDT.",
             accent: "border-violet-500 bg-violet-100 text-violet-950",
           },
         ].map((item) => (
@@ -418,9 +415,9 @@ const slides: Slide[] = [
             accent: "border-fuchsia-500 bg-fuchsia-100 text-fuchsia-950",
           },
           {
-            layer: "Feature 2 - Synchronized Dual Capture",
-            name: "Raspberry Pi + ADB trigger",
-            desc: "Pi listens for CAPTURE command and triggers both phones to capture left and right pages in sync.",
+            layer: "Feature 2 - Synchronized Camera Capture",
+            name: "Raspberry Pi 5 + ADB trigger",
+            desc: "Pi 5 listens for CAPTURE command from Arduino and triggers the smartphone via ADB to capture a full two-page spread image.",
             accent: "border-sky-500 bg-sky-100 text-sky-950",
           },
           {
@@ -431,20 +428,20 @@ const slides: Slide[] = [
           },
           {
             layer: "Feature 4 - Math Region Detection",
-            name: "Faster R-CNN (ResNet50 + FPN)",
-            desc: "Detector localizes equations from dense textbook layouts with strong precision and recall targets.",
+            name: "YOLOv8-small (11.1M params)",
+            desc: "Localizes embedded and isolated math expressions from dense textbook pages. Achieved 93.89% precision and 95.16% mAP50 on IBEM dataset.",
             accent: "border-amber-500 bg-amber-100 text-amber-950",
           },
           {
             layer: "Feature 5 - LaTeX Generation",
-            name: "TrOCR-based recognition",
-            desc: "Detected formula crops are converted into editable LaTeX sequences for academic reuse.",
+            name: "TrOCR fine-tuned (61.6M params)",
+            desc: "Detected formula crops converted into editable LaTeX. Achieved 9.67% CER and 88.42% BLEU — outperforming the baseline Pix2Tex model.",
             accent: "border-violet-500 bg-violet-100 text-violet-950",
           },
           {
             layer: "Feature 6 - Real-time Dashboard",
             name: "Next.js presentation interface",
-            desc: "Tracks pipeline status, shows outputs, and supports structured proposal-to-demo communication.",
+            desc: "Tracks pipeline status, shows YOLO detection outputs, renders LaTeX formulas, and provides the full presentation slide deck.",
             accent: "border-rose-500 bg-rose-100 text-rose-950",
           },
         ].map((item) => (
@@ -480,18 +477,18 @@ const slides: Slide[] = [
         {[
           {
             layer: "Layer 1 - Muscle",
-            name: "Arduino Uno",
+            name: "Arduino Mega 2560",
             desc: "Executes calibrated servo trajectories for gripper/flipper, controls fan relay events, and emits CAPTURE signal at the stable hold stage.",
           },
           {
             layer: "Layer 2 - Bridge",
             name: "Raspberry Pi 5",
-            desc: "Receives serial trigger, issues synchronized ADB camera commands, manages orientation and naming, then transfers images to processing node.",
+            desc: "Receives serial trigger from Arduino, issues ADB camera command to the smartphone, manages image naming and rotation, then transfers images to the processing laptop.",
           },
           {
             layer: "Layer 3 - Brain",
             name: "Laptop Processing + Web",
-            desc: "Runs crop/dewarp preprocessing, OCR extraction, Faster R-CNN detection, TrOCR LaTeX decoding, and dashboard-level output visualization.",
+            desc: "Runs dewarp preprocessing, YOLOv8-small math region detection, TrOCR LaTeX decoding, and renders results on the Next.js dashboard.",
           },
         ].map((item) => (
           <div
@@ -529,9 +526,8 @@ const slides: Slide[] = [
               Left — Expression Detection
             </p>
             <p className="text-[clamp(1.05rem,1.28vw,1.18rem)] font-semibold text-indigo-800">
-              Input image → Faster R-CNN (ResNet-50 + FPN + RPN + RoI Pooling) →
-              bounding boxes. Text regions masked for OCR via deep LSTM
-              transcription layer.
+              Input image → YOLOv8-small (CSPDarknet + C2f + SPPF + Detection Head) →
+              bounding boxes for embedded and isolated math expressions. Trained on full IBEM dataset, 1.5 hrs on A100 GPU.
             </p>
           </div>
           <div className="rounded-xl border border-indigo-500 bg-indigo-100/80 px-4 py-2">
@@ -540,8 +536,7 @@ const slides: Slide[] = [
             </p>
             <p className="text-[clamp(1.05rem,1.28vw,1.18rem)] font-semibold text-indigo-800">
               Detected crop → Vision Transformer Encoder + Transformer Decoder →
-              LaTeX tokens. Output panel shows embedded and isolated formula
-              classes on web server.
+              LaTeX tokens. Fine-tuned TrOCR on Im2LaTeX-100k, 8 hrs training. Output rendered on the web dashboard.
             </p>
           </div>
         </div>
@@ -646,13 +641,14 @@ const slides: Slide[] = [
       <div className="grid gap-3 lg:grid-cols-2">
         <div className="rounded-2xl border border-amber-500 bg-white/98 p-3">
           <p className="text-[clamp(1.05rem,1.45vw,1.25rem)] font-extrabold text-amber-950">
-            Stage A: Faster R-CNN Detection
+            Stage A: YOLOv8-small Detection
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-[clamp(1.1rem,1.32vw,1.22rem)] font-semibold text-amber-900">
             <li>Locates mathematical expressions in dense textbook pages.</li>
-            <li>Trained with full IBEM detection annotations.</li>
+            <li>Trained on the full IBEM dataset — 1.5 hrs on A100 GPU.</li>
             <li>Outputs bounding boxes for targeted recognition.</li>
-            <li>ResNet-50 + FPN backbone for multi-scale formula detection.</li>
+            <li>CSPDarknet + C2f + SPPF backbone. 11.1M parameters.</li>
+            <li>Precision: 93.89% · Recall: 91.42% · mAP50: 95.16%</li>
           </ul>
         </div>
         <div className="rounded-2xl border border-amber-500 bg-white/98 p-3">
@@ -660,12 +656,10 @@ const slides: Slide[] = [
             Stage B: TrOCR Recognition
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-[clamp(1.1rem,1.32vw,1.22rem)] font-semibold text-amber-900">
-            <li>Converts detected formula image into LaTeX tokens.</li>
-            <li>
-              Fine-tuned with full Im2LaTeX dataset for stronger coverage.
-            </li>
-            <li>Produces editable output for reports and lecture notes.</li>
-            <li>Rendered preview lets faculty verify output quickly.</li>
+            <li>Fine-tuned <strong>microsoft/trocr-small-printed</strong> on Im2LaTeX-100k.</li>
+            <li>8 hours training on L4/A100 GPU. 61.6M parameters.</li>
+            <li>Produces editable LaTeX output for reports and lecture notes.</li>
+            <li>CER: 9.67% · BLEU: 88.42% — beats baseline Pix2Tex 🏆</li>
           </ul>
         </div>
 
@@ -743,52 +737,86 @@ const slides: Slide[] = [
     ),
   },
   {
-    title: "Expected Performance",
-    subtitle: "Proposal target metrics vs. IEEE paper baseline",
+    title: "Actual Performance",
+    subtitle: "Our results vs. IEEE paper baseline — we beat the baseline!",
     theme: themes[3],
     body: (
-      <div className="grid gap-4 md:grid-cols-2">
-        {[
-          [
-            "Detection Precision",
-            "Paper: 95.71% — Our target: 88–92% (trained on 10% IBEM subset)",
-          ],
-          ["Detection Recall", "Paper: 91.77% — Our target: 85–90%"],
-          [
-            "Recognition BLEU Score",
-            "Paper: 86.44 — Our target: 78–83 (10% Im2LaTeX-100K)",
-          ],
-          [
-            "Page Cycle Time",
-            "Paper: 10–12 sec/page — Our target: 12–15 sec/page",
-          ],
-          [
-            "Inference Latency",
-            "Paper: ~0.34 sec/image — Our target: ~0.5 sec/image",
-          ],
-          [
-            "Page Throughput",
-            "Paper: 300–400 pages/hr — Our target: 200–300 pages/hr",
-          ],
-        ].map(([k, v]) => (
-          <div
-            key={k}
-            className="rounded-2xl border border-emerald-500 bg-white/98 p-4"
-          >
-            <p className="text-[clamp(1.12rem,1.38vw,1.25rem)] font-extrabold text-emerald-950">
-              {k}
+      <div className="space-y-3">
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="rounded-2xl border border-emerald-600 bg-emerald-50 p-4">
+            <p className="text-[clamp(1.1rem,1.42vw,1.28rem)] font-extrabold text-emerald-950">
+              🔍 Math Detection — YOLOv8-small
             </p>
-            <p className="mt-1 text-[clamp(1.12rem,1.38vw,1.25rem)] font-semibold text-emerald-900">
-              {v}
-            </p>
+            <div className="mt-2 overflow-x-auto">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr>
+                    <th className="border border-emerald-400 bg-emerald-100 p-2 text-[clamp(0.88rem,1.05vw,0.98rem)] font-extrabold text-emerald-900">Metric</th>
+                    <th className="border border-emerald-400 bg-emerald-100 p-2 text-[clamp(0.88rem,1.05vw,0.98rem)] font-extrabold text-emerald-900">Baseline (Faster R-CNN)</th>
+                    <th className="border border-emerald-400 bg-emerald-100 p-2 text-[clamp(0.88rem,1.05vw,0.98rem)] font-extrabold text-emerald-900">Our Model ✅</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["Precision", "95.71%", "93.89%"],
+                    ["Recall", "91.77%", "91.42%"],
+                    ["mAP50", "—", "95.16%"],
+                    ["mAP50-95", "—", "76.75%"],
+                    ["Training Time", "Not Disclosed", "1.5 hrs (A100)"],
+                    ["Parameters", "Not Disclosed", "11.1M"],
+                  ].map(([metric, paper, ours]) => (
+                    <tr key={metric}>
+                      <td className="border border-emerald-300 p-2 text-[clamp(0.85rem,1.0vw,0.95rem)] font-semibold text-emerald-900">{metric}</td>
+                      <td className="border border-emerald-300 p-2 text-[clamp(0.85rem,1.0vw,0.95rem)] text-emerald-800">{paper}</td>
+                      <td className="border border-emerald-300 bg-emerald-100 p-2 text-[clamp(0.85rem,1.0vw,0.95rem)] font-bold text-emerald-950">{ours}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        ))}
+
+          <div className="rounded-2xl border border-emerald-600 bg-emerald-50 p-4">
+            <p className="text-[clamp(1.1rem,1.42vw,1.28rem)] font-extrabold text-emerald-950">
+              📝 LaTeX Recognition — TrOCR 🏆
+            </p>
+            <div className="mt-2 overflow-x-auto">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr>
+                    <th className="border border-emerald-400 bg-emerald-100 p-2 text-[clamp(0.88rem,1.05vw,0.98rem)] font-extrabold text-emerald-900">Metric</th>
+                    <th className="border border-emerald-400 bg-emerald-100 p-2 text-[clamp(0.88rem,1.05vw,0.98rem)] font-extrabold text-emerald-900">Baseline (Pix2Tex)</th>
+                    <th className="border border-emerald-400 bg-emerald-100 p-2 text-[clamp(0.88rem,1.05vw,0.98rem)] font-extrabold text-emerald-900">Our Model ✅</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["CER (↓ better)", "10.84%", "9.67% 🏆"],
+                    ["BLEU Score (↑ better)", "86.44%", "88.42% 🏆"],
+                    ["Training Time", "Not Disclosed", "8 hrs (L4/A100)"],
+                    ["Parameters", "Not Disclosed", "61.6M"],
+                  ].map(([metric, paper, ours]) => (
+                    <tr key={metric}>
+                      <td className="border border-emerald-300 p-2 text-[clamp(0.85rem,1.0vw,0.95rem)] font-semibold text-emerald-900">{metric}</td>
+                      <td className="border border-emerald-300 p-2 text-[clamp(0.85rem,1.0vw,0.95rem)] text-emerald-800">{paper}</td>
+                      <td className="border border-emerald-300 bg-emerald-100 p-2 text-[clamp(0.85rem,1.0vw,0.95rem)] font-bold text-emerald-950">{ours}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-emerald-500 bg-white/98 px-5 py-3 text-[clamp(1.05rem,1.32vw,1.18rem)] font-semibold text-emerald-900">
+          Our TrOCR pipeline <strong>outperformed</strong> the baseline on both CER and BLEU Score.
+          Detection precision is on par with the heavier Faster R-CNN — but at significantly faster inference speed, ideal for edge deployment.
+        </div>
       </div>
     ),
   },
   {
     title: "Budget and Feasibility",
-    subtitle: "~20,000 BDT total — far below commercial alternatives",
+    subtitle: "~40,000 BDT total — far below commercial alternatives",
     theme: themes[4],
     body: (
       <div className="space-y-3">
@@ -812,12 +840,12 @@ const slides: Slide[] = [
           </div>
           <div className="flex flex-col justify-center gap-3 rounded-2xl border border-rose-500 bg-white/98 p-4">
             <div className="rounded-xl border border-rose-400 bg-rose-100 p-3 text-center">
-              <p className="text-[clamp(0.98rem,1.28vw,1.12rem)] font-extrabold text-rose-950">Total Estimated Cost</p>
-              <p className="mt-1 text-[clamp(1.6rem,2.2vw,2rem)] font-black text-rose-700">~20,000 BDT</p>
-              <p className="text-[clamp(0.9rem,1.05vw,0.98rem)] font-semibold text-rose-800">(≈ $180 USD)</p>
+              <p className="text-[clamp(0.98rem,1.28vw,1.12rem)] font-extrabold text-rose-950">Total Build Cost</p>
+              <p className="mt-1 text-[clamp(1.6rem,2.2vw,2rem)] font-black text-rose-700">~40,000 BDT</p>
+              <p className="text-[clamp(0.9rem,1.05vw,0.98rem)] font-semibold text-rose-800">(≈ $360 USD)</p>
             </div>
             <p className="text-[clamp(0.98rem,1.18vw,1.08rem)] font-semibold text-rose-900">
-              Commercial scanners cost $5,000–$50,000+. SmartScan delivers the same capability for under $200.
+              Commercial scanners cost $5,000–$50,000+. SmartScan delivers comparable capability for under $400, including a Raspberry Pi 5 (8GB).
             </p>
           </div>
         </div>
@@ -826,7 +854,7 @@ const slides: Slide[] = [
           <div className="rounded-2xl border border-violet-500 bg-violet-50 p-3">
             <p className="mb-2 text-[clamp(1rem,1.28vw,1.12rem)] font-extrabold text-violet-950">🧠 Deep Learning</p>
             <div className="flex flex-wrap gap-1.5">
-              {["Python","PyTorch","Faster R-CNN","ResNet-50 + FPN","TrOCR","Hugging Face","OpenCV","Albumentations"].map((t) => (
+              {["Python","PyTorch","YOLOv8-small","Ultralytics","TrOCR","Hugging Face","OpenCV","Albumentations"].map((t) => (
                 <span key={t} className="rounded-full bg-violet-200 px-3 py-0.5 text-[clamp(0.83rem,0.96vw,0.92rem)] font-semibold text-violet-900">{t}</span>
               ))}
             </div>
@@ -853,18 +881,18 @@ const slides: Slide[] = [
   },
   {
     title: "Conclusion",
-    subtitle: "Proposal summary",
+    subtitle: "Project summary and future plans",
     theme: themes[1],
     body: (
       <div className="space-y-5">
         <div className="rounded-2xl border border-amber-500 bg-white/98 p-6 text-[clamp(1.2rem,1.6vw,1.45rem)] font-semibold text-amber-900">
-          SmartScan is a feasible, low-cost, and academically strong proposal
-          that integrates embedded control, image processing, and deep learning
-          for real textbook digitization with math-aware LaTeX output.
+          SmartScan successfully integrated embedded mechatronics with deep learning,
+          delivering a fully functional, low-cost system for digitizing academic books with math-aware LaTeX output.
+          Our TrOCR model outperformed the IEEE baseline paper on LaTeX recognition quality.
         </div>
         <div className="rounded-2xl border border-amber-500 bg-white/98 p-6 text-[clamp(1.2rem,1.6vw,1.45rem)] font-semibold text-amber-900">
-          The architecture, roadmap, and risk strategy make it suitable for a
-          structured university implementation timeline.
+          Future plans include scaling the dataset for handwriting recognition, adding multilingual OCR support,
+          and integrating a second camera for true dual-page simultaneous capture.
         </div>
       </div>
     ),
@@ -1020,7 +1048,7 @@ export default function SlidePage() {
             <div
               className={`rounded-xl px-3 py-1 text-base font-bold ${activeSlide.theme.badge}`}
             >
-              SmartScan Proposal Deck
+              SmartScan Final Presentation
             </div>
             <p className="text-[clamp(1rem,1.35vw,1.15rem)] font-semibold text-slate-700">
               Slide {currentSlide + 1} of {totalSlides}
