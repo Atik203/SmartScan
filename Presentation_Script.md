@@ -1,11 +1,15 @@
 # SmartScan — Final Project Presentation Script
+
 ### Course: Microprocessors and Microcontrollers Laboratory (CSE 4326)
+
 ### Team: Phantom Devs | Group 06
+
 ### Max Duration: 10 Minutes | Language: English
 
 ---
 
 > **Script Notation Guide:**
+>
 > - `[PAUSE]` — Stop for 1–2 seconds. Take a breath.
 > - `[SHORT PAUSE]` — Stop for half a second.
 > - `[SLOW]` — Read this part slowly and clearly.
@@ -18,7 +22,9 @@
 ---
 
 ## PART 1 — Introduction & Architecture
+
 ### 🎯 Target Time: 3 minutes 30 seconds
+
 ### 📺 Format: Screen recording of slides with narration
 
 ---
@@ -31,7 +37,7 @@ Hello everyone. [SHORT PAUSE]
 
 We are **Team Phantom Devs**. [PAUSE]
 
-Today, we are presenting our final project
+Today, we are presenting our project
 for the **Microprocessors and Microcontrollers Laboratory**. [PAUSE]
 
 Our project is called [SLOW] **SmartScan** — [SHORT PAUSE]
@@ -176,8 +182,11 @@ to translate those image regions into accurate **LaTeX tokens**. [PAUSE]
 ---
 
 ## PART 2 — Hardware Demonstration
+
 ### 🎯 Target Time: 2 minutes 30 seconds
+
 ### 📹 Format: Live video of the hardware prototype
+
 ### ⚠️ Rule: No slides allowed here — show actual hardware
 
 ---
@@ -259,7 +268,9 @@ ready for the AI pipeline. [PAUSE]
 ---
 
 ## PART 3 — Software & AI Model Demonstration
+
 ### 🎯 Target Time: 2 minutes
+
 ### 📺 Format: Screen recording of web dashboard and Colab notebooks
 
 ---
@@ -328,7 +339,9 @@ confirming that both models are well-optimized. [PAUSE]
 ---
 
 ## PART 4 — Results, Budget & Conclusion
+
 ### 🎯 Target Time: 2 minutes
+
 ### 📺 Format: Screen recording of remaining slides
 
 ---
@@ -450,37 +463,37 @@ We welcome any **questions**. [PAUSE]
 
 ## ⏱️ Time Summary
 
-| Part | Section                         | Target Time |
-|------|---------------------------------|-------------|
-| 1    | Introduction & Architecture     | 3 min 30 sec |
-| 2    | Hardware Demonstration          | 2 min 30 sec |
-| 3    | Software & AI Demonstration     | 2 min 00 sec |
-| 4    | Results, Budget & Conclusion    | 2 min 00 sec |
-| **Total** |                            | **~10 minutes** |
+| Part      | Section                      | Target Time     |
+| --------- | ---------------------------- | --------------- |
+| 1         | Introduction & Architecture  | 3 min 30 sec    |
+| 2         | Hardware Demonstration       | 2 min 30 sec    |
+| 3         | Software & AI Demonstration  | 2 min 00 sec    |
+| 4         | Results, Budget & Conclusion | 2 min 00 sec    |
+| **Total** |                              | **~10 minutes** |
 
 ---
 
 ## ✅ Guideline Compliance Check
 
-| Rule | Status |
-|------|--------|
-| Max 10 minutes | ✅ Planned for exactly ~10 min |
-| English language mandatory | ✅ Full English script |
-| Slides for intro/features/results | ✅ Parts 1, 3, 4 use slides |
-| Actual hardware shown live | ✅ Part 2 is live hardware demo |
-| No slides during hardware demo | ✅ Part 2 is video only |
-| Project title mentioned | ✅ Slide 1 |
-| Team information mentioned | ✅ Slide 1 |
-| Problem statement covered | ✅ Slide 2 & 4 |
-| Real-life application covered | ✅ Slide 5 |
-| Features listed (min 3) | ✅ 4 features listed in Slide 6 & 7 |
-| Block diagram / architecture | ✅ Slide 8 & 9 |
-| Hardware components named | ✅ Arduino Mega, Raspberry Pi, Servo, Fan |
-| Feature demonstration with I/O | ✅ Part 2 explains input/sensor/output |
-| Cost breakdown shown | ✅ Slide 14 |
-| Future plans covered | ✅ Slide 15 |
-| Conclusion with summary | ✅ Slide 15 |
+| Rule                              | Status                                    |
+| --------------------------------- | ----------------------------------------- |
+| Max 10 minutes                    | ✅ Planned for exactly ~10 min            |
+| English language mandatory        | ✅ Full English script                    |
+| Slides for intro/features/results | ✅ Parts 1, 3, 4 use slides               |
+| Actual hardware shown live        | ✅ Part 2 is live hardware demo           |
+| No slides during hardware demo    | ✅ Part 2 is video only                   |
+| Project title mentioned           | ✅ Slide 1                                |
+| Team information mentioned        | ✅ Slide 1                                |
+| Problem statement covered         | ✅ Slide 2 & 4                            |
+| Real-life application covered     | ✅ Slide 5                                |
+| Features listed (min 3)           | ✅ 4 features listed in Slide 6 & 7       |
+| Block diagram / architecture      | ✅ Slide 8 & 9                            |
+| Hardware components named         | ✅ Arduino Mega, Raspberry Pi, Servo, Fan |
+| Feature demonstration with I/O    | ✅ Part 2 explains input/sensor/output    |
+| Cost breakdown shown              | ✅ Slide 14                               |
+| Future plans covered              | ✅ Slide 15                               |
+| Conclusion with summary           | ✅ Slide 15                               |
 
 ---
 
-*Script prepared for Team Phantom Devs — CSE 4326 Final Project Show*
+_Script prepared for Team Phantom Devs — CSE 4326 Final Project Show_
