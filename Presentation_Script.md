@@ -193,79 +193,77 @@ to translate those image regions into accurate **LaTeX tokens**. [PAUSE]
 
 ### [Video 0:00 – 0:15 — Wide Shot of Setup]
 
-[CAMERA — wide view of the full setup]
+[CAMERA — wide view of the full setup showing the book and mechanisms]
 
 > 🎙️ **Speaker:**
 
 Here is the live demonstration of the **SmartScan hardware**. [PAUSE]
 
-As you can see, the book rests safely on a custom **V-cradle**. [SHORT PAUSE]
-This design prevents any spine damage during the flipping process. [PAUSE]
+As you can see, the book rests securely on a flat surface. [SHORT PAUSE]
 
-You can also see the **Arduino Mega** connected to our servo motors, [SHORT PAUSE]
-the blower fan, [SHORT PAUSE]
-and the smartphone camera mounted above the book. [PAUSE]
+You can observe the Arduino setup controlling our servo motors and actuators. [SHORT PAUSE]
+On the right, we have the motorized **friction wheel** mechanism, [SHORT PAUSE]
+on the left is the **flipping arm**, [SHORT PAUSE]
+and above the book is the smartphone camera securely mounted to the frame. [PAUSE]
 
 ---
 
-### [Video 0:16 – 0:40 — Gripper and Flipper Moving]
+### [Video 0:16 – 0:40 — Friction Wheel and Flipper Moving]
 
-[CAMERA — close shot of the gripper arm]
+[CAMERA — close shot focusing on the yellow wheel and the flipping arm in action]
 
 > 🎙️ **Speaker:**
 
-The automation cycle is now beginning. [PAUSE]
+The automation cycle begins with the page separation phase. [PAUSE]
 
-First, the **gripper arm** lowers [SHORT PAUSE]
-to isolate and hold the left side of the book. [PAUSE]
-
-Then, the **blower fan** activates. [SHORT PAUSE]
-This step is very important — [SHORT PAUSE]
-the fan air separates a **single page** from the rest of the stack. [PAUSE]
+First, the motorized **friction wheel** lowers and spins directly against the top page. [SHORT PAUSE]
+This friction pushes the paper inwards, [SHORT PAUSE]
+creating a buckle or loop that perfectly separates a **single page** from the rest of the stack. [PAUSE]
 
 [BREATHE]
 
-Next, the **flipper arm** servo [SHORT PAUSE]
-smoothly sweeps the isolated page across the cradle. [PAUSE]
+Next, the **flipping arm** swings over. [SHORT PAUSE]
+It slides under the buckled page [SHORT PAUSE]
+and smoothly sweeps it across to the left side of the book. [PAUSE]
 
 ---
 
-### [Video 0:41 – 1:20 — Page Turns, Camera Captures]
+### [Video 0:41 – 1:20 — Page Settles, Camera Captures]
 
-[CAMERA — show the page being flipped and settling]
+[CAMERA — show the page settling, followed by the smartphone capture setup]
 
 > 🎙️ **Speaker:**
 
-Once the page is turned and has settled flat, [SHORT PAUSE]
+Once the page is fully turned and held flat, [SHORT PAUSE]
 the system enters the **Hold** stage. [PAUSE]
 
-At this exact moment, [SHORT PAUSE]
-the **Arduino** sends a signal to the **Raspberry Pi**. [PAUSE]
+At this exact moment, the capture sequence is triggered. [PAUSE]
 
-The Raspberry Pi then executes an **ADB command**, [SHORT PAUSE]
-which triggers the smartphone to capture [SHORT PAUSE]
-a high-resolution, synchronized image of the open page spread. [PAUSE]
+The system executes an automated **ADB command**, [SHORT PAUSE]
+which triggers the mounted smartphone to capture [SHORT PAUSE]
+a high-resolution, synchronized image of the newly opened page spread. [PAUSE]
 
 ---
 
 ### [Video 1:21 – 2:17 — Terminal Logs and Next Cycle]
 
-[CAMERA — show the terminal screen]
+[CAMERA — show the laptop screen displaying the terminal logs running auto_capture.py]
 
 > 🎙️ **Speaker:**
 
-The system now resets all arms back to the **home position** [SHORT PAUSE]
-and begins the **next cycle** automatically. [PAUSE]
+The hardware mechanisms then reset to their **home positions**, [SHORT PAUSE]
+ready to begin the **next cycle** automatically. [PAUSE]
 
 [BREATHE]
 
-In the background, you can see the **terminal logs** [SHORT PAUSE]
-confirming the successful ADB capture [SHORT PAUSE]
-and the transfer of the raw image files [SHORT PAUSE]
-to the laptop's local directory — [SHORT PAUSE]
-ready for the AI pipeline. [PAUSE]
+Here on the screen, you can see our **terminal logs** actively running the capture script. [SHORT PAUSE]
+It confirms the successful trigger of the shutter, [SHORT PAUSE]
+the processing of the image, [SHORT PAUSE]
+and the transfer of the raw image files directly to the local directory — [SHORT PAUSE]
+where they are now ready to be processed by our **AI pipeline**. [PAUSE]
 
 ---
+
 
 ## PART 3 — Software & AI Model Demonstration
 
