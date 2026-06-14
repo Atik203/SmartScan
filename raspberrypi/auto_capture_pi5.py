@@ -10,6 +10,10 @@ ADB_PATH = "adb"
 PI_SAVE_PATH = "/home/simplex/SmartScan_Captures"
 COUNTER_FILE = os.path.join(PI_SAVE_PATH, "page_counter.txt")
 
+# === LAPTOP UPLOAD CONFIG ===
+# Set to your laptop's IP address (e.g. "http://10.15.27.56:5000")
+LAPTOP_URL = "http://10.15.27.56:5000"
+
 # === DEVICE CONFIG ===
 # Only ONE phone is used at a time. Comment/uncomment to switch devices.
 
@@ -94,6 +98,60 @@ def ensure_adb_ready():
         )
 
     print(f"[ADB] Redmi Note 13 Pro ({DEVICE_SERIAL}) connected OK.")
+
+
+def upload_to_laptop(file_path, filename):
+    if not LAPTOP_URL:
+        print("[Upload] LAPTOP_URL not configured. Image saved locally only.")
+        return False
+
+    print(f"[Upload] Uploading {filename} to laptop at {LAPTOP_URL}...")
+    try:
+        # Try to use requests if installed
+        try:
+            import requests
+            with open(file_path, 'rb') as f:
+                files = {'image': (filename, f, 'image/jpeg')}
+                r = requests.post(f"{LAPTOP_URL}/upload-capture", files=files, timeout=15)
+                if r.status_code == 200:
+                    print(f"[Upload] Success! Laptop response: {r.json().get('message')}")
+                    return True
+                else:
+                    print(f"[Upload] Failed with status code {r.status_code}: {r.text}")
+                    return False
+        except ImportError:
+            # Fallback to standard library urllib.request
+            import urllib.request
+            
+            boundary = '----WebKitFormBoundary7MA4YWxkTrZu0gW'
+            data = []
+            data.append(f'--{boundary}'.encode('utf-8'))
+            data.append(f'Content-Disposition: form-data; name="image"; filename="{filename}"'.encode('utf-8'))
+            data.append('Content-Type: image/jpeg'.encode('utf-8'))
+            data.append(b'')
+            with open(file_path, 'rb') as f:
+                data.append(f.read())
+            data.append(f'--{boundary}--'.encode('utf-8'))
+            data.append(b'')
+            
+            body = b'\r\n'.join(data)
+            
+            req = urllib.request.Request(
+                f"{LAPTOP_URL}/upload-capture",
+                data=body,
+                headers={
+                    'Content-Type': f'multipart/form-data; boundary={boundary}',
+                    'Content-Length': str(len(body))
+                },
+                method='POST'
+            )
+            with urllib.request.urlopen(req, timeout=15) as response:
+                resp_data = response.read().decode('utf-8')
+                print(f"[Upload] Success! Laptop response: {resp_data}")
+                return True
+    except Exception as e:
+        print(f"[Upload] ERROR: Failed to upload file to laptop. Details: {e}")
+        return False
 
 
 def load_page_counter():
@@ -183,8 +241,11 @@ def pull_image(filename, remote_path, capture_num):
         print(f"[ERROR] Pull failed — file not found locally: {raw_path}")
         return
 
-    rotate_spread(raw_path, capture_num)
+    spread_path = rotate_spread(raw_path, capture_num)
     print(f"[SAVE] Raw file kept: {raw_name}")
+
+    if spread_path and os.path.exists(spread_path):
+        upload_to_laptop(spread_path, os.path.basename(spread_path))
 
 
 # === MAIN ===

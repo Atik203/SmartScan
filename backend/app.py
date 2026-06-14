@@ -397,6 +397,30 @@ def process_page():
     return jsonify(result)
 
 
+# ── POST /upload-capture ──────────────────────────────────────────────────────
+@app.route("/upload-capture", methods=["POST"])
+def upload_capture():
+    """
+    Accept raw or spread image from Pi 5 and save it directly in CAPTURES_DIR.
+    The background captures watcher thread will detect and process it asynchronously.
+    """
+    if "image" not in request.files:
+        return jsonify({"error": "Missing 'image' field"}), 400
+
+    file = request.files["image"]
+    if not file or not file.filename:
+        return jsonify({"error": "Empty file"}), 400
+
+    filename = secure_filename(file.filename)
+    save_path = os.path.join(CAPTURES_DIR, filename)
+    file.save(save_path)
+    print(f"[App] Received capture upload: {filename} and saved to {save_path}")
+    return jsonify({
+        "success": True, 
+        "message": f"Successfully received {filename} and queued for processing"
+    })
+
+
 # ── POST /process-captures ───────────────────────────────────────────────────
 @app.route("/process-captures", methods=["POST"])
 def process_captures():
