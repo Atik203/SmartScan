@@ -7,6 +7,8 @@ import cv2
 ADB_PATH = r"C:\Program Files (x86)\Minimal ADB and Fastboot\adb.exe"
 PI_SAVE_PATH = r"E:\PROJECT\SmartScan\SmartScan_Captures"
 COUNTER_FILE = os.path.join(PI_SAVE_PATH, "page_counter.txt")
+# Rotation settings: "90_CW" (90° clockwise), "90_CCW" (90° counter-clockwise), "180" (180°), or None (no rotation)
+ROTATION_MODE = "90_CCW"
 
 # === DEVICE CONFIG ===
 # Only ONE phone is used at a time. Comment/uncomment to switch devices.
@@ -88,7 +90,7 @@ def get_latest_image():
 
 def rotate_spread(image_path, capture_num):
     """
-    Rotate the raw capture 90° CCW (left) so the 2-page book spread
+    Rotate the raw capture according to ROTATION_MODE so the 2-page book spread
     is upright, then save as a single full-spread image.
 
     Naming: page_NNN_MMM.jpg  where NNN = left page, MMM = right page
@@ -106,8 +108,16 @@ def rotate_spread(image_path, capture_num):
         print(f"[ERROR] Cannot read image: {image_path}")
         return None
 
-    # Rotate 90° counter-clockwise (left)
-    rotated = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    # Apply configured rotation
+    if ROTATION_MODE == "90_CW":
+        rotated = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+    elif ROTATION_MODE == "90_CCW":
+        rotated = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    elif ROTATION_MODE == "180":
+        rotated = cv2.rotate(img, cv2.ROTATE_180)
+    else:
+        rotated = img
+
     h, w = rotated.shape[:2]
 
     left_page_num  = 2 * capture_num - 1
@@ -167,7 +177,7 @@ def capture_page(capture_num):
 def main():
     print("🚀 SmartScan — Full-Spread Capture Mode")
     print(f"   Device : Redmi Note 13 Pro ({DEVICE_SERIAL})")
-    print(f"   Mode   : 2 pages per capture, saved as one spread image (rotate 90°CCW)")
+    print(f"   Mode   : 2 pages per capture, saved as one spread image (rotation: {ROTATION_MODE})")
     print("=" * 55)
 
     capture_num = load_page_counter()
