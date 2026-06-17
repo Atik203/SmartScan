@@ -68,3 +68,12 @@ temp_interactive_push.bat
 
 
 Test-Image/
+
+# ===== LaTeX (Project Report) =====
+project_report/*.aux
+project_report/*.fdb_latexmk
+project_report/*.fls
+project_report/*.synctex.gz
+project_report/*.toc
+project_report/*.out
+project_report/*.log

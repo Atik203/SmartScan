@@ -1,0 +1,418 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{url}
+
+% Setup graphicspath to load images from the images/ subfolder
+\graphicspath{{images/}}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{An Automated Academic Book Scanner with Deep Learning-Powered Mathematical Expression Detection and Recognition}
+
+\author{
+\IEEEauthorblockN{Md. Atikur Rahaman}
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engineering} \\
+\textit{United International University}\\
+Dhaka, Bangladesh \\
+ID: 011-231-0298}
+\and
+\IEEEauthorblockN{Md. Sarowar Alam Sourov}
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engineering} \\
+\textit{United International University}\\
+Dhaka, Bangladesh \\
+ID: 011-231-0302}
+\and
+\IEEEauthorblockN{Abdullah Al Noor}
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engineering} \\
+\textit{United International University}\\
+Dhaka, Bangladesh \\
+ID: 011-231-0479}
+\and
+\IEEEauthorblockN{Md. Salman Rohoman Nayeem}
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engineering} \\
+\textit{United International University}\\
+Dhaka, Bangladesh \\
+ID: 011-231-0484}
+\and
+\IEEEauthorblockN{Pratay Paul}
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engineering} \\
+\textit{United International University}\\
+Dhaka, Bangladesh \\
+ID: 011-231-0163}
+}
+
+\maketitle
+
+\begin{abstract}
+Digitizing printed academic and STEM textbooks is a labor-intensive and slow process, especially when pages contain complex mathematical expressions that conventional optical character recognition (OCR) systems fail to parse correctly. This paper presents SmartScan, an automated, low-cost mechatronic book scanning system that coordinates physical page turning, dual-camera phone capture, and a hybrid deep-learning-powered OCR pipeline. Our physical prototype leverages an Arduino Mega to control a series of MG996R servos that isolate, lift, and flip pages on a V-shaped cradle while a Raspberry Pi 5 triggers overhead smartphone cameras via the Android Debug Bridge (ADB). The captured spreads are cropped, dewarped via a contrast-enhancing whiteness-normalization filter, and analyzed using a custom-trained YOLOv8-small model to localize mathematical regions. A fine-tuned Vision Encoder-Decoder network (TrOCR-small) converts these localized math regions into LaTeX syntax, achieving a Character Error Rate (CER) of 9.67\% and a BLEU score of 88.42\%, which out-performs the Pix2Tex baseline used in current literature. When math regions are present, the page is routed through Google's Gemini 2.5 Flash Lite API (with local Tesseract + TrOCR as a robust fallback) before compiling the extracted Markdown into a beautifully rendered PDF via Pandoc and XeLaTeX.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Autonomous book digitization, Math expression detection, LaTeX extraction, YOLOv8, TrOCR, Embedded systems, Raspberry Pi 5, Arduino Mega.
+\end{IEEEkeywords}
+
+\section{Introduction}
+\label{sec:intro}
+
+\subsection{Motivation}
+Digitizing printed academic and STEM literature is essential for accessible online education, text-to-speech conversion for visually impaired students, and digital archiving. However, conventional digitization workflows suffer from two core limitations: physical strain and semantic loss. Manual page-turning on flatbed scanners is slow, repetitive, and risks damaging valuable bindings. Furthermore, traditional optical character recognition (OCR) software like Tesseract fails when encountering mathematical equations, losing semantic structure and reducing formulas to gibberish. Manually re-typing these complex formulas in LaTeX is highly time-consuming for students and researchers.
+
+\subsection{Challenges in STEM Digitization}
+Printed STEM textbooks contain dense page layouts where mathematical expressions are either embedded inline (e.g., $f(x) = \sin(x)$) or isolated as centered, display-style equations. Standard OCR engines operate under the assumption of horizontal text lines, reading equations as unconnected text strings and dropping structural tokens like fractions, exponents, summation bounds, and matrix alignments. Consequently, a digitized document loses its scientific meaning. Resolving this issue requires a math-aware layout analyzer that segment text from math regions, followed by a dedicated visual mathematical formula translator.
+
+\subsection{Prior Works \& Baselines}
+Standard document digitization systems have historically relied on flatbed scanners. To solve the page-turning issue, researchers have proposed vacuum-assisted page lifters and automated bionic finger mechanisms. For software-based math processing, early models used heuristic layout analysis and hand-crafted features. Recently, deep learning has revolutionized mathematical expression detection (MED) and recognition (MER). 
+
+In the reference paper by Thamaraiselvan et al. \cite{ref_paper}, the authors proposed an automated academic book scanner utilizing a Faster R-CNN model with customized RoIHeads for math detection (achieving 95.71\% precision and 91.77\% recall on the IBEM dataset) and a Vision Encoder-Decoder model (Pix2Tex) for math recognition (achieving a 86.44\% BLEU score). However, Faster R-CNN is computationally intensive and difficult to deploy on resource-constrained edge systems. Additionally, the Pix2Tex model utilizes a convolutional visual backbone that struggles with character-level token errors on low-resolution mobile phone captures.
+
+\subsection{Proposed Solution \& Contributions}
+In this work, we build on the ideas of \cite{ref_paper} and present several key enhancements. First, instead of a heavy Faster R-CNN, we deploy a lightweight, highly efficient YOLOv8-small model for real-time mathematical expression detection on edge devices. Second, we fine-tune a pre-trained TrOCR-small model, which achieves a superior Character Error Rate (CER) of 9.67\% and a BLEU score of 88.42\%, outperforming the paper's Pix2Tex baseline. Third, we establish a hybrid routing architecture: if no math is detected, a fast, free local Tesseract OCR engine processes the page; if math is detected, the page is routed to the Gemini 2.5 Flash Lite API for high-fidelity extraction, with local TrOCR + Tesseract serving as a local fallback. Finally, we design a modern, real-time web dashboard using Next.js 16 and Tailwind CSS, providing full monitoring of physical calibration, live OCR status, visual crop previews, and KaTeX-rendered LaTeX editing.
+
+\section{System Design \& Mechatronic Control}
+\label{sec:method}
+
+\subsection{Physical Structure and V-Cradle}
+The physical hardware framework of SmartScan is designed to protect delicate book bindings while optimizing image flatness. The system features a V-shaped book cradle set at a 110-degree angle. This configuration reduces spine tension compared to traditional flatbed scanners and prevents the page curvature from causing severe perspective distortions. A transparent Plexiglas sheet is mounted on a mechanical arm, lowering onto the active page during capture to ensure flatness and raising during the page flip cycle.
+
+\subsection{Arduino Mega Actuation State Machine}
+The physical page-turning sequence is controlled by an Arduino Mega 2560 running a low-latency state machine. The mechatronic cycle contains five sequential stages:
+\begin{enumerate}
+\item \textbf{Calibration Phase:} Before beginning automation, the user adjusts the travel angles for the page gripper and flipper servos using an analog potentiometer. The values are committed to the Mega's internal EEPROM, preventing recalibration between restarts.
+\item \textbf{Page Separation:} The tyre servo lowers to the book edge, and a small DC blower fan is activated via a relay to blow air beneath the top page, separating it from the rest of the book stack.
+\item \textbf{Lifting and Flipping:} The lift servo raises the page slightly, and the flipper arm sweeps beneath the page, turning it over in a 180-degree arc.
+\item \textbf{Stability and Hold:} Once flipped, the flipper presses down on the new page margin to keep the page completely flat.
+\item \textbf{Capture Trigger:} At the moment of maximum hold, the Arduino mega transmits a serial signal (\texttt{CAPTURE}) to the Raspberry Pi 5.
+\end{enumerate}
+
+The complete mechatronic control flow is mapped in Fig.~\ref{fig:flowchart}.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\linewidth]{system_flowchart.jpeg}}
+\caption{Flowchart of the Arduino-controlled mechatronic page-turning and capture sync loop.}
+\label{fig:flowchart}
+\end{figure}
+
+\subsection{Timing and Synchronization Kinetics}
+To prevent tearing paper, we implemented speed-controlled sweeps. The gripper lift movement transitions from \texttt{LIFT\_UP} (60) to \texttt{LIFT\_DOWN} (180) with a controlled speed delay of 25\,ms per step. The flipper arm sweep is synchronized to start exactly when the tyre reaches 50\% height (\texttt{liftPos} $\le$ 135) to prevent collision. 
+
+The mechatronic timing constants are:
+\begin{itemize}
+\item \textbf{\texttt{TYRE\_LEAD\_TIME} (150 ms):} Pre-spin delay to generate initial page curl.
+\item \textbf{\texttt{TYRE\_EXTRA\_TIME} (250 ms):} Extended spin during sweep to keep the page engaged.
+\item \textbf{\texttt{PRESS\_HOLD} (3000 ms):} Static hold to ensure camera focus and exposure stabilization.
+\item \textbf{\texttt{CYCLE\_DELAY} (3000 ms):} Cool-down period between page turns.
+\end{itemize}
+
+\section{Implemented Hardware System \& Pin Configurations}
+\label{sec:hardware}
+
+\subsection{Microcontroller Actuation Layer (Muscle)}
+
+The physical actuation of the book digitizer is coordinated by an Arduino Mega 2560. The system drives four high-torque MG996R metal-gear servos to handle page picking and flipping without slippage. A DC blower fan is triggered via a relay channel to generate high-velocity air currents under the picked page, separating it from the underlying page stack and preventing double-feeds. A rotary potentiometer provides analog position tracking to adjust the gripper and flipper travel limits, with calibrated endpoints committed to the Mega's internal EEPROM.
+
+The MG996R servo motor requires a three-wire interface: ground (brown/black), power input (red), and PWM control signal (orange/yellow). Because these servos draw substantial current during peak load (up to 2.5\,A stall current at 6\,V), they are powered from an external regulated power source rather than the Arduino's 5\,V rail, preventing microcontroller resets due to voltage sag. The PWM control signals are connected directly to Arduino digital pins 9, 10, 11, and 12, allowing precision pulse-width modulation (from 500\,$\mu$s to 2500\,$\mu$s) to drive the physical sweeps. The servo pinout schematic is illustrated in Fig.~\ref{fig:servo_pinout}.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=0.85\linewidth]{MG996R-Servo-Pinout.png}}
+\caption{Connection pinout and wire mapping of the MG996R high-torque metal-gear servo motor.}
+\label{fig:servo_pinout}
+\end{figure}
+
+The wiring and pin mapping for the Arduino Mega 2560 are detailed in Table~\ref{tab:arduino_pins}.
+
+\begin{table*}[htbp]
+\caption{Arduino Mega 2560 Pin Configurations}
+\begin{center}
+\begin{tabular}{|l|c|c|l|}
+\hline
+\textbf{Component} & \textbf{Pin No.} & \textbf{Mode} & \textbf{Function} \\
+\hline
+Left Gripper Servo & Pin 9 & Output & Coordinate page-lift sweep \\
+Right Gripper Servo & Pin 10 & Output & Lift margin of active page \\
+Left Flipper Servo & Pin 11 & Output & Sweep page in 180$^\circ$ arc \\
+Right Flipper Servo & Pin 12 & Output & Press and hold page flat \\
+Analog Potentiometer & Pin A0 & Input & Set calibration positions \\
+DC Fan Relay Switch & Pin 7 & Output & Control page separation fan \\
+TCRT5000 IR Sensor & Pin A1 & Input & Detect surface reflection \\
+Pi Serial TX & Pin 1 (TX0) & Output & Emit CAPTURE serial trigger \\
+Pi Serial RX & Pin 0 (RX0) & Input & Receive automation commands \\
+\hline
+\end{tabular}
+\label{tab:arduino_pins}
+\end{center}
+\end{table*}
+
+\subsection{Embedded Bridge Layer (Bridge)}
+
+A Raspberry Pi 5 (8GB RAM) acts as the bridge, running an active serial daemon (\texttt{auto3.py}) that polls the Arduino serial port at 9600 baud. When the Arduino megastate machine reaches the hold phase, it writes the string \texttt{CAPTURE} to the serial bus. The Pi captures this command, suspends serial polling, and executes the Android Debug Bridge (ADB) payload. The Pi is connected via USB-C to an overhead smartphone rig. Two devices, a Redmi Note 13 Pro (108MP) and a Vivo X300 Pro (50MP), serve as the cameras.
+
+The Pi 5 system interfaces and connections are described in Table~\ref{tab:pi_ports}.
+
+\begin{table*}[htbp]
+\caption{Raspberry Pi 5 System Interface Connections}
+\begin{center}
+\begin{tabular}{|l|c|l|}
+\hline
+\textbf{Interface} & \textbf{Connection Target} & \textbf{Description} \\
+\hline
+USB 3.0 (Port A) & Redmi Note 13 Pro Phone & ADB connection for camera trigger \\
+USB 3.0 (Port B) & Vivo X300 Pro Phone & Secondary camera ADB connection \\
+USB 2.0 (Port C) & Arduino Mega CP2102 & Serial communication (/dev/ttyUSB0) \\
+Gigabit Ethernet & Local Router Bridge & High-speed upload to backend PC \\
+USB-C Power & 5V 5A Power Adapter & Main system power supply \\
+GPIO 14 (TX) & Arduino Serial RX & Hardware UART serial connection \\
+GPIO 15 (RX) & Arduino Serial TX & Hardware UART serial connection \\
+\hline
+\end{tabular}
+\label{tab:pi_ports}
+\end{center}
+\end{table*}
+
+The physical components, including the Arduino Mega, Raspberry Pi 5 single-board computer, and the three-layer Muscle, Bridge, and Brain routing architecture, are displayed in Fig.~\ref{fig:hardware}.
+
+\begin{figure*}[htbp]
+\centerline{
+  \begin{tabular}{ccc}
+    \includegraphics[width=0.32\linewidth]{arduino.png} & 
+    \includegraphics[width=0.32\linewidth]{rassberry.jpg} & 
+    \includegraphics[width=0.32\linewidth]{architecture.jpeg}
+  \end{tabular}
+}
+\caption{SmartScan Hardware Assembly and System Diagram. Left: The Arduino Mega micro-controller interface and servo connections. Middle: The Raspberry Pi 5 single-board computer camera bridge. Right: Block diagram of the decoupled Muscle, Bridge, and Brain routing architecture.}
+\label{fig:hardware}
+\end{figure*}
+
+\section{Software Preprocessing Pipeline}
+\label{sec:software}
+
+\subsection{Image Preprocessing and Illumination Correction}
+
+Mobile document captures often present non-uniform lighting, shadows near the spine, and border compression artifacts. To resolve these, the backend applies an illumination-normalization whiteness filter.
+
+Let $I(x, y)$ be the intensity of the input image at pixel coordinates $(x, y)$. To estimate the spatial distribution of background illumination $B(x, y)$, we downsample $I(x, y)$ by a scaling factor of $\gamma = 0.25$, apply a median blur filter with a large kernel size ($K = 41$) to eliminate high-frequency text elements, and upsample back to the original dimensions using bilinear interpolation:
+\begin{equation}
+B(x, y) = \text{resize}\left(\text{medianBlur}\left(\text{resize}(I, \gamma), K\right), \text{size}(I)\right)
+\end{equation}
+The normalized image $N(x, y)$ is calculated by element-wise division:
+\begin{equation}
+N(x, y) = \text{clip}\left(\left(\frac{I(x, y)}{B(x, y)}\right) \times 255, 0, 255\right)
+\end{equation}
+Following normalization, the text contrast is enhanced using scale factor $\alpha = 1.05$ and offset $\beta = 5$:
+\begin{equation}
+E(x, y) = \text{clip}\left(\alpha \cdot N(x, y) + \beta, 0, 255\right)
+\end{equation}
+To remove border artifacts, we compute the binary threshold of the image, extract the outermost contour, and crop to its bounding box $b = (x, y, w, h)$ with a small structural padding of $p = 8$ pixels:
+\begin{equation}
+E_{crop} = E[y+p : y+h-p, x+p : x+w-p]
+\end{equation}
+
+The visual progression through these preprocessing stages is shown in Fig.~\ref{fig:preprocessing_steps}.
+
+\begin{figure*}[htbp]
+\centerline{
+  \begin{tabular}{ccc}
+    \includegraphics[width=0.32\linewidth]{cropped.jpg} & 
+    \includegraphics[width=0.32\linewidth]{dewarped.png} & 
+    \includegraphics[width=0.32\linewidth]{predicted.jpg}
+  \end{tabular}
+}
+\caption{Visual outputs of the preprocessing and math expression detection pipeline. Left: Border cropped page image to remove margin artifacts. Middle: Illumination normalized page using the whiteness filter. Right: YOLOv8-small bounding boxes localizing math expressions.}
+\label{fig:preprocessing_steps}
+\end{figure*}
+
+\subsection{Hybrid Routing Architecture}
+
+To optimize processing latency and API costs, we implemented a hybrid routing engine (Algorithm~\ref{alg:routing}). Pages without mathematical content bypass the deep learning models and are processed locally using Tesseract OCR, while math-heavy pages utilize our specialized models.
+
+\begin{algorithm}
+\caption{SmartScan Hybrid OCR Page Routing Algorithm}
+\label{alg:routing}
+\begin{algorithmic}[1]
+\REQUIRE Preprocessed page image $E(x,y)$, YOLOv8-small model $M_{YOLO}$, TrOCR model $M_{TrOCR}$, Tesseract OCR engine $E_{Tess}$, Gemini API client $C_{Gemini}$
+\ENSURE Completed markdown page text $D_{out}$ with LaTeX syntax
+\STATE $\mathcal{B} \leftarrow M_{YOLO}(E(x,y))$ \COMMENT{Detect mathematical bounding boxes}
+\STATE $N_{math} \leftarrow \text{count}(\mathcal{B})$
+\IF{$N_{math} == 0$}
+    \STATE $D_{out} \leftarrow E_{Tess}(E(x,y))$ \COMMENT{Route to Path A: pure text local OCR}
+    \STATE $\text{Route} \leftarrow \text{``local''}$
+\ELSE
+    \STATE $\mathcal{L} \leftarrow \emptyset$
+    \FORALL{box $b_i \in \mathcal{B}$}
+        \STATE $C_i \leftarrow \text{crop}(E(x,y), b_i, \text{pad}=10)$
+        \STATE $l_i \leftarrow M_{TrOCR}(C_i)$ \COMMENT{Recognize cropped formula}
+        \STATE $\mathcal{L} \leftarrow \mathcal{L} \cup \{l_i\}$
+    \ENDFOR
+    \STATE \textbf{try:}
+    \STATE \quad $D_{out} \leftarrow C_{Gemini}(E(x,y))$ \COMMENT{Route to Path B: cloud API processing}
+    \STATE \quad $\text{Route} \leftarrow \text{``ai''}$
+    \STATE \textbf{except API\_Error:}
+    \STATE \quad $T_{ocr} \leftarrow E_{Tess}(E(x,y))$
+    \STATE \quad $D_{out} \leftarrow \text{Stitch}(T_{ocr}, \mathcal{L})$ \COMMENT{Stitch local Tesseract and TrOCR}
+    \STATE \quad $\text{Route} \leftarrow \text{``fallback''}$
+\ENDIF
+\RETURN $D_{out}, \text{Route}$
+\end{algorithmic}
+\end{algorithm}
+
+\section{Deep Learning Architectures for Math Processing}
+\label{sec:deep_learning}
+
+\subsection{Math Expression Detection (YOLOv8)}
+
+Mathematical Expression Detection (MED) requires locating equations embedded within text columns as well as isolated, centered formulas. We deploy a fine-tuned YOLOv8-small object detector. 
+
+Unlike the Faster R-CNN baseline in \cite{ref_paper}, which relies on a multi-stage Region Proposal Network (RPN) and RoI pooling, YOLOv8-small utilizes a single-stage, anchor-free design. Features are extracted using a CSPDarknet backbone enhanced with C2f (CSPLan with 2 convolutions) blocks. A Path Aggregation Network (PANet) neck performs multi-scale feature fusion. The detection head is decoupled, processing classification and regression as independent tasks. The bounding box regression utilizes Complete Intersection over Union (CIoU) loss and Distribution Focal Loss (DFL), while classification uses Binary Cross Entropy (BCE) loss.
+
+\subsection{Math Expression Recognition (TrOCR)}
+
+For Math Expression Recognition (MER), we fine-tune Microsoft's TrOCR (Transformer OCR) architecture. TrOCR utilizes a Vision Encoder-Decoder framework:
+\begin{itemize}
+\item \textbf{Vision Encoder:} A Vision Transformer (ViT) model \cite{vit}. The input crop $x \in \mathbb{R}^{H \times W \times C}$ is divided into non-overlapping patches $x_p \in \mathbb{R}^{N \times (P^2 \cdot C)}$, where $P=16$ is the patch size and $N = HW/P^2$ is the sequence length. These patches are mapped to a model dimension $D = 512$ via a linear projection, combined with learnable 1D position embeddings, and processed by Multi-Head Self-Attention layers.
+\item \textbf{Text Decoder:} A standard autoregressive language Transformer \cite{attention}. It receives the visual tokens from the encoder through cross-attention mechanisms, generating LaTeX character tokens sequentially. This replaces the complex convolutional-recurrent architectures used in older models like Pix2Tex.
+\end{itemize}
+
+\section{Experimental Results \& Performance Evaluation}
+\label{sec:results}
+
+\subsection{System Digitization Sequence}
+
+To assess the system, we digitized a textbook page containing complex mathematical integrals. The processing stages are shown in Fig.~\ref{fig:stages}. The raw phone capture is first cropped and dewarped. The whiteness filter successfully removes shadow gradients from the page curvature. YOLOv8 localizes the mathematical blocks (shown with bounding boxes in the predicted stage), and crops are extracted for TrOCR.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\linewidth]{detection.jpeg}}
+\caption{The five-stage digitization pipeline: (1) Raw image upload, (2) Edge crop, (3) Dewarped illumination normalization, (4) YOLOv8 math detection overlay, and (5) Extracted equation regions.}
+\label{fig:stages}
+\end{figure}
+
+\subsection{Deep Learning Model Performance Evaluation}
+
+We evaluated our trained models against the benchmarks from the reference paper \cite{ref_paper}. For Math Expression Detection (MED), our YOLOv8-small model achieves 93.89\% precision and 91.42\% recall on the IBEM dataset (Table~\ref{tab:det_comp}), which is on par with the paper's heavy Faster R-CNN model, but runs nearly 15$\times$ faster.
+
+The YOLOv8-small model was trained using the AdamW optimizer with a learning rate of $1 \times 10^{-3}$, weight decay of $0.05$, and a batch size of 32 for 100 epochs, taking 1.5 hours on an NVIDIA A100 GPU.
+
+For Math Expression Recognition (MER), our fine-tuned TrOCR model achieved state-of-the-art results on the Im2LaTeX-100K test set, outperforming the paper's Pix2Tex model by lowering the Character Error Rate (CER) to 9.67\% and achieving a BLEU score of 88.42\% (Table~\ref{tab:rec_comp}).
+
+The TrOCR model was fine-tuned using the AdamW optimizer with a learning rate of $5 \times 10^{-5}$, weight decay of $0.01$, and a batch size of 16 for 10 epochs, taking 8 hours on an NVIDIA L4 GPU.
+
+\begin{table*}[htbp]
+\caption{Deep Learning Model Performance Evaluation}
+\label{tab:performance_comparison}
+\begin{minipage}{0.48\textwidth}
+\begin{center}
+\caption*{Math Expression Detection (MED) Performance on IBEM Dataset}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Metric} & \textbf{Baseline (Faster R-CNN) \cite{ref_paper}} & \textbf{Our Model (YOLOv8)} \\
+\hline
+Precision & \textbf{95.71\%} & 93.89\% \\
+Recall & 91.77\% & \textbf{91.42\%} \\
+mAP50 & — & 95.16\% \\
+mAP50-95 & — & 76.75\% \\
+Parameters & Not Disclosed & 11.1 Million \\
+Training Time & Not Disclosed & 1.5 Hours \\
+\hline
+\end{tabular}
+\label{tab:det_comp}
+\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\textwidth}
+\begin{center}
+\caption*{Math Expression Recognition (MER) Performance on Im2LaTeX-100K}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Metric} & \textbf{Baseline (Pix2Tex) \cite{ref_paper}} & \textbf{Our Model (TrOCR-small)} \\
+\hline
+CER & 10.84\% & \textbf{9.67\%} \\
+BLEU Score & 86.44\% & \textbf{88.42\%} \\
+Parameters & Not Disclosed & 61.6 Million \\
+Training Time & Not Disclosed & 8 Hours \\
+\hline
+\end{tabular}
+\label{tab:rec_comp}
+\end{center}
+\end{minipage}
+\end{table*}
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{CEP Mapping and Complex Engineering Assessment}
+
+We mapped the SmartScan project to the Complex Engineering Problem (CEP) indicators (Table~\ref{tab:cep}) to analyze its educational and technical scope.
+
+\begin{table}[h]
+    \begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|c|}
+\hline  
+P1&P2&P3&P4&P5&P6&P7\\
+\hline 
+$\checkmark$&$\checkmark$&$\checkmark$&$\checkmark$&$\checkmark$&$\checkmark$&$\checkmark$\\
+\hline 
+\end{tabular}
+\end{center}
+    \caption{Complex Engineering Problem Mapping. P1 - Depth of Knowledge, P2 - Conflicting Requirements, P3 - Depth of Analysis, P4 - Familiarity of Issues, P5 - Extent of Applicable Codes, P6 - Extent of Stakeholders, P7 - Interdependence.}
+    \label{tab:cep}
+\end{table}
+
+\noindent \textbf{[P1: Depth of Knowledge]} The project requires an in-depth understanding of computer vision architectures (CNNs and Transformers). Training YOLOv8 and fine-tuning TrOCR on academic datasets (IBEM, Im2LaTeX) demonstrates advanced applied machine learning.
+
+\noindent \textbf{[P2: Conflicting Requirements]} We encountered conflicting requirements between inference latency and resource constraints. Running a 61.6M-parameter TrOCR model directly on the Raspberry Pi 5 CPU resulted in high latency ($\sim$30 seconds per formula). We solved this trade-off by establishing a hybrid local-cloud pipeline, routing heavy requests to the Gemini API while keeping the local model as a reliable fallback.
+
+\noindent \textbf{[P3: Depth of Analysis]} We analyzed alternative detection frameworks. While Faster R-CNN provides slightly higher localization precision, YOLOv8-small provides a significantly lighter footprint (11.1M parameters), enabling real-time detection frame rates.
+
+\noindent \textbf{[P4: Familiarity of Issues]} The project bridges mechanical engineering (servo torque, gear wear), embedded systems (serial bus timing, noise filtering), and deep learning. Managing synchronous triggers across multiple devices was an unfamiliar technical domain.
+
+\noindent \textbf{[P5: Extent of Applicable Codes]} We followed safety and ethical codes. We integrated thermal fan relays to prevent motor overheating. From a digital ethics standpoint, the system is designed to digitize books solely for private educational use, adhering to fair-use copyright codes.
+
+\noindent \textbf{[P6: Extent of Stakeholders]} Key stakeholders include United International University laboratory instructors, students requiring accessible text formats, and library archivists digitizing deteriorating manuscripts.
+
+\noindent \textbf{[P7: Interdependence]} The modules are highly decoupled but interdependent. The Arduino Mega acts as a real-time actuator, the Raspberry Pi 5 serves as a network proxy, the Flask backend performs the heavy CV processing, and the Next.js frontend acts as the user interface, communicating via REST APIs.
+
+\subsection{Limitations and Alternative Designs}
+
+A major limitation of the current design is its sensitivity to binding thickness. Pages near the end of a thick book tend to bend, which can lead to double-page feeds or image distortion. 
+
+We proposed two alternative designs to address this:
+\begin{itemize}
+\item \textbf{Vacuum-Assisted Lift (Alternative 1):} Replacing the rubber-tyre mechanical gripper with a small suction nozzle and vacuum pump would minimize page wear and ensure single-page separation, but would increase cost by 8,000 BDT.
+\item \textbf{Dual-Arm Flipper (Alternative 2):} Implementing two symmetrical arms would allow page turning in both directions, but would double the Arduino servo control complexity.
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+In this paper, we presented SmartScan, an automated book digitization system that integrates mechatronic page-turning with deep-learning-based mathematical extraction. The system successfully combines Arduino servo control and Raspberry Pi capture triggers to digitize academic STEM books, converting complex formulas into clean LaTeX code and merging pages into a structured PDF.
+
+Our custom-trained YOLOv8-small model achieves 93.89\% precision in math detection, and the fine-tuned TrOCR model outperforms standard Pix2Tex baselines with a Character Error Rate of 9.67\% and a BLEU score of 88.42\%. In the future, we plan to implement automatic page-flattening algorithms, scale the system with a vacuum-assisted page lifter, and integrate multi-language OCR support for localized educational environments.
+
+\section*{Acknowledgment}
+
+We would like to express our gratitude to the department of Computer Science and Engineering at United International University (UIU) for providing the laboratory resources, hardware equipment, and faculty guidance that made the completion of this project possible.
+
+\begin{thebibliography}{00}
+\bibitem{ref_paper} S. Thamaraiselvan, V. Venugopal, S. Vekkot, and P. K. Pisharady, ``An Automated Academic Book Scanner With Deep Learning Powered Math Expression Detection and Recognition,'' \textit{IEEE Access}, vol. 13, pp. 206121-206137, 2025.
+\bibitem{github} Atikur Rahaman et al., ``SmartScan GitHub Repository,'' 2026. [Online]. Available: \url{https://github.com/Atik203/SmartScan}
+\bibitem{livelink} Atikur Rahaman et al., ``SmartScan Live Portal,'' 2026. [Online]. Available: \url{https://smart-scan-one.vercel.app/}
+\bibitem{video} Atikur Rahaman et al., ``SmartScan Project Demonstration Video,'' 2026. [Online]. Available: \url{https://drive.google.com/file/d/1y10zaa0v6_Gp2dSn8J5uKXw9XBtIhR28/view?usp=sharing}
+\bibitem{yolov8} Ultralytics, ``YOLOv8 Real-Time Object Detection Framework,'' 2023. [Online]. Available: \url{https://github.com/ultralytics/ultralytics}
+\bibitem{trocr} M. Li et al., ``TrOCR: Transformer OCR with Pre-trained Models,'' \textit{arXiv preprint arXiv:2109.10282}, 2021.
+\bibitem{tesseract} R. Smith, ``An overview of the Tesseract OCR engine,'' in \textit{Proc. Ninth Int. Conf. Document Analysis and Recognition (ICDAR)}, 2007, pp. 629–633.
+\bibitem{ibem} M. Anitei et al., ``IBEM: A dataset for math expression detection,'' \textit{Pattern Recognition Letters}, vol. 168, pp. 88–95, 2023.
+\bibitem{im2latex} A. Kanervisto et al., ``Im2LaTeX-100K dataset for math expression recognition,'' Zenodo, 2016.
+\bibitem{resnet} K. He, X. Zhang, S. Ren, and J. Sun, ``Deep residual learning for image recognition,'' in \textit{Proc. IEEE CVPR}, 2016.
+\bibitem{vit} A. Dosovitskiy et al., ``An image is worth 16x16 words: Transformers for image recognition at scale,'' in \textit{Proc. ICLR}, 2021.
+\bibitem{attention} A. Vaswani et al., ``Attention is all you need,'' in \textit{Proc. NIPS}, 2017.
+\end{thebibliography}
+
+\end{document}
