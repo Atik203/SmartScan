@@ -19,37 +19,9 @@
 
 \title{An Automated Academic Book Scanner with Deep Learning-Powered Mathematical Expression Detection and Recognition}
 
-\author{
-\IEEEauthorblockN{Md. Atikur Rahaman}
-\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engineering} \\
-\textit{United International University}\\
-Dhaka, Bangladesh \\
-ID: 011-231-0298}
-\and
-\IEEEauthorblockN{Md. Sarowar Alam Sourov}
-\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engineering} \\
-\textit{United International University}\\
-Dhaka, Bangladesh \\
-ID: 011-231-0302}
-\and
-\IEEEauthorblockN{Abdullah Al Noor}
-\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engineering} \\
-\textit{United International University}\\
-Dhaka, Bangladesh \\
-ID: 011-231-0479}
-\and
-\IEEEauthorblockN{Md. Salman Rohoman Nayeem}
-\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engineering} \\
-\textit{United International University}\\
-Dhaka, Bangladesh \\
-ID: 011-231-0484}
-\and
-\IEEEauthorblockN{Pratay Paul}
-\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engineering} \\
-\textit{United International University}\\
-Dhaka, Bangladesh \\
-ID: 011-231-0163}
-}
+\author{\IEEEauthorblockN{Md. Atikur Rahaman (0112310298), Md. Sarowar Alam Sourov (0112310302), Abdullah Al Noor (0112310479),\\
+Md. Salman Rohoman Nayeem (0112310484), and Pratay Paul (0112310163)}
+\IEEEauthorblockA{Department of Computer Science and Engineering, United International University, Dhaka, Bangladesh}}
 
 \maketitle
 
@@ -288,11 +260,11 @@ For Math Expression Recognition (MER), we fine-tune Microsoft's TrOCR (Transform
 
 To assess the system, we digitized a textbook page containing complex mathematical integrals. The processing stages are shown in Fig.~\ref{fig:stages}. The raw phone capture is first cropped and dewarped. The whiteness filter successfully removes shadow gradients from the page curvature. YOLOv8 localizes the mathematical blocks (shown with bounding boxes in the predicted stage), and crops are extracted for TrOCR.
 
-\begin{figure}[htbp]
+\begin{figure*}[htbp]
 \centerline{\includegraphics[width=\linewidth]{detection.jpeg}}
 \caption{The five-stage digitization pipeline: (1) Raw image upload, (2) Edge crop, (3) Dewarped illumination normalization, (4) YOLOv8 math detection overlay, and (5) Extracted equation regions.}
 \label{fig:stages}
-\end{figure}
+\end{figure*}
 
 \subsection{Deep Learning Model Performance Evaluation}
 
@@ -304,34 +276,34 @@ For Math Expression Recognition (MER), our fine-tuned TrOCR model achieved state
 
 The TrOCR model was fine-tuned using the AdamW optimizer with a learning rate of $5 \times 10^{-5}$, weight decay of $0.01$, and a batch size of 16 for 10 epochs, taking 8 hours on an NVIDIA L4 GPU.
 
-\begin{table*}[htbp]
-\caption{Deep Learning Model Performance Evaluation}
-\label{tab:performance_comparison}
-\begin{minipage}{0.48\textwidth}
+\begin{table}[htbp]
+\caption{Math Expression Detection (MED) Performance Comparison on IBEM Dataset}
+\label{tab:det_comp}
 \begin{center}
-\caption*{Math Expression Detection (MED) Performance on IBEM Dataset}
+\footnotesize
 \begin{tabular}{|l|c|c|}
 \hline
-\textbf{Metric} & \textbf{Baseline (Faster R-CNN) \cite{ref_paper}} & \textbf{Our Model (YOLOv8)} \\
+\textbf{Metric} & \textbf{\shortstack{Baseline\\(Faster R-CNN~\cite{ref_paper})}} & \textbf{\shortstack{Proposed Model\\(YOLOv8)}} \\
 \hline
 Precision & \textbf{95.71\%} & 93.89\% \\
-Recall & 91.77\% & \textbf{91.42\%} \\
+Recall & \textbf{91.77\%} & 91.42\% \\
 mAP50 & — & 95.16\% \\
 mAP50-95 & — & 76.75\% \\
 Parameters & Not Disclosed & 11.1 Million \\
 Training Time & Not Disclosed & 1.5 Hours \\
 \hline
 \end{tabular}
-\label{tab:det_comp}
 \end{center}
-\end{minipage}
-\hfill
-\begin{minipage}{0.48\textwidth}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Math Expression Recognition (MER) Performance Comparison on Im2LaTeX-100K}
+\label{tab:rec_comp}
 \begin{center}
-\caption*{Math Expression Recognition (MER) Performance on Im2LaTeX-100K}
+\footnotesize
 \begin{tabular}{|l|c|c|}
 \hline
-\textbf{Metric} & \textbf{Baseline (Pix2Tex) \cite{ref_paper}} & \textbf{Our Model (TrOCR-small)} \\
+\textbf{Metric} & \textbf{\shortstack{Baseline\\(Pix2Tex~\cite{ref_paper})}} & \textbf{\shortstack{Proposed Model\\(TrOCR-small)}} \\
 \hline
 CER & 10.84\% & \textbf{9.67\%} \\
 BLEU Score & 86.44\% & \textbf{88.42\%} \\
@@ -339,10 +311,8 @@ Parameters & Not Disclosed & 61.6 Million \\
 Training Time & Not Disclosed & 8 Hours \\
 \hline
 \end{tabular}
-\label{tab:rec_comp}
 \end{center}
-\end{minipage}
-\end{table*}
+\end{table}
 
 \section{Discussion}
 \label{sec:discussion}
