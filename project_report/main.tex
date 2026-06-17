@@ -149,6 +149,32 @@ USB-C Power & 5V 5A Power Adapter & Main system power supply \\
 
 The physical components, including the Arduino Uno, Raspberry Pi 5 single-board computer, and the three-layer Muscle, Bridge, and Brain routing architecture, are displayed in Fig.~\ref{fig:hardware}.
 
+\subsection{System Bill of Materials (BOM) \& Cost Analysis}
+A primary advantage of the SmartScan system is its low-cost physical prototype implementation. While industrial robotic book digitization platforms routinely exceed \$10,000, our assembly achieves full automation under \$290. The itemized system budget is detailed in Table~\ref{tab:bom}.
+
+\begin{table}[htbp]
+\caption{SmartScan System Bill of Materials (BOM)}
+\begin{center}
+\footnotesize
+\begin{tabular}{|p{2.3cm}|c|r|r|}
+\hline
+\textbf{Component} & \textbf{Qty} & \textbf{Unit Cost (BDT)} & \textbf{Total (BDT)} \\
+\hline
+Arduino Uno R3 & 1 & 850 & 850 \\
+Raspberry Pi 5 Setup & 1 & 30,000 & 30,000 \\
+Actuation Servos & 3 & 400 & 1,200 \\
+Multi-Rail Power Supply & 1 & 350 & 350 \\
+Custom V-Cradle Chassis & 1 & 1,000 & 1,000 \\
+Misc. Wires & 1 & 1,000 & 1,000 \\
+Redmi Note Phone & 1 & (Existing) & — \\
+\hline
+\textbf{Total Cost} & \multicolumn{3}{r|}{\textbf{34,400 BDT (\(\approx\) \$290 USD)}} \\
+\hline
+\end{tabular}
+\label{tab:bom}
+\end{center}
+\end{table}
+
 \begin{figure*}[htbp]
 \centerline{
   \begin{tabular}{ccc}
@@ -166,7 +192,30 @@ The physical components, including the Arduino Uno, Raspberry Pi 5 single-board 
 
 \subsection{Image Preprocessing and Illumination Correction}
 
-Mobile document captures often present non-uniform lighting, shadows near the spine, and border compression artifacts. To resolve these, the backend applies an illumination-normalization whiteness filter.
+Mobile document captures often present non-uniform lighting, shadows near the spine, and border compression artifacts. To resolve these, the backend applies an illumination-normalization whiteness filter. The mathematical parameters and symbols utilized in this pipeline are summarized in Table~\ref{tab:nomenclature}.
+
+\begin{table}[htbp]
+\caption{Mathematical Nomenclature and Parameters}
+\begin{center}
+\footnotesize
+\begin{tabular}{|c|p{5.5cm}|}
+\hline
+\textbf{Symbol} & \textbf{Description and Baseline Value} \\
+\hline
+\(I(x,y)\) & Input grayscale pixel intensity at coordinates \((x,y)\) \\
+\(B(x,y)\) & Estimated spatial background illumination intensity \\
+\(N(x,y)\) & Whiteness-normalized pixel intensity \\
+\(E(x,y)\) & Enhanced, contrast-stretched pixel intensity \\
+\(\gamma\) & Downsampling scale factor for background estimation (\(0.25\)) \\
+\(K\) & Median blur filter kernel window dimensions (\(41 \times 41\)) \\
+\(\alpha\) & Linear contrast scaling coefficient (\(1.05\)) \\
+\(\beta\) & Brightness offset parameter (\(5\)) \\
+\(p\) & Structural bounding box cropping padding (\(8\,\text{px}\)) \\
+\hline
+\end{tabular}
+\label{tab:nomenclature}
+\end{center}
+\end{table}
 
 Let $I(x, y)$ be the intensity of the input image at pixel coordinates $(x, y)$. To estimate the spatial distribution of background illumination $B(x, y)$, we downsample $I(x, y)$ by a scaling factor of $\gamma = 0.25$, apply a median blur filter with a large kernel size ($K = 41$) to eliminate high-frequency text elements, and upsample back to the original dimensions using bilinear interpolation:
 \begin{equation}
@@ -240,7 +289,7 @@ To optimize processing latency and maintain fully private, local execution, we i
 
 Mathematical Expression Detection (MED) requires locating equations embedded within text columns as well as isolated, centered formulas. We deploy a fine-tuned YOLOv8-small object detector. 
 
-Unlike the Faster R-CNN baseline in \cite{ref_paper}, which relies on a multi-stage Region Proposal Network (RPN) and RoI pooling, YOLOv8-small utilizes a single-stage, anchor-free design. Features are extracted using a CSPDarknet backbone enhanced with C2f (CSPLan with 2 convolutions) blocks. A Path Aggregation Network (PANet) neck performs multi-scale feature fusion. The detection head is decoupled, processing classification and regression as independent tasks.
+Unlike the Faster R-CNN baseline in \cite{ref_paper}, which relies on a multi-stage Region Proposal Network (RPN) and RoI pooling, YOLOv8-small utilizes a single-stage, anchor-free design. The model contains approximately 11.1 million parameters across 225 layers. Features are extracted using a CSPDarknet backbone consisting of five stage Conv/C2f (Cross Stage Partial Bottleneck with two convolutions) blocks using a Darknet53 architecture, yielding multi-scale feature maps at strides of 8, 16, and 32 pixels. A Path Aggregation Network (PANet) neck performs multi-scale top-down and bottom-up feature fusion. The detection head is decoupled, processing classification and bounding box regression as independent tasks utilizing separate convolution channels before loss optimization.
 
 To optimize box localization and classification, YOLOv8-small utilizes a multi-task loss function. The total loss $\mathcal{L}_{\text{total}}$ is a weighted combination of bounding box regression loss $\mathcal{L}_{\text{box}}$ and classification loss $\mathcal{L}_{\text{cls}}$:
 \begin{equation}
@@ -278,8 +327,8 @@ where $y_i$ and $y_{i+1}$ are the two closest integer grid values flanking the c
 
 For Math Expression Recognition (MER), we fine-tune Microsoft's TrOCR (Transformer OCR) architecture. TrOCR utilizes a Vision Encoder-Decoder framework:
 \begin{itemize}
-\item \textbf{Vision Encoder:} A Vision Transformer (ViT) model \cite{vit}. The input crop $x \in \mathbb{R}^{H \times W \times C}$ is divided into non-overlapping patches $x_p \in \mathbb{R}^{N \times (P^2 \cdot C)}$, where $P=16$ is the patch size and $N = HW/P^2$ is the sequence length. These patches are mapped to a model dimension $D = 512$ via a linear projection, combined with learnable 1D position embeddings, and processed by Multi-Head Self-Attention layers.
-\item \textbf{Text Decoder:} A standard autoregressive language Transformer \cite{attention}. It receives the visual tokens from the encoder through cross-attention mechanisms, generating LaTeX character tokens sequentially. This replaces the complex convolutional-recurrent architectures used in older models like Pix2Tex.
+\item \textbf{Vision Encoder:} A Vision Transformer (ViT) model \cite{vit}. The input crop $x \in \mathbb{R}^{H \times W \times C}$ is divided into non-overlapping patches $x_p \in \mathbb{R}^{N \times (P^2 \cdot C)}$, where $P=16$ is the patch size and $N = HW/P^2$ is the sequence length. These patches are mapped to a model dimension $D = 512$ via a linear projection, combined with learnable 1D position embeddings, and processed by 12 Multi-Head Self-Attention layers (configured with 8 attention heads).
+\item \textbf{Text Decoder:} A standard autoregressive language Transformer \cite{attention}. It consists of 6 decoder layers with a model dimension of 256 and 8 attention heads. It receives the visual tokens from the encoder through cross-attention mechanisms, generating LaTeX character tokens sequentially. This replaces the complex convolutional-recurrent architectures used in older models like Pix2Tex.
 \end{itemize}
 
 During training, the TrOCR-small model maps the visual patch tokens to LaTeX token sequences. The encoder converts the patch embeddings into hidden representation states $h = \text{Encoder}(x)$. The autoregressive language decoder is trained to predict the probability of the target LaTeX formula sequence $Y = (y_1, y_2, \dots, y_T)$ by minimizing the token-level cross-entropy loss $\mathcal{L}_{\text{seq}}$:
