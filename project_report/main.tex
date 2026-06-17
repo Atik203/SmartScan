@@ -26,7 +26,7 @@ Md. Salman Rohoman Nayeem (0112310484), and Pratay Paul (0112310163)}
 \maketitle
 
 \begin{abstract}
-Digitizing printed academic and STEM textbooks is a labor-intensive and slow process, especially when pages contain complex mathematical expressions that conventional optical character recognition (OCR) systems fail to parse correctly. This paper presents SmartScan, an automated, low-cost mechatronic book scanning system that coordinates physical page turning, dual-camera phone capture, and a hybrid deep-learning-powered OCR pipeline. Our physical prototype leverages an Arduino Mega to control a series of MG996R servos that isolate, lift, and flip pages on a V-shaped cradle while a Raspberry Pi 5 triggers overhead smartphone cameras via the Android Debug Bridge (ADB). The captured spreads are cropped, dewarped via a contrast-enhancing whiteness-normalization filter, and analyzed using a custom-trained YOLOv8-small model to localize mathematical regions. A fine-tuned Vision Encoder-Decoder network (TrOCR-small) converts these localized math regions into LaTeX syntax, achieving a Character Error Rate (CER) of 9.67\% and a BLEU score of 88.42\%, which out-performs the Pix2Tex baseline used in current literature. When math regions are present, the page is routed through Google's Gemini 2.5 Flash Lite API (with local Tesseract + TrOCR as a robust fallback) before compiling the extracted Markdown into a beautifully rendered PDF via Pandoc and XeLaTeX.
+Digitizing printed academic and STEM textbooks is a labor-intensive and slow process, especially when pages contain complex mathematical expressions that conventional optical character recognition (OCR) systems fail to parse correctly. This paper presents SmartScan, an automated, low-cost mechatronic book scanning system that coordinates physical page turning, dual-camera phone capture, and a local deep-learning-powered OCR pipeline. Our physical prototype leverages an Arduino Mega to control a series of MG996R servos that isolate, lift, and flip pages on a V-shaped cradle while a Raspberry Pi 5 triggers overhead smartphone cameras via the Android Debug Bridge (ADB). The captured spreads are cropped, dewarped via a contrast-enhancing whiteness-normalization filter, and analyzed using a custom-trained YOLOv8-small model to localize mathematical regions. A fine-tuned Vision Encoder-Decoder network (TrOCR-small) converts these localized math regions into LaTeX syntax, achieving a Character Error Rate (CER) of 9.67\% and a BLEU score of 88.42\%, which out-performs the Pix2Tex baseline used in current literature. When math regions are present, they are extracted via the YOLOv8 detector and converted to LaTeX using our fine-tuned offline TrOCR-small model, which runs locally alongside Tesseract OCR to assemble the completed page structure before compiling the extracted Markdown into a beautifully rendered PDF via Pandoc and XeLaTeX.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -48,7 +48,7 @@ Standard document digitization systems have historically relied on flatbed scann
 In the reference paper by Thamaraiselvan et al. \cite{ref_paper}, the authors proposed an automated academic book scanner utilizing a Faster R-CNN model with customized RoIHeads for math detection (achieving 95.71\% precision and 91.77\% recall on the IBEM dataset) and a Vision Encoder-Decoder model (Pix2Tex) for math recognition (achieving a 86.44\% BLEU score). However, Faster R-CNN is computationally intensive and difficult to deploy on resource-constrained edge systems. Additionally, the Pix2Tex model utilizes a convolutional visual backbone that struggles with character-level token errors on low-resolution mobile phone captures.
 
 \subsection{Proposed Solution \& Contributions}
-In this work, we build on the ideas of \cite{ref_paper} and present several key enhancements. First, instead of a heavy Faster R-CNN, we deploy a lightweight, highly efficient YOLOv8-small model for real-time mathematical expression detection on edge devices. Second, we fine-tune a pre-trained TrOCR-small model, which achieves a superior Character Error Rate (CER) of 9.67\% and a BLEU score of 88.42\%, outperforming the paper's Pix2Tex baseline. Third, we establish a hybrid routing architecture: if no math is detected, a fast, free local Tesseract OCR engine processes the page; if math is detected, the page is routed to the Gemini 2.5 Flash Lite API for high-fidelity extraction, with local TrOCR + Tesseract serving as a local fallback. Finally, we design a modern, real-time web dashboard using Next.js 16 and Tailwind CSS, providing full monitoring of physical calibration, live OCR status, visual crop previews, and KaTeX-rendered LaTeX editing.
+In this work, we build on the ideas of \cite{ref_paper} and present several key enhancements. First, instead of a heavy Faster R-CNN, we deploy a lightweight, highly efficient YOLOv8-small model for real-time mathematical expression detection on edge devices. Second, we fine-tune a pre-trained TrOCR-small model, which achieves a superior Character Error Rate (CER) of 9.67\% and a BLEU score of 88.42\%, outperforming the paper's Pix2Tex baseline. Third, we establish an offline, layout-guided hybrid OCR architecture: if no math is detected, a fast, local Tesseract OCR engine processes the text; if math is detected, the page is processed through a coordinated pipeline that uses a fine-tuned local TrOCR-small model for mathematical expressions, and Tesseract for plain text regions, stitching the visual formulas back into the text flow dynamically. Finally, we design a modern, real-time web dashboard using Next.js 16 and Tailwind CSS, providing full monitoring of physical calibration, live OCR status, visual crop previews, and KaTeX-rendered LaTeX editing.
 
 \section{System Design \& Mechatronic Control}
 \label{sec:method}
@@ -202,37 +202,33 @@ The visual progression through these preprocessing stages is shown in Fig.~\ref{
 \label{fig:preprocessing_steps}
 \end{figure*}
 
-\subsection{Hybrid Routing Architecture}
+\subsection{Layout-Guided OCR Reconstruction Pipeline}
 
-To optimize processing latency and API costs, we implemented a hybrid routing engine (Algorithm~\ref{alg:routing}). Pages without mathematical content bypass the deep learning models and are processed locally using Tesseract OCR, while math-heavy pages utilize our specialized models.
+To optimize processing latency and maintain fully private, local execution, we implemented an offline layout-guided OCR pipeline (Algorithm~\ref{alg:routing}). Pages without mathematical content bypass the deep learning models and are processed locally using Tesseract OCR, while math-heavy pages utilize our specialized offline models.
 
 \begin{algorithm}
-\caption{SmartScan Hybrid OCR Page Routing Algorithm}
+\caption{SmartScan Layout-Guided LaTeX OCR Pipeline}
 \label{alg:routing}
 \begin{algorithmic}[1]
-\REQUIRE Preprocessed page image $E(x,y)$, YOLOv8-small model $M_{YOLO}$, TrOCR model $M_{TrOCR}$, Tesseract OCR engine $E_{Tess}$, Gemini API client $C_{Gemini}$
+\REQUIRE Preprocessed page image $E(x,y)$, YOLOv8-small model $M_{YOLO}$, TrOCR model $M_{TrOCR}$, Tesseract OCR engine $E_{Tess}$
 \ENSURE Completed markdown page text $D_{out}$ with LaTeX syntax
 \STATE $\mathcal{B} \leftarrow M_{YOLO}(E(x,y))$ \COMMENT{Detect mathematical bounding boxes}
 \STATE $N_{math} \leftarrow \text{count}(\mathcal{B})$
 \IF{$N_{math} == 0$}
     \STATE $D_{out} \leftarrow E_{Tess}(E(x,y))$ \COMMENT{Route to Path A: pure text local OCR}
-    \STATE $\text{Route} \leftarrow \text{``local''}$
+    \STATE $\text{Mode} \leftarrow \text{``Tesseract-only''}$
 \ELSE
     \STATE $\mathcal{L} \leftarrow \emptyset$
     \FORALL{box $b_i \in \mathcal{B}$}
         \STATE $C_i \leftarrow \text{crop}(E(x,y), b_i, \text{pad}=10)$
-        \STATE $l_i \leftarrow M_{TrOCR}(C_i)$ \COMMENT{Recognize cropped formula}
+        \STATE $l_i \leftarrow M_{TrOCR}(C_i)$ \COMMENT{Translate cropped formula to LaTeX}
         \STATE $\mathcal{L} \leftarrow \mathcal{L} \cup \{l_i\}$
     \ENDFOR
-    \STATE \textbf{try:}
-    \STATE \quad $D_{out} \leftarrow C_{Gemini}(E(x,y))$ \COMMENT{Route to Path B: cloud API processing}
-    \STATE \quad $\text{Route} \leftarrow \text{``ai''}$
-    \STATE \textbf{except API\_Error:}
-    \STATE \quad $T_{ocr} \leftarrow E_{Tess}(E(x,y))$
-    \STATE \quad $D_{out} \leftarrow \text{Stitch}(T_{ocr}, \mathcal{L})$ \COMMENT{Stitch local Tesseract and TrOCR}
-    \STATE \quad $\text{Route} \leftarrow \text{``fallback''}$
+    \STATE $T_{ocr} \leftarrow E_{Tess}(E(x,y))$ \COMMENT{Route to Path B: offline hybrid OCR}
+    \STATE $D_{out} \leftarrow \text{Stitch}(T_{ocr}, \mathcal{L}, \mathcal{B})$ \COMMENT{Stitch local text and LaTeX formulas}
+    \STATE $\text{Mode} \leftarrow \text{``Hybrid-Offline''}$
 \ENDIF
-\RETURN $D_{out}, \text{Route}$
+\RETURN $D_{out}, \text{Mode}$
 \end{algorithmic}
 \end{algorithm}
 
@@ -337,7 +333,7 @@ $\checkmark$&$\checkmark$&$\checkmark$&$\checkmark$&$\checkmark$&$\checkmark$&$\
 
 \noindent \textbf{[P1: Depth of Knowledge]} The project requires an in-depth understanding of computer vision architectures (CNNs and Transformers). Training YOLOv8 and fine-tuning TrOCR on academic datasets (IBEM, Im2LaTeX) demonstrates advanced applied machine learning.
 
-\noindent \textbf{[P2: Conflicting Requirements]} We encountered conflicting requirements between inference latency and resource constraints. Running a 61.6M-parameter TrOCR model directly on the Raspberry Pi 5 CPU resulted in high latency ($\sim$30 seconds per formula). We solved this trade-off by establishing a hybrid local-cloud pipeline, routing heavy requests to the Gemini API while keeping the local model as a reliable fallback.
+\noindent \textbf{[P2: Conflicting Requirements]} We encountered conflicting requirements between inference latency and resource constraints. Running a 61.6M-parameter TrOCR model directly on the Raspberry Pi 5 single-board computer resulted in high latency ($\sim$30 seconds per formula). We solved this trade-off by establishing a decoupled architecture where the heavy deep learning inference (YOLOv8 and TrOCR) runs offline on a dedicated local edge server, while the Raspberry Pi 5 acts as a lightweight capture bridge and UART serial controller.
 
 \noindent \textbf{[P3: Depth of Analysis]} We analyzed alternative detection frameworks. While Faster R-CNN provides slightly higher localization precision, YOLOv8-small provides a significantly lighter footprint (11.1M parameters), enabling real-time detection frame rates.
 
