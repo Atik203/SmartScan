@@ -19,7 +19,6 @@ ENV/
 
 # ===== IDE =====
 .idea/
-.vscode/
 *.swp
 *.swo
 *~
