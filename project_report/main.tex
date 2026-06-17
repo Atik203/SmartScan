@@ -58,13 +58,14 @@ In this work, we build on the ideas of \cite{ref_paper} and present several key 
 The physical hardware framework of SmartScan is designed to protect delicate book bindings while optimizing image flatness. The system features a V-shaped book cradle set at a 110-degree angle. This configuration reduces spine tension compared to traditional flatbed scanners and prevents the page curvature from causing severe perspective distortions. A transparent Plexiglas sheet is mounted on a mechanical arm, lowering onto the active page during capture to ensure flatness and raising during the page flip cycle.
 
 \subsection{Arduino Uno Actuation State Machine}
-The physical page-turning sequence is controlled by an Arduino Uno running a low-latency state machine. The mechatronic cycle contains five sequential stages:
+The physical page-turning sequence is controlled by an Arduino Uno running a low-latency state machine. The mechatronic cycle contains six sequential stages:
 \begin{enumerate}
-\item \textbf{Calibration Phase:} Before beginning automation, the user adjusts the travel angles for the page gripper and flipper servos using an analog potentiometer. The values are committed to the Uno's internal EEPROM, preventing recalibration between restarts.
-\item \textbf{Page Separation:} The tyre servo lowers to the book edge, and a small DC blower fan is activated via a relay to blow air beneath the top page, separating it from the rest of the book stack.
-\item \textbf{Lifting and Flipping:} The lift servo raises the page slightly, and the flipper arm sweeps beneath the page, turning it over in a 180-degree arc.
-\item \textbf{Stability and Hold:} Once flipped, the flipper presses down on the new page margin to keep the page completely flat.
-\item \textbf{Capture Trigger:} At the moment of maximum hold, the Arduino Uno transmits a serial signal (\texttt{CAPTURE}) to the Raspberry Pi 5.
+\item \textbf{Lower Tyre Assembly:} The lift servo slowly sweeps from \texttt{LIFT\_UP} ($60^\circ$) to \texttt{LIFT\_DOWN} ($180^\circ$) with a step delay of $25$\,ms to gently lower the rubber tyre onto the active page.
+\item \textbf{Tyre Curl Activation (Pre-spin):} The continuous-rotation tyre servo is activated in the turn direction (\texttt{TYRE\_TURN} $= 0$) and runs for a duration of \texttt{TYRE\_LEAD\_TIME} ($150$\,ms) to frictionally slide and create an initial curl in the page margin.
+\item \textbf{Simultaneous Lift and Flip:} The lift servo sweeps back from \texttt{LIFT\_DOWN} ($180^\circ$) to \texttt{LIFT\_UP} ($60^\circ$). To prevent physical collision, the flipper servo is triggered to sweep from \texttt{FLIP\_RELEASE} ($0^\circ$) to \texttt{FLIP\_PRESS} ($180^\circ$) as soon as the lift height reaches the 50\% threshold (\texttt{liftPos} $\le 135$).
+\item \textbf{Tyre Halt:} The tyre servo is kept spinning for an additional \texttt{TYRE\_EXTRA\_TIME} ($250$\,ms) during the lift sweep to maintain page contact, then halts by writing \texttt{TYRE\_STOP} ($120$).
+\item \textbf{Hold and Capture Phase:} The flipper arm holds at \texttt{FLIP\_PRESS} ($180^\circ$) for a static duration of \texttt{PRESS\_HOLD} ($3000$\,ms) to keep the turned page completely flat. During this window, the Raspberry Pi 5 camera capture loop triggers the smartphone camera shutter.
+\item \textbf{Release Flipper:} The flipper arm sweeps back from \texttt{FLIP\_PRESS} ($180^\circ$) to \texttt{FLIP\_RELEASE} ($0^\circ$) with a step delay of $3$\,ms, resetting the mechanism for the next page cycle.
 \end{enumerate}
 
 The complete mechatronic control flow is mapped in Fig.~\ref{fig:flowchart}.
@@ -91,9 +92,9 @@ The mechatronic timing constants are:
 
 \subsection{Microcontroller Actuation Layer (Muscle)}
 
-The physical actuation of the book digitizer is coordinated by an Arduino Uno. The system drives four high-torque MG996R metal-gear servos to handle page picking and flipping without slippage. A DC blower fan is triggered via a relay channel to generate high-velocity air currents under the picked page, separating it from the underlying page stack and preventing double-feeds. A rotary potentiometer provides analog position tracking to adjust the gripper and flipper travel limits, with calibrated endpoints committed to the Uno's internal EEPROM.
+The physical actuation of the book digitizer is coordinated by an Arduino Uno. The system drives three high-torque servos to handle page picking, lifting, and flipping: a continuous-rotation servo for tyre rolling, and two positional MG996R metal-gear servos for the lifting and flipping mechanisms. 
 
-The MG996R servo motor requires a three-wire interface: ground (brown/black), power input (red), and PWM control signal (orange/yellow). Because these servos draw substantial current during peak load (up to 2.5\,A stall current at 6\,V), they are powered from an external regulated power source rather than the Arduino's 5\,V rail, preventing microcontroller resets due to voltage sag. The PWM control signals are connected directly to Arduino digital pins 9, 10, 11, and 12, allowing precision pulse-width modulation (from 500\,$\mu$s to 2500\,$\mu$s) to drive the physical sweeps. The servo pinout schematic is illustrated in Fig.~\ref{fig:servo_pinout}.
+The MG996R servo motor and the continuous-rotation tyre servo require a three-wire interface: ground (brown/black), power input (red), and PWM control signal (orange/yellow). Because these servos draw substantial current during peak load (up to 2.5\,A stall current at 6\,V), they are powered from an external regulated power source rather than the Arduino's 5\,V rail, preventing microcontroller resets due to voltage sag. The PWM control signals are connected directly to Arduino digital pins 8 (tyre), 9 (lift), and 11 (flipper), allowing precision pulse-width modulation (from 500\,$\mu$s to 2500\,$\mu$s) to drive the physical sweeps. The servo pinout schematic is illustrated in Fig.~\ref{fig:servo_pinout}.
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=0.85\linewidth]{MG996R-Servo-Pinout.png}}
@@ -103,53 +104,48 @@ The MG996R servo motor requires a three-wire interface: ground (brown/black), po
 
 The wiring and pin mapping for the Arduino Uno are detailed in Table~\ref{tab:arduino_pins}.
 
-\begin{table*}[htbp]
+\begin{table}[htbp]
 \caption{Arduino Uno Pin Configurations}
 \begin{center}
-\begin{tabular}{|l|c|c|l|}
+\footnotesize
+\begin{tabular}{|p{1.8cm}|c|c|p{3.0cm}|}
 \hline
 \textbf{Component} & \textbf{Pin No.} & \textbf{Mode} & \textbf{Function} \\
 \hline
-Left Gripper Servo & Pin 9 & Output & Coordinate page-lift sweep \\
-Right Gripper Servo & Pin 10 & Output & Lift margin of active page \\
-Left Flipper Servo & Pin 11 & Output & Sweep page in 180$^\circ$ arc \\
-Right Flipper Servo & Pin 12 & Output & Press and hold page flat \\
-Analog Potentiometer & Pin A0 & Input & Set calibration positions \\
-DC Fan Relay Switch & Pin 7 & Output & Control page separation fan \\
-TCRT5000 IR Sensor & Pin A1 & Input & Detect surface reflection \\
-Pi Serial TX & Pin 1 (TX) & Output & Emit CAPTURE serial trigger \\
-Pi Serial RX & Pin 0 (RX) & Input & Receive automation commands \\
+Tyre Servo & Pin 8 & Output & Continuous-rotation tyre roll \\
+Lift Servo & Pin 9 & Output & Positional lift assembly sweep \\
+Flipper Servo & Pin 11 & Output & Positional page flip and hold \\
+USB Interface & USB Port & I/O & Power and serial monitoring \\
 \hline
 \end{tabular}
 \label{tab:arduino_pins}
 \end{center}
-\end{table*}
+\end{table}
 
 \subsection{Embedded Bridge Layer (Bridge)}
 
-A Raspberry Pi 5 (8GB RAM) acts as the bridge, running an active serial daemon (\texttt{auto3.py}) that polls the Arduino serial port at 9600 baud. When the Arduino Uno state machine reaches the hold phase, it writes the string \texttt{CAPTURE} to the serial bus. The Pi captures this command, suspends serial polling, and executes the Android Debug Bridge (ADB) payload. The Pi is connected via USB-C to an overhead smartphone rig. Two devices, a Redmi Note 13 Pro (108MP) and a Vivo X300 Pro (50MP), serve as the cameras.
+A Raspberry Pi 5 (8GB RAM) acts as the communication bridge, executing a synchronized camera control daemon (\texttt{auto\_capture\_pi5.py}). The capture sequence is temporally synchronized with the Arduino's page-flipping state machine. During the static hold phase of the flipper arm, the Pi 5 triggers the camera shutter of the overhead smartphone rig via Android Debug Bridge (ADB) commands. Specifically, the script executes \texttt{adb shell monkey -p com.android.camera 1} to open the native camera app and sends an \texttt{input keyevent 66} command to trigger the shutter. Two devices, a Redmi Note 13 Pro (108MP) and a Vivo X300 Pro (50MP), are supported. The script waits 5\,s for image processing, pulls the raw JPEG image from the device's storage directory via \texttt{adb pull}, rotates the full-spread image 90$^\circ$ CCW using OpenCV, and uploads the rotated spread to the laptop Flask server via a POST request (\texttt{/upload-capture}).
 
 The Pi 5 system interfaces and connections are described in Table~\ref{tab:pi_ports}.
 
-\begin{table*}[htbp]
+\begin{table}[htbp]
 \caption{Raspberry Pi 5 System Interface Connections}
 \begin{center}
-\begin{tabular}{|l|c|l|}
+\footnotesize
+\begin{tabular}{|p{2.2cm}|p{2.0cm}|p{3.2cm}|}
 \hline
 \textbf{Interface} & \textbf{Connection Target} & \textbf{Description} \\
 \hline
-USB 3.0 (Port A) & Redmi Note 13 Pro Phone & ADB connection for camera trigger \\
+USB 3.0 (Port A) & Redmi Note 13 Pro Phone & ADB camera trigger \& image pull \\
 USB 3.0 (Port B) & Vivo X300 Pro Phone & Secondary camera ADB connection \\
-USB 2.0 (Port C) & Arduino Uno CP2102 & Serial communication (/dev/ttyUSB0) \\
+USB 2.0 (Port C) & Arduino Uno (USB) & Serial link (/dev/ttyUSB0) \\
 Gigabit Ethernet & Local Router Bridge & High-speed upload to backend PC \\
 USB-C Power & 5V 5A Power Adapter & Main system power supply \\
-GPIO 14 (TX) & Arduino Serial RX & Hardware UART serial connection \\
-GPIO 15 (RX) & Arduino Serial TX & Hardware UART serial connection \\
 \hline
 \end{tabular}
 \label{tab:pi_ports}
 \end{center}
-\end{table*}
+\end{table}
 
 The physical components, including the Arduino Uno, Raspberry Pi 5 single-board computer, and the three-layer Muscle, Bridge, and Brain routing architecture, are displayed in Fig.~\ref{fig:hardware}.
 
